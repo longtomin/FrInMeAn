@@ -1,0 +1,29 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="de.radiohacks.frinmean.SingleChatActivity">
+    <item
+        android:id="@+id/action_sendpicture"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_sendpicture" />
+    <item
+        android:id="@+id/action_sendvideo"
+        android:orderInCategory="200"
+        android:showAsAction="never"
+        android:title="@string/action_sendvideo" />
+    <item
+        android:id="@+id/action_sendlocation"
+        android:orderInCategory="300"
+        android:showAsAction="never"
+        android:title="@string/action_sendlocation" />
+    <item
+        android:id="@+id/action_sendfile"
+        android:orderInCategory="400"
+        android:showAsAction="never"
+        android:title="@string/action_sendfile" />
+    <item
+        android:id="@+id/action_sendcontact"
+        android:orderInCategory="500"
+        android:showAsAction="never"
+        android:title="@string/action_sendcontact" />
+</menu>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">FrInMeAn</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="action_signup">Anmelden</string>
+    <string name="action_createchat">Chat erzeugen</string>
+    <string name="action_sendpicture">Bild senden</string>
+    <string name="action_sendvideo">Video senden</string>
+    <string name="action_sendlocation">Standort senden</string>
+    <string name="action_sendfile">Datei senden</string>
+    <string name="action_sendcontact">Kontakt senden</string>
+    <string name="title_activity_chat">Chats</string>
+    <string name="no_chats">Keine Chats vorhanden</string>
+    <string name="username">Benutzername</string>
+    <string name="password">Passwort</string>
+    <string name="password_again">Passwort erneut</string>
+    <string name="email">Email Adresse</string>
+    <string name="sign_up">Anmelden</string>
+    <string name="fetch_chats">Lade Chats</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="no_server_given">Keine Server in den Einstellungen vorhanden!</string>
+    <string name="no_user_or_password_given">Kein Benutzer oder Passwort angegeben, bitte anmelden!</string>
+    <string name="signup_type_same_password_in_password_fields">Passwörter stimmen nicht überein!</string>
+    <string name="signup_fill_all_fields">Es müssen alle Felder für den SignUp ausgefüllt werden!</string>
+    <string name="signup_user_already_exists_saved">Der Benutzer existiert bereits, wird aber für spätere Authentizifzierung gespeichert!</string>
+    <string name="not_connected_to_service">Keine Verbindung zum Hintergrund Service</string>
+    <string name="not_connected_to_network">Keine Internet Verbindung</string>
+    <string name="DirecotryChooser">Ablageort auswählen</string>
+
+    <!-- String for ErrorText FROM SERVER -->
+    <string name="NO_CONNECTION_TO_SERVER">Keine Verbindung zum Server!</string>
+    <string name="USER_AUTHENTICATION_FAILED">Authentisierung fehlgeschlagen!</string>
+    <string name="NONE_EXISTING_USER">Benutzer exisitert nicht!</string>
+    <string name="NONE_EXISTING_CHAT">Chat existiert nicht!</string>
+    <string name="NO_TEXTMESSAGE_GIVEN">Keine Textnachricht übergeben!</string>
+    <string name="INVALID_MESSAGE_TYPE">Ungültiger Nachrichten-Typ!</string>
+    <string name="INVALID_EMAIL_ADRESS">Ungültige Email-Adresse!</string>
+    <string name="MISSING_CHATNAME">Chatname fehlt!</string>
+    <string name="NONE_EXISTING_TEXT_MESSAGE">Text Nachricht existiert nicht!</string>
+    <string name="DATABASE_ERROR">Ein Datenbankfehler ist aufgetrete, bitte überprüfen Sie den Server!</string>
+    <string name="NONE_EXISTING_MESSAGE">Nachricht existiert nicht!</string>
+    <string name="USER_NOT_ACTIVE">User ist nicht aktiv!</string>
+    <string name="WRONG_PASSWORD">Passwort nicht korrekt!</string>
+    <string name="NO_USERNAME_OR_PASSWORD">Benutzername oder Passwort fehlt!</string>
+    <string name="USER_ALREADY_EXISTS">Benutzer ist bereits vorhanden!</string>
+    <string name="NO_ACTIVE_CHATS">Keine aktiven Chats vorhanden!</string>
+    <string name="title_activity_sign_up">SignUpActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_single_chat">SingleChatActivity</string>
+
+</resources>
