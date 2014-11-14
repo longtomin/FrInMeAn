@@ -197,6 +197,8 @@ public class SingleChatActivity extends ActionBarActivity {
                 Intent picintent = new Intent(this, MeBaService.class);
 
                 picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
+                picintent.putExtra(Constants.CHATID, ChatID);
+                picintent.putExtra(Constants.CHATNAME, ChatName);
                 picintent.putExtra(Constants.IMAGELOCATION, data.getData());
 
                 startService(picintent);
