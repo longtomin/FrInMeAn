@@ -113,7 +113,7 @@ public class RestClient {
         headers.add(new BasicNameValuePair(name, value));
     }
 
-    public HttpGet BevorExecuteGet() throws Exception {
+    public HttpGet BevorExecuteGetQuery() throws Exception {
         //add parameters
         String combinedParams = "";
         if (!params.isEmpty()) {
@@ -134,10 +134,28 @@ public class RestClient {
         for (NameValuePair h : headers) {
             request.addHeader(h.getName(), h.getValue());
         }
-
         return request;
-
     }
+
+    public HttpGet BevorExecuteGetPath(String uid, String pw, int id) throws Exception {
+        //add parameters
+        String combinedParams = "";
+
+        if (url.endsWith("/")) {
+            combinedParams += uid + "/" + pw + "/" + String.valueOf(id);
+        } else {
+            combinedParams += "/" + uid + "/" + pw + "/" + String.valueOf(id);
+        }
+
+        HttpGet request = new HttpGet(url + combinedParams);
+
+        //add headers
+        for (NameValuePair h : headers) {
+            request.addHeader(h.getName(), h.getValue());
+        }
+        return request;
+    }
+
 
     public HttpPost BevorExecutePost() throws Exception {
         HttpPost request = new HttpPost(url);

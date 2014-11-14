@@ -8,48 +8,48 @@ package net.rdrei.android.dirchooser;
 
 public final class R {
 	public static final class color {
-		public static final int bright_blue = 0x7f060000;
-		public static final int selection_background_color = 0x7f060001;
+		public static final int bright_blue = 0x7f080003;
+		public static final int selection_background_color = 0x7f080004;
 	}
 	public static final class drawable {
-		public static final int borderless_button = 0x7f020000;
-		public static final int ic_action_create = 0x7f020005;
-		public static final int ic_action_create_light = 0x7f020006;
-		public static final int navigation_up = 0x7f02000d;
-		public static final int navigation_up_light = 0x7f02000e;
+		public static final int borderless_button = 0x7f020057;
+		public static final int ic_action_create = 0x7f02005e;
+		public static final int ic_action_create_light = 0x7f02005f;
+		public static final int navigation_up = 0x7f020068;
+		public static final int navigation_up_light = 0x7f020069;
 	}
 	public static final class id {
-		public static final int btnCancel = 0x7f0b000f;
-		public static final int btnConfirm = 0x7f0b000e;
-		public static final int btnCreateFolder = 0x7f0b0014;
-		public static final int btnNavUp = 0x7f0b0011;
-		public static final int directoryInfo = 0x7f0b0010;
-		public static final int directoryList = 0x7f0b0016;
-		public static final int divider = 0x7f0b0015;
-		public static final int footer = 0x7f0b000d;
-		public static final int horizontalDivider = 0x7f0b0017;
-		public static final int main = 0x7f0b0018;
-		public static final int new_folder_item = 0x7f0b0025;
-		public static final int txtvSelectedFolder = 0x7f0b0013;
-		public static final int txtvSelectedFolderLabel = 0x7f0b0012;
+		public static final int btnCancel = 0x7f090052;
+		public static final int btnConfirm = 0x7f090051;
+		public static final int btnCreateFolder = 0x7f090057;
+		public static final int btnNavUp = 0x7f090054;
+		public static final int directoryInfo = 0x7f090053;
+		public static final int directoryList = 0x7f090059;
+		public static final int divider = 0x7f090058;
+		public static final int footer = 0x7f090050;
+		public static final int horizontalDivider = 0x7f09005a;
+		public static final int main = 0x7f09005b;
+		public static final int new_folder_item = 0x7f090068;
+		public static final int txtvSelectedFolder = 0x7f090056;
+		public static final int txtvSelectedFolderLabel = 0x7f090055;
 	}
 	public static final class layout {
-		public static final int directory_chooser = 0x7f030005;
-		public static final int directory_chooser_activity = 0x7f030006;
+		public static final int directory_chooser = 0x7f03001d;
+		public static final int directory_chooser_activity = 0x7f03001e;
 	}
 	public static final class menu {
-		public static final int directory_chooser = 0x7f0a0001;
+		public static final int directory_chooser = 0x7f0e0001;
 	}
 	public static final class string {
-		public static final int cancel_label = 0x7f08001b;
-		public static final int confirm_label = 0x7f08001c;
-		public static final int create_folder_error = 0x7f08001d;
-		public static final int create_folder_error_already_exists = 0x7f08001e;
-		public static final int create_folder_error_no_write_access = 0x7f08001f;
-		public static final int create_folder_label = 0x7f080020;
-		public static final int create_folder_msg = 0x7f080021;
-		public static final int create_folder_success = 0x7f080022;
-		public static final int selected_folder_label = 0x7f08003a;
-		public static final int up_label = 0x7f080043;
+		public static final int cancel_label = 0x7f0c0028;
+		public static final int confirm_label = 0x7f0c0029;
+		public static final int create_folder_error = 0x7f0c002a;
+		public static final int create_folder_error_already_exists = 0x7f0c002b;
+		public static final int create_folder_error_no_write_access = 0x7f0c002c;
+		public static final int create_folder_label = 0x7f0c002d;
+		public static final int create_folder_msg = 0x7f0c002e;
+		public static final int create_folder_success = 0x7f0c002f;
+		public static final int selected_folder_label = 0x7f0c004a;
+		public static final int up_label = 0x7f0c0053;
 	}
 }

@@ -9,6 +9,9 @@
     <string name="action_sendvideo">Video senden</string>
     <string name="action_sendlocation">Standort senden</string>
     <string name="action_sendfile">Datei senden</string>
+    <string name="option_adduser">Benutzer hinzufügen</string>
+    <string name="oprion_removeuser">Benutzer entfernen</string>
+    <string name="option_deletechat">Chat löschen</string>
     <string name="action_sendcontact">Kontakt senden</string>
     <string name="title_activity_chat">Chats</string>
     <string name="no_chats">Keine Chats vorhanden</string>

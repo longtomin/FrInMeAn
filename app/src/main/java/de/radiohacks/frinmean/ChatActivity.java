@@ -2,16 +2,13 @@ package de.radiohacks.frinmean;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -35,7 +32,6 @@ import de.radiohacks.frinmean.model.OutListChat;
 import de.radiohacks.frinmean.model.OwningUser;
 import de.radiohacks.frinmean.service.ErrorHelper;
 import de.radiohacks.frinmean.service.MeBaService;
-import de.radiohacks.frinmean.service.RestClient;
 
 
 public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnRefreshListener {
@@ -106,13 +102,6 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
     }
 
     @Override
-    protected void onDestroy() {
-        //un-register BroadcastReceiver
-        unregisterReceiver(mListChatStateReceiver);
-        super.onDestroy();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         IntentFilter infi = new IntentFilter(Constants.BROADCAST_LISTCHAT);
@@ -124,7 +113,9 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mListChatStateReceiver);
+        if (mListChatStateReceiver != null) {
+            unregisterReceiver(mListChatStateReceiver);
+        }
     }
 
 
@@ -188,6 +179,8 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
         Intent i = new Intent(ChatActivity.this, SingleChatActivity.class);
         i.putExtra(Constants.CHATID, c.getChatID());
         i.putExtra(Constants.CHATNAME, c.getChatname());
+        i.putExtra(Constants.OWNINGUSERID, c.getOwningUser().getOwningUserID());
+        i.putExtra(Constants.OWNINGUSERNAME, c.getOwningUser().getOwningUserName());
         startActivity(i);
     }
 

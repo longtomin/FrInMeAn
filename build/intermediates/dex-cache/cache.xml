@@ -2,28 +2,24 @@
 <pre-dex-items>
 
     <item
-        dex="/home/thomas/Entwicklung/Android/import/FrInMeAn/app/build/intermediates/pre-dexed/debug/support-v4-19.1.0-837b292bbf7ce825ddd63dd1952a6d361d877ae4.jar"
-        jar="/home/thomas/Entwicklung/Android/sdk/extras/android/m2repository/com/android/support/support-v4/19.1.0/support-v4-19.1.0.jar"
-        jumboMode="false"
-        revision="20.0.0"
-        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+        dex="/home/andy/dev/workspaces/Android/app/build/intermediates/pre-dexed/debug/simple-xml-2.7.1-03c2ed5cd2997447236d3ab8e13bfe2d1f50189a.jar"
+        jar="/home/andy/dev/workspaces/Android/app/libs/simple-xml-2.7.1.jar" jumboMode="false"
+        revision="20.0.0" sha1="dd91fb744c2ff921407475cb29a1e3fee397d411" />
     <item
-        dex="/home/thomas/Entwicklung/Android/import/FrInMeAn/app/build/intermediates/pre-dexed/debug/httpmime-4.3.5-7a39f3684846d1c53cac87b92b97b4baed1474d1.jar"
-        jar="/home/thomas/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpmime/4.3.5/1dd0d38df9c6d21e893f2e52403f1cd99e91cd81/httpmime-4.3.5.jar"
-        jumboMode="false"
-        revision="20.0.0"
-        sha1="1dd0d38df9c6d21e893f2e52403f1cd99e91cd81"/>
+        dex="/home/andy/dev/workspaces/Android/app/build/intermediates/pre-dexed/debug/httpmime-4.3.5-40d0945334bacf0c34aced612673ead58a085bf3.jar"
+        jar="/home/andy/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpmime/4.3.5/1dd0d38df9c6d21e893f2e52403f1cd99e91cd81/httpmime-4.3.5.jar"
+        jumboMode="false" revision="20.0.0" sha1="1dd0d38df9c6d21e893f2e52403f1cd99e91cd81" />
     <item
-        dex="/home/thomas/Entwicklung/Android/import/FrInMeAn/app/build/intermediates/pre-dexed/debug/classes-1d61f68610988c5dddd68f7dff5f6df7549e3469.jar"
-        jar="/home/thomas/Entwicklung/Android/import/FrInMeAn/app/build/intermediates/exploded-aar/net.rdrei.android.dirchooser/library/2.1/classes.jar"
-        jumboMode="false"
-        revision="20.0.0"
-        sha1="80f7977c9545ad0472210159da0878eda4ecb283"/>
+        dex="/home/andy/dev/workspaces/Android/app/build/intermediates/pre-dexed/debug/support-v4-19.1.0-ff2fb2e767885c223fd308c5b4bdde599bc5bd75.jar"
+        jar="/home/andy/dev/sdk/extras/android/m2repository/com/android/support/support-v4/19.1.0/support-v4-19.1.0.jar"
+        jumboMode="false" revision="20.0.0" sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67" />
     <item
-        dex="/home/thomas/Entwicklung/Android/import/FrInMeAn/app/build/intermediates/pre-dexed/debug/simple-xml-2.7.1-82ce886bcd01b5a4332ffc821a9835278095bb91.jar"
-        jar="/home/thomas/Entwicklung/Android/import/FrInMeAn/app/libs/simple-xml-2.7.1.jar"
-        jumboMode="false"
-        revision="20.0.0"
-        sha1="dd91fb744c2ff921407475cb29a1e3fee397d411"/>
+        dex="/home/andy/dev/workspaces/Android/app/build/intermediates/pre-dexed/debug/classes-e56a3d7c0cf49abae663e072f920401f0e259b04.jar"
+        jar="/home/andy/dev/workspaces/Android/app/build/intermediates/exploded-aar/net.rdrei.android.dirchooser/library/2.1/classes.jar"
+        jumboMode="false" revision="20.0.0" sha1="80f7977c9545ad0472210159da0878eda4ecb283" />
+    <item
+        dex="/home/andy/dev/workspaces/Android/app/build/intermediates/pre-dexed/debug/classes-73c9dc31e3b31134af60cc06d8c739a895ec6c46.jar"
+        jar="/home/andy/dev/workspaces/Android/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/18.0.0/classes.jar"
+        jumboMode="false" revision="20.0.0" sha1="8f11f56e350eacabf2273f646d981356eea0ed77" />
 
 </pre-dex-items>

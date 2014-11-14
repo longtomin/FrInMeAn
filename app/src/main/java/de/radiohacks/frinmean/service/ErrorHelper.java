@@ -1,6 +1,5 @@
 package de.radiohacks.frinmean.service;
 
-import android.app.Activity;
 import android.content.Context;
 import android.widget.Toast;
 

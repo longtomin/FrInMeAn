@@ -146,7 +146,7 @@ public class MeBaService extends IntentService {
             }
             if (Constants.ACTION_SENDIMAGEMESSAGE.equalsIgnoreCase(action)) {
                 final String ImageLoc = intent.getStringExtra(Constants.IMAGELOCATION);
-                handleActionSendImage(ImageLoc);
+                //   handleActionSendImage(ImageLoc);
             }
         }
     }

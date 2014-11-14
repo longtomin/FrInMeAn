@@ -203,7 +203,7 @@ public class SignUpActivity extends Activity {
             rc.AddParam("password", password);
             rc.AddParam("email", email);
             try {
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 Serializer serializer = new Persister();
                 Reader reader = new StringReader(ret);
 
