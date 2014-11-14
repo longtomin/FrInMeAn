@@ -30,22 +30,25 @@
             android:label="@string/title_activity_sign_up" />
         <activity
             android:name=".SingleChatActivity"
-            android:theme="@android:style/Theme.DeviceDefault.Light.DarkActionBar"
-            android:label="@string/title_activity_single_chat" />
+            android:label="@string/title_activity_single_chat"
+            android:theme="@style/Theme.AppCompat.Light" />
         <activity android:name="net.rdrei.android.dirchooser.DirectoryChooserActivity" />
 
         <service
             android:name=".service.MeBaService"
             android:enabled="true"
             android:exported="false"></service>
+
         <receiver
             android:name=".StartActivity$AuthenticateStateReceiver"
-            android:exported="false"
-            android:enabled="true" />
-        <receiver android:name=".SingleChatActivity$SingleChatReceiver"
             android:enabled="true"
             android:exported="false" />
-        <receiver android:name=".ChatActivity$ListChatStateReceiver"
+        <receiver
+            android:name=".SingleChatActivity$SingleChatReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".ChatActivity$ListChatStateReceiver"
             android:enabled="true"
             android:exported="false" />
     </application>

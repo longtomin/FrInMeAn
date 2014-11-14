@@ -1,14 +1,12 @@
 package de.radiohacks.frinmean;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -21,13 +19,13 @@ import java.io.StringReader;
 
 import de.radiohacks.frinmean.model.OutAuthenticate;
 import de.radiohacks.frinmean.service.ErrorHelper;
-import de.radiohacks.frinmean.service.MeBaService;
+import de.radiohacks.frinmean.service.RestClient;
 
 
 public class StartActivity extends Activity {
 
     // boolean mBound = false;
-    private AuthenticateStateReceiver mAuthenticateStateReceiver;
+    // private AuthenticateStateReceiver mAuthenticateStateReceiver;
     // private MeBaService mService;
     private String username;
     private String password;
@@ -75,7 +73,7 @@ public class StartActivity extends Activity {
                 Toast.makeText(StartActivity.this, this.getString(R.string.no_user_or_password_given), Toast.LENGTH_SHORT).show();
             } else {
                 // The filter's action is BROADCAST_ACTION
-                IntentFilter statusIntentFilter = new IntentFilter(
+                /* IntentFilter statusIntentFilter = new IntentFilter(
                         Constants.BROADCAST_AUTHENTICATE);
 
                 // Sets the filter's category to DEFAULT
@@ -95,10 +93,10 @@ public class StartActivity extends Activity {
                 intentMyIntentService.putExtra(Constants.USERNAME, username);
                 intentMyIntentService.putExtra(Constants.PASSWORD, password);
 
-                startService(intentMyIntentService);
+                startService(intentMyIntentService); */
 
                 // connect = true;
-                /* if (!server.endsWith("/")) {
+                if (!server.endsWith("/")) {
                     server += "/user/authenticate";
                 } else {
                     server += "user/authenticate";
@@ -106,7 +104,7 @@ public class StartActivity extends Activity {
                 AuthenticateLoader loadFeedData = new AuthenticateLoader();
                 loadFeedData.execute(server);
 
-                if (!server.endsWith("/")) {
+                /* if (!server.endsWith("/")) {
                     server += "/";
                 }
                 server += "image/downloadpreview/" + username + "/" + password + "/3";
@@ -172,14 +170,56 @@ public class StartActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mAuthenticateStateReceiver, new IntentFilter(
-                Constants.BROADCAST_AUTHENTICATE));
+
+        getPreferenceInfo();
+
+        if (server.equalsIgnoreCase("NULL")) {
+            Toast.makeText(StartActivity.this, this.getString(R.string.no_server_given), Toast.LENGTH_SHORT).show();
+        } else {
+            if (username.equalsIgnoreCase("NULL")
+                    || password.equalsIgnoreCase("NULL")) {
+                Toast.makeText(StartActivity.this, this.getString(R.string.no_user_or_password_given), Toast.LENGTH_SHORT).show();
+            } else {
+
+                /*IntentFilter intfil = new IntentFilter(
+                        Constants.BROADCAST_AUTHENTICATE);
+
+                // Sets the filter's category to DEFAULT
+                intfil.addCategory(Intent.CATEGORY_DEFAULT);
+
+                mAuthenticateStateReceiver = new AuthenticateStateReceiver();
+
+                // Registers the DownloadStateReceiver and its intent filters
+                LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
+                        mAuthenticateStateReceiver,
+                        intfil);
+
+                //Start MeBaService
+                Intent resint = new Intent(this, MeBaService.class);
+
+                resint.setAction(Constants.ACTION_AUTHENTICATE);
+                resint.putExtra(Constants.USERNAME, username);
+                resint.putExtra(Constants.PASSWORD, password);
+
+                startService(resint); */
+
+                if (!server.endsWith("/")) {
+                    server += "/user/authenticate";
+                } else {
+                    server += "user/authenticate";
+                }
+                AuthenticateLoader loadFeedData = new AuthenticateLoader();
+                loadFeedData.execute(server);
+            }
+        }
     }
 
     @Override
     protected void onPause() {
+        /* if (mAuthenticateStateReceiver != null) {
+            unregisterReceiver(mAuthenticateStateReceiver);
+        } */
         super.onPause();
-        unregisterReceiver(mAuthenticateStateReceiver);
     }
 
     @Override
@@ -208,7 +248,7 @@ public class StartActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    /* private class AuthenticateLoader extends AsyncTask<String, Void, OutAuthenticate> {
+    private class AuthenticateLoader extends AsyncTask<String, Void, OutAuthenticate> {
         private final ProgressDialog dialog = new ProgressDialog(StartActivity.this);
 
         @Override
@@ -247,7 +287,7 @@ public class StartActivity extends Activity {
             rc.AddParam("username", username);
             rc.AddParam("password", password);
             try {
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 Serializer serializer = new Persister();
                 Reader reader = new StringReader(ret);
 
@@ -257,7 +297,7 @@ public class StartActivity extends Activity {
             }
             return res;
         }
-    } */
+    }
 
     /* private class ImageLoader extends AsyncTask<String, Void, Bitmap> {
         private final ProgressDialog dialog = new ProgressDialog(StartActivity.this);
@@ -313,27 +353,24 @@ public class StartActivity extends Activity {
         }
     } */
 
-    private class AuthenticateStateReceiver extends BroadcastReceiver {
+    /* private class AuthenticateStateReceiver extends BroadcastReceiver {
 
         private AuthenticateStateReceiver() {
             super();
 
             // prevents instantiation by other packages.
-        }
+        } */
 
-        /**
-         * This method is called by the system when a broadcast Intent is matched by this class'
-         * intent filters
-         *
-         * @param context An Android context
-         * @param intent  The incoming broadcast Intent
-         */
-        @Override
+    /**
+     * This method is called by the system when a broadcast Intent is matched by this class'
+     * intent filters
+     *
+     * @param context An Android context
+     * @param intent  The incoming broadcast Intent
+     */
+       /* @Override
         public void onReceive(Context context, Intent intent) {
 
-            /*
-             * Gets the status from the Intent's extended data, and chooses the appropriate action
-             */
             if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_AUTHENTICATE)) {
                 try {
                     String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
@@ -361,5 +398,5 @@ public class StartActivity extends Activity {
                 }
             }
         }
-    }
+    }*/
 }

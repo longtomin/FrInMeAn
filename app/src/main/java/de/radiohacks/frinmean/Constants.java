@@ -18,6 +18,7 @@ public class Constants {
     public static final String ACTION_LISTUSER = "listuser";
     public static final String ACTION_LISTCHAT = "listchat";
     public static final String ACTION_SENDTEXTMESSAGE = "sendtextmessage";
+    public static final String ACTION_SENDIMAGEMESSAGE = "sendimagemessage";
     public static final String ACTION_GETTEXTMESSAGE = "gettextmessage";
     public static final String ACTION_INSERTMESSAGEINTOCHAT = "insertmessageintochat";
     public static final String ACTION_GETMESSAGEFROMCHAT = "getmessagefromchat";
@@ -72,6 +73,11 @@ public class Constants {
     public final static String USERID = "userid";
     public final static String TIMESTAMP = "timestamp";
     public final static String TEXTMESSAGE = "textmessage";
+    public final static String OWNINGUSERID = "owninguserid";
+    public final static String OWNINGUSERNAME = "owningusername";
+    public final static String MESSAGEID = "messageid";
+    public final static String MESSAGETYPE = "messagetype";
+    public final static String IMAGELOCATION = "imagelocation";
 
     /*
     Constants for Broadcasts

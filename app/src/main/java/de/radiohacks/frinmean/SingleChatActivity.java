@@ -1,26 +1,28 @@
 package de.radiohacks.frinmean;
 
-import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -29,22 +31,18 @@ import org.simpleframework.xml.core.Persister;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
 import de.radiohacks.frinmean.adapters.SingleChatAdapter;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
-import de.radiohacks.frinmean.model.OutSendTextMessage;
 import de.radiohacks.frinmean.service.ErrorHelper;
 import de.radiohacks.frinmean.service.LocalDBHandler;
 import de.radiohacks.frinmean.service.MeBaService;
 
 
-public class SingleChatActivity extends ListActivity {
+public class SingleChatActivity extends ActionBarActivity {
 
     private static final String TAG = SingleChatActivity.class.getSimpleName();
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
@@ -64,6 +62,8 @@ public class SingleChatActivity extends ListActivity {
     private String server;
     private int ChatID;
     private String ChatName;
+    private int OwningUserID;
+    private String OwningUserName;
     private EditText Message;
     private LocalDBHandler ldb;
 
@@ -76,7 +76,21 @@ public class SingleChatActivity extends ListActivity {
         Intent i = getIntent();
         ChatID = i.getIntExtra(Constants.CHATID, 0);
         ChatName = i.getStringExtra(Constants.CHATNAME);
+        OwningUserName = i.getStringExtra(Constants.OWNINGUSERNAME);
+        OwningUserID = i.getIntExtra(Constants.OWNINGUSERID, -1);
+
         getPreferenceInfo();
+
+        ActionBar actionBar = getSupportActionBar();
+//        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        actionBar.setTitle(ChatName);
+
+//        android.app.ActionBar.LayoutParams lp = new android.app.ActionBar.LayoutParams(android.app.ActionBar.LayoutParams.WRAP_CONTENT, android.app.ActionBar.LayoutParams.WRAP_CONTENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        //View customNav = LayoutInflater.from(this).inflate(R.menu.single_chat_action, null); // layout which contains your button.
+        //actionBar.setCustomView(customNav, lp);
+        actionBar.setDisplayShowCustomEnabled(true);
+
 
         long time = System.currentTimeMillis() / 1000L;
 
@@ -84,7 +98,8 @@ public class SingleChatActivity extends ListActivity {
         Cursor c = ldb.get(ChatID, time);
         mAdapter = new SingleChatAdapter(this, c, this.userid);
 
-        this.setListAdapter(mAdapter);
+        ListView lv = (ListView) findViewById(R.id.singlechatlist);
+        lv.setAdapter(mAdapter);
 
         IntentFilter statusIntentFilter = new IntentFilter(
                 Constants.BROADCAST_GETMESSAGEFROMCHAT);
@@ -154,7 +169,9 @@ public class SingleChatActivity extends ListActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mSingleChatReceiver);
+        if (mSingleChatReceiver != null) {
+            unregisterReceiver(mSingleChatReceiver);
+        }
     }
 
     protected void getPreferenceInfo() {
@@ -176,7 +193,15 @@ public class SingleChatActivity extends ListActivity {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
 
-                InputStream stream1 = null;
+                //Start MeBaService
+                Intent picintent = new Intent(this, MeBaService.class);
+
+                picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
+                picintent.putExtra(Constants.IMAGELOCATION, data.getData());
+
+                startService(picintent);
+
+                /* InputStream stream1 = null;
                 Bitmap bitmap = null;
                 try {
                     stream1 = getContentResolver().openInputStream(data.getData());
@@ -199,7 +224,7 @@ public class SingleChatActivity extends ListActivity {
                     server += "/image/upload";
                 } else {
                     server += "image/upload";
-                }
+                } */
                 // ImageUploader uploadPicData = new ImageUploader();
                 // uploadPicData.execute(server);
 
@@ -270,9 +295,47 @@ public class SingleChatActivity extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG, "start onCreateOptionsMenu");
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.single_chat, menu);
+        getMenuInflater().inflate(R.menu.single_chat_action, menu);
+        // View acbview = View.inflate(this, R.menu.single_chat_action, null);
+        //getActionBar().setCustomView(acbview);
         Log.d(TAG, "end onCreateOptionsMenu");
         return true;
+    }
+
+    public void showPopup() {
+        View menuItemView = findViewById(R.id.action_show_popup);
+        PopupMenu popup = new PopupMenu(this, menuItemView);
+        MenuInflater inflate = popup.getMenuInflater();
+        inflate.inflate(R.menu.single_chat_show_popup, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                Log.d(TAG, "start Popup onMenuItemClick");
+                // Handle action bar item clicks here. The action bar will
+                // automatically handle clicks on the Home/Up button, so long
+                // as you specify a parent activity in AndroidManifest.xml.
+                int id = menuItem.getItemId();
+
+                switch (menuItem.getItemId()) {
+                    case R.id.action_sendcontact:
+//                openCreateChat();
+                        return true;
+                    case R.id.action_sendfile:
+//                SendFileAction;
+                        return true;
+                    case R.id.action_sendpicture:
+                        SendPicture();
+                        return true;
+                    case R.id.action_sendvideo:
+                        SendVideo();
+                        return true;
+                }
+                Log.d(TAG, "end Popup onMenuItemClick");
+                // return super.onMenuItemClick(menuItem);
+                return false;
+            }
+        });
+        popup.show();
     }
 
     @Override
@@ -284,6 +347,9 @@ public class SingleChatActivity extends ListActivity {
         int id = item.getItemId();
 
         switch (item.getItemId()) {
+            case R.id.action_show_popup:
+                showPopup();
+                return true;
             case R.id.action_sendcontact:
 //                openCreateChat();
                 return true;
@@ -300,7 +366,6 @@ public class SingleChatActivity extends ListActivity {
                 Intent su = new Intent(SingleChatActivity.this, SettingsActivity.class);
                 startActivity(su);
                 return true;
-
         }
         Log.d(TAG, "end onOptionsItemSelected");
         return super.onOptionsItemSelected(item);

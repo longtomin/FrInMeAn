@@ -20,7 +20,7 @@ import java.util.List;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.model.Message;
-import de.radiohacks.frinmean.model.OutCheckNewMessages;
+import de.radiohacks.frinmean.model.OutFetchImageMessage;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutFetchTextMessage;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
@@ -113,9 +113,6 @@ public class MeBaService extends IntentService {
 //                handleActionSignup(user, pw, email);
             }
             if (Constants.ACTION_AUTHENTICATE.equalsIgnoreCase(action)) {
-                final String user = intent.getStringExtra(Constants.USERNAME);
-                final String pw = intent.getStringExtra(Constants.PASSWORD);
-                //handleActionAuthenticate(user, pw);
                 handleActionAuthenticate();
             }
             if (Constants.ACTION_CHECKNEWMESSAGES.equalsIgnoreCase(
@@ -147,6 +144,10 @@ public class MeBaService extends IntentService {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 handleActionCreateChat(ChatName);
             }
+            if (Constants.ACTION_SENDIMAGEMESSAGE.equalsIgnoreCase(action)) {
+                final String ImageLoc = intent.getStringExtra(Constants.IMAGELOCATION);
+                handleActionSendImage(ImageLoc);
+            }
         }
     }
 
@@ -164,7 +165,7 @@ public class MeBaService extends IntentService {
                 rcsend.AddParam(Constants.PASSWORD, password);
                 rcsend.AddParam(Constants.TEXTMESSAGE, TextMessage);
 
-                String ret = rcsend.ExecuteRequestXML(rcsend.BevorExecuteGet());
+                String ret = rcsend.ExecuteRequestXML(rcsend.BevorExecuteGetQuery());
                 if (rcsend.getResponseCode() == HttpStatus.SC_OK) {
                     Serializer sersendtxtmsg = new Persister();
                     Reader readersendtxtmsg = new StringReader(ret);
@@ -180,41 +181,7 @@ public class MeBaService extends IntentService {
                             eh.CheckErrorText(ressend.getErrortext());
                         } else {
                             if (ressend.getTextID() != null && ressend.getTextID() > 0) {
-                                final int txtid = ressend.getTextID();
-                                if (!server.endsWith("/")) {
-                                    rcinsert = new RestClient(server + "/user/insertmessageintochat");
-                                } else {
-                                    rcinsert = new RestClient(server + "user/insertmessageintochat");
-                                }
-                                Integer cid = ChatID;
-                                Integer mid = ressend.getTextID();
-                                rcinsert.AddParam("username", username);
-                                rcinsert.AddParam("password", password);
-                                rcinsert.AddParam("chatid", URLEncoder.encode(cid.toString(), "UTF-8"));
-                                rcinsert.AddParam("messageid", URLEncoder.encode(mid.toString(), "UTF-8"));
-                                rcinsert.AddParam("messagetype", URLEncoder.encode(Constants.TYP_TEXT, "UTF-8"));
-
-                                String retinsert = rcinsert.ExecuteRequestXML(rcinsert.BevorExecuteGet());
-                                if (rcinsert.getResponseCode() == HttpStatus.SC_OK) {
-                                    Serializer serinserttxtmsg = new Persister();
-                                    Reader readinserttxtmsg = new StringReader(retinsert);
-
-                                    OutInsertMessageIntoChat resinsert = serinserttxtmsg.read(OutInsertMessageIntoChat.class, readinserttxtmsg, false);
-
-                                    if (resinsert == null) {
-                                        ErrorHelper eh = new ErrorHelper(this);
-                                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
-                                    } else {
-                                        if (resinsert.getErrortext() != null && !resinsert.getErrortext().isEmpty()) {
-                                            ErrorHelper eh = new ErrorHelper(this);
-                                            eh.CheckErrorText(resinsert.getErrortext());
-                                        } else {
-                                            ldb.insert(userid, username, ChatID, ChatName, Constants.TYP_TEXT, resinsert.getSendTimestamp(), resinsert.getSendTimestamp(), resinsert.getMessageID());
-                                            ldb.update(Constants.TYP_TEXT, resinsert.getMessageID(), TextMessage);
-                                            mBroadcaster.notifyProgress(retinsert, Constants.BROADCAST_INSERTMESSAGEINTOCHAT);
-                                        }
-                                    }
-                                }
+                                OutInsertMessageIntoChat ins = insertMessageIntoChatAndDB(ChatName, ressend.getTextID(), ChatID, Constants.TYP_TEXT, TextMessage);
                             }
                         }
                     }
@@ -223,6 +190,55 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+    }
+
+    private OutInsertMessageIntoChat insertMessageIntoChatAndDB(String ChatName, int MsgID, int ChatID, String MessageType, String Message) {
+
+        RestClient rcinsert;
+        OutInsertMessageIntoChat ret = null;
+
+        try {
+            if (!server.endsWith("/")) {
+                rcinsert = new RestClient(server + "/user/insertmessageintochat");
+            } else {
+                rcinsert = new RestClient(server + "user/insertmessageintochat");
+            }
+            Integer cid = ChatID;
+            Integer mid = MsgID;
+            rcinsert.AddParam(Constants.USERNAME, username);
+            rcinsert.AddParam(Constants.PASSWORD, password);
+
+            rcinsert.AddParam(Constants.CHATNAME, URLEncoder.encode(cid.toString(), "UTF-8"));
+            rcinsert.AddParam(Constants.MESSAGEID, URLEncoder.encode(mid.toString(), "UTF-8"));
+            rcinsert.AddParam(Constants.MESSAGETYPE, URLEncoder.encode(MessageType, "UTF-8"));
+
+            String retinsert = rcinsert.ExecuteRequestXML(rcinsert.BevorExecuteGetQuery());
+            if (rcinsert.getResponseCode() == HttpStatus.SC_OK) {
+                Serializer serinserttxtmsg = new Persister();
+                Reader readinserttxtmsg = new StringReader(retinsert);
+
+                OutInsertMessageIntoChat resinsert = serinserttxtmsg.read(OutInsertMessageIntoChat.class, readinserttxtmsg, false);
+
+                if (resinsert == null) {
+                    ErrorHelper eh = new ErrorHelper(this);
+                    eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                } else {
+                    if (resinsert.getErrortext() != null && !resinsert.getErrortext().isEmpty()) {
+                        ErrorHelper eh = new ErrorHelper(this);
+                        eh.CheckErrorText(resinsert.getErrortext());
+                    } else {
+                        ldb.insert(userid, username, ChatID, ChatName, Constants.TYP_TEXT, resinsert.getSendTimestamp(), resinsert.getSendTimestamp(), resinsert.getMessageID());
+                        ldb.update(Constants.TYP_TEXT, resinsert.getMessageID(), Message);
+                        ret = resinsert;
+                    }
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
     private void handleActionCreateChat(String ChatName) {
@@ -238,7 +254,7 @@ public class MeBaService extends IntentService {
                 rc.AddParam(Constants.PASSWORD, password);
                 rc.AddParam(Constants.CHATNAME, ChatName);
 
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 if (rc.getResponseCode() == HttpStatus.SC_OK) {
                     mBroadcaster.notifyProgress(ret, Constants.BROADCAST_CREATECHAT);
                 }
@@ -247,6 +263,7 @@ public class MeBaService extends IntentService {
             }
         }
     }
+
     private void handleActionListChat() {
         if (CheckServer()) {
             RestClient rc;
@@ -259,9 +276,33 @@ public class MeBaService extends IntentService {
                 rc.AddParam(Constants.USERNAME, username);
                 rc.AddParam(Constants.PASSWORD, password);
 
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 if (rc.getResponseCode() == HttpStatus.SC_OK) {
                     mBroadcaster.notifyProgress(ret, Constants.BROADCAST_LISTCHAT);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void handleActionAuthenticate() {
+        if (CheckServer()) {
+            RestClient rc;
+            if (!server.endsWith("/")) {
+                rc = new RestClient(server + "/user/authenticate");
+            } else {
+                rc = new RestClient(server + "user/authenticate");
+            }
+            try {
+                //rc.AddParam("username", user);
+                //rc.AddParam("password", password);
+                rc.AddParam(Constants.USERNAME, username);
+                rc.AddParam(Constants.PASSWORD, password);
+
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_AUTHENTICATE);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -281,7 +322,7 @@ public class MeBaService extends IntentService {
                 rc.AddParam(Constants.USERNAME, username);
                 rc.AddParam(Constants.PASSWORD, password);
 
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 if (rc.getResponseCode() == HttpStatus.SC_OK) {
                     mBroadcaster.notifyProgress(ret, Constants.BROADCAST_LISTUSER);
                 }
@@ -305,17 +346,24 @@ public class MeBaService extends IntentService {
             rc.AddParam(Constants.TIMESTAMP, String.valueOf(readtime));
 
             try {
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 if (rc.getResponseCode() == HttpStatus.SC_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
                     OutFetchMessageFromChat res = serializer.read(OutFetchMessageFromChat.class, reader, false);
 
-                    if (res != null) {
-                        //TODO Check Errortext
-                        if (res.getMessage() != null && res.getMessage().size() > 0) {
-                            SaveMessageToLDB(res.getMessage(), cid, CName);
+                    if (res == null) {
+                        ErrorHelper eh = new ErrorHelper(this);
+                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                    } else {
+                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                            ErrorHelper eh = new ErrorHelper(this);
+                            eh.CheckErrorText(res.getErrortext());
+                        } else {
+                            if (res.getMessage() != null && res.getMessage().size() > 0) {
+                                SaveMessageToLDB(res.getMessage(), cid, CName);
+                            }
                         }
                     }
                     mBroadcaster.notifyProgress(ret, Constants.BROADCAST_GETMESSAGEFROMCHAT);
@@ -345,6 +393,15 @@ public class MeBaService extends IntentService {
             }
             if (m.getImageMsgID() > 0) {
                 ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getImageMsgID());
+
+                OutFetchImageMessage ofim = FetchImageMessage(m.getImageMsgID());
+                if (ofim.getErrortext() != null && !ofim.getErrortext().isEmpty()) {
+                    //Do notthing we are in the Background working
+                } else {
+                    ldb.update(m.getMessageTyp(), m.getTextMsgID(), ofim.getImageMessage());
+                }
+
+
             }
             if (m.getFileMsgID() > 0) {
                 ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getFileMsgID());
@@ -353,109 +410,6 @@ public class MeBaService extends IntentService {
                 ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getLocationMsgID());
             }
         }
-    }
-
-    private void handleActionAuthenticate() {
-        if (CheckServer()) {
-            RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/authenticate");
-            } else {
-                rc = new RestClient(server + "user/authenticate");
-            }
-            try {
-                //rc.AddParam("username", user);
-                //rc.AddParam("password", password);
-                rc.AddParam(Constants.USERNAME, username);
-                rc.AddParam(Constants.PASSWORD, password);
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_AUTHENTICATE);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void SendTextMessage(String Message) throws UnsupportedEncodingException {
-
-        if (CheckServer()) {
-            RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/sendtextmessage");
-            } else {
-                rc = new RestClient(server + "user/sendtextmessage");
-            }
-            try {
-                rc.AddParam(Constants.USERNAME, URLEncoder.encode(username, "UTF-8"));
-                rc.AddParam(Constants.PASSWORD, URLEncoder.encode(password, "UTF-8"));
-                rc.AddParam(Constants.TEXTMESSAGE, URLEncoder.encode(Message, "UTF-8"));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_SENDTEXTMESSAGE);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void InsertMessageIntoChat(int ChatID, int MessageID, String MessageType) {
-
-        if (CheckServer()) {
-            RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/insertmessageintochat");
-            } else {
-                rc = new RestClient(server + "user/insertmessageintochat");
-            }
-            try {
-                Integer cid = ChatID;
-                Integer mid = MessageID;
-                rc.AddParam(Constants.USERNAME, username);
-                rc.AddParam(Constants.PASSWORD, password);
-                rc.AddParam(Constants.CHATID, URLEncoder.encode(cid.toString(), "UTF-8"));
-                rc.AddParam("messageid", URLEncoder.encode(mid.toString(), "UTF-8"));
-                rc.AddParam("messagetype", URLEncoder.encode(MessageType, "UTF-8"));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_INSERTMESSAGEINTOCHAT);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private OutCheckNewMessages CheckNewMessages() {
-        OutCheckNewMessages out = null;
-        if (CheckServer()) {
-            RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/checknewmessages");
-            } else {
-                rc = new RestClient(server + "user/checknewmessages");
-            }
-            try {
-                rc.AddParam(Constants.USERNAME, username);
-                rc.AddParam(Constants.PASSWORD, password);
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                out = serializer.read(OutCheckNewMessages.class, reader, false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return out;
-
     }
 
     private OutFetchTextMessage FetchTextMessage(int TxtMsgID) {
@@ -473,7 +427,7 @@ public class MeBaService extends IntentService {
                 rc.AddParam("password", password);
                 rc.AddParam("textmessageid", URLEncoder.encode(mid.toString(), "UTF-8"));
 
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 Serializer serializer = new Persister();
                 Reader reader = new StringReader(ret);
 
@@ -485,32 +439,24 @@ public class MeBaService extends IntentService {
         return out;
     }
 
-    private OutFetchMessageFromChat FetchMessageFromChat(int ChatID) {
-        OutFetchMessageFromChat out = null;
+    private OutFetchImageMessage FetchImageMessage(int ImgMsgID) {
+        OutFetchImageMessage out = null;
         if (CheckServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/getmessagefromchat");
+                rc = new RestClient(server + "/image/download");
             } else {
-                rc = new RestClient(server + "user/getmessagefromchat");
+                rc = new RestClient(server + "image/download");
             }
             try {
-                Integer cid = ChatID;
-                rc.AddParam("username", username);
-                rc.AddParam("password", password);
-                rc.AddParam("chatid", URLEncoder.encode(cid.toString(), "UTF-8"));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                out = serializer.read(OutFetchMessageFromChat.class, reader, false);
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetPath(username, password, ImgMsgID));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return out;
     }
+
 
     /*    public void Refresh() {
 
