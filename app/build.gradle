@@ -18,6 +18,11 @@ android {
     }
     productFlavors {
     }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+    }
 }
 
 configurations {
@@ -33,7 +38,8 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'org.simpleframework:simple-xml:2.7.+'
     compile 'org.apache.httpcomponents:httpmime:4.3.5'
-    compile "com.android.support:appcompat-v7:18.0.+"
+    compile 'org.apache.httpcomponents:httpcore:4.3.3'
+    compile 'com.android.support:appcompat-v7:18.0.+'
     compile 'com.android.support:support-v4:19.1.0'
     compile 'net.rdrei.android.dirchooser:library:2.1@aar'
 }
