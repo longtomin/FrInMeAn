@@ -1,6 +1,9 @@
 package de.radiohacks.frinmean.service;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
+import android.net.Uri;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -11,8 +14,13 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
@@ -20,11 +28,13 @@ import org.apache.http.util.ByteArrayBuffer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
@@ -93,6 +103,8 @@ public class RestClient {
         return filename;
     }
 
+    public void setFilename(String in) {this.filename = in; }
+
     public Bitmap getResponseImage() {
         return responseImage;
     }
@@ -158,25 +170,81 @@ public class RestClient {
 
 
     public HttpPost BevorExecutePost() throws Exception {
-        HttpPost request = new HttpPost(url);
+
+
+        String combinedParams = "";
+        if (!params.isEmpty()) {
+            combinedParams += "?";
+            for (NameValuePair p : params) {
+                String paramString = p.getName() + "=" + URLEncoder.encode(p.getValue(), "UTF-8");
+                if (combinedParams.length() > 1) {
+                    combinedParams += "&" + paramString;
+                } else {
+                    combinedParams += paramString;
+                }
+            }
+        }
+        HttpPost request = new HttpPost(url + combinedParams);
 
         //add headers
         for (NameValuePair h : headers) {
             request.addHeader(h.getName(), h.getValue());
         }
 
-        if (!params.isEmpty()) {
+        /* if (!params.isEmpty()) {
             request.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
         }
 
         if (reqEntity != null) {
             request.setEntity(reqEntity);
-        }
+        } */
 
         return request;
     }
 
-    public String ExecuteRequestXML(HttpUriRequest... httpUriRequests) {
+
+    public String ExecuteRequestUploadXML(HttpPost... httpposts) {
+
+        HttpClient client = new DefaultHttpClient();
+
+        HttpResponse response;
+
+        try {
+            HttpPost httppost = httpposts[0];
+
+            File f = new File(getFilename());
+
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            builder.addBinaryBody("file", f, ContentType.MULTIPART_FORM_DATA, f.getName());
+            HttpEntity multipart = builder.build();
+
+            httppost.setEntity(multipart);
+
+            response = client.execute(httppost);
+            HttpEntity entity = response.getEntity();
+
+            if (entity != null) {
+
+                InputStream instream = entity.getContent();
+                responseXML = convertStreamToString(instream);
+
+                // Closing the input stream will trigger connection release
+                instream.close();
+            }
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return responseXML;
+    }
+
+
+
+        public String ExecuteRequestXML(HttpUriRequest... httpUriRequests) {
 
         HttpClient client = new DefaultHttpClient();
 
