@@ -148,11 +148,7 @@ public class MeBaService extends IntentService {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final String ImageLoc = intent.getStringExtra(Constants.IMAGELOCATION);
-<<<<<<< .mine
                 handleActionSendImageMessage(ChatName, cid, ImageLoc);
-=======
-                //   handleActionSendImage(ImageLoc);
->>>>>>> .r9
             }
         }
     }
