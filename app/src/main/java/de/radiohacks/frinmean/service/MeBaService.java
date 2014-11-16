@@ -145,11 +145,59 @@ public class MeBaService extends IntentService {
                 handleActionCreateChat(ChatName);
             }
             if (Constants.ACTION_SENDIMAGEMESSAGE.equalsIgnoreCase(action)) {
+                final String ChatName = intent.getStringExtra(Constants.CHATNAME);
+                final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final String ImageLoc = intent.getStringExtra(Constants.IMAGELOCATION);
+<<<<<<< .mine
+                handleActionSendImageMessage(ChatName, cid, ImageLoc);
+=======
                 //   handleActionSendImage(ImageLoc);
+>>>>>>> .r9
             }
         }
     }
+
+    private void handleActionSendImageMessage(String ChatName, int ChatID, String Message) {
+        if (CheckServer()) {
+            RestClient rcsend;
+            if (!server.endsWith("/")) {
+                rcsend = new RestClient(server + "/image/upload");
+            } else {
+                rcsend = new RestClient(server + "image/upload");
+            }
+            try {
+                rcsend.AddHeader("enctype", "multipart/form-data");
+                rcsend.AddParam(Constants.USERNAME, username);
+                rcsend.AddParam(Constants.PASSWORD, password);
+                rcsend.setFilename(Message);
+
+                String ret = rcsend.ExecuteRequestUploadXML(rcsend.BevorExecutePost());
+                /* if (rcsend.getResponseCode() == HttpStatus.SC_OK) {
+                    Serializer sersendtxtmsg = new Persister();
+                    Reader readersendtxtmsg = new StringReader(ret);
+
+                    OutSendTextMessage ressend = sersendtxtmsg.read(OutSendTextMessage.class, readersendtxtmsg, false);
+
+                    if (ressend == null) {
+                        ErrorHelper eh = new ErrorHelper(this);
+                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                    } else {
+                        if (ressend.getErrortext() != null && !ressend.getErrortext().isEmpty()) {
+                            ErrorHelper eh = new ErrorHelper(this);
+                            eh.CheckErrorText(ressend.getErrortext());
+                        } else {
+                            if (ressend.getTextID() != null && ressend.getTextID() > 0) {
+                                OutInsertMessageIntoChat ins = insertMessageIntoChatAndDB(ChatName, ressend.getTextID(), ChatID, Constants.TYP_IMAGE, Message);
+                            }
+                        }
+                    }
+                } */
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     private void handleActionSendTextMessage(String ChatName, int ChatID, String TextMessage) {
         if (CheckServer()) {
