@@ -509,7 +509,7 @@ public class SingleChatActivity extends ActionBarActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_ADDUSERTOCHAT)) {
+            } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_LISTUSER)) {
                 try {
                     String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
                     Serializer serializer = new Persister();
