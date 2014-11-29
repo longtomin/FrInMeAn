@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_sendpicture"
+        android:icon="@drawable/ic_action_camera"
+        android:orderInCategory="100"
+        android:title="@string/action_sendpicture" />
+    <item
+        android:id="@+id/action_sendvideo"
+        android:icon="@drawable/ic_action_video"
+        android:orderInCategory="200"
+        android:title="@string/action_sendvideo" />
+    <item
+        android:id="@+id/action_sendlocation"
+        android:icon="@drawable/ic_action_place"
+        android:orderInCategory="300"
+        android:title="@string/action_sendlocation" />
+    <item
+        android:id="@+id/action_sendfile"
+        android:icon="@drawable/ic_action_place"
+        android:orderInCategory="400"
+        android:title="@string/action_sendfile" />
+    <item
+        android:id="@+id/action_sendcontact"
+        android:icon="@drawable/ic_action_place"
+        android:orderInCategory="500"
+        android:title="@string/action_sendcontact" />
+</menu>
