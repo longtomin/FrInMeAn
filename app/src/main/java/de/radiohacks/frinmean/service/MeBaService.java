@@ -7,11 +7,15 @@ import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpStatus;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -24,6 +28,7 @@ import de.radiohacks.frinmean.model.OutFetchImageMessage;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutFetchTextMessage;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
+import de.radiohacks.frinmean.model.OutSendImageMessage;
 import de.radiohacks.frinmean.model.OutSendTextMessage;
 
 public class MeBaService extends IntentService {
@@ -34,6 +39,7 @@ public class MeBaService extends IntentService {
     private String username;
     private String password;
     private int userid;
+    private String directory;
     // private int freq;
     private LocalDBHandler ldb = null;
     private BroadcastNotifier mBroadcaster = new BroadcastNotifier(this);
@@ -68,6 +74,8 @@ public class MeBaService extends IntentService {
         username = sharedPrefs.getString("prefUsername", "NULL");
         password = sharedPrefs.getString("prefPassword", "NULL");
         userid = sharedPrefs.getInt("prefUserID", -1);
+        directory = sharedPrefs.getString("prefDirectory", "NULL");
+
         // freq = sharedPrefs.getInt("prefSyncfrequency", -1);
     }
 
@@ -83,32 +91,11 @@ public class MeBaService extends IntentService {
         return ret;
     }
 
-    // Helper Funktion um den Service im Hintergrund zu starten.
-    /* public void startActionSignup(Context context, String user, String pw, String email) {
-        Intent intent = new Intent(context, MeBaService.class);
-        intent.setAction(Constants.ACTION_SIGNUP);
-        intent.putExtra(Constants.USERNAME, user);
-        intent.putExtra(Constants.PASSWORD, pw);
-        intent.putExtra(Constants.EMAIL, email);
-        context.startService(intent);
-    }*/
-
-    // Helper Funktion um den Service im Hintergrund zu starten.
-    /* public void startActionAuthenticate(Context context, String user, String pw) {
-        Intent intent = new Intent(context, MeBaService.class);
-        intent.setAction(Constants.ACTION_AUTHENTICATE);
-        intent.putExtra(Constants.USERNAME, user);
-        intent.putExtra(Constants.PASSWORD, pw);
-        context.startService(intent);
-    } */
-
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
             if (Constants.ACTION_SIGNUP.equalsIgnoreCase(action)) {
-                final String user = intent.getStringExtra(Constants.USERNAME);
-                final String pw = intent.getStringExtra(Constants.PASSWORD);
                 final String email = intent.getStringExtra(Constants.EMAIL);
 //                handleActionSignup(user, pw, email);
             }
@@ -132,7 +119,8 @@ public class MeBaService extends IntentService {
                 handleActionListChat();
             }
             if (Constants.ACTION_LISTUSER.equalsIgnoreCase(action)) {
-                handleActionListUser();
+                final String search = intent.getStringExtra(Constants.SEARCH);
+                handleActionListUser(search);
             }
             if (Constants.ACTION_SENDTEXTMESSAGE.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
@@ -150,10 +138,54 @@ public class MeBaService extends IntentService {
                 final String ImageLoc = intent.getStringExtra(Constants.IMAGELOCATION);
                 handleActionSendImageMessage(ChatName, cid, ImageLoc);
             }
+            if (Constants.ACTION_ADDUSERTOCHAT.equalsIgnoreCase(action)) {
+                final int cid = intent.getIntExtra(Constants.CHATID, -1);
+                final int uid = intent.getIntExtra(Constants.USERID, -1);
+                handleActionAddUserToChat(cid, uid);
+            }
         }
     }
 
+    private void handleActionAddUserToChat(int ChatID, int UserID) {
+        Integer tmpcid = ChatID;
+        Integer tmpuid = UserID;
+        if (CheckServer()) {
+            RestClient rc;
+            if (!server.endsWith("/")) {
+                rc = new RestClient(server + "/user/addusertochat");
+            } else {
+                rc = new RestClient(server + "user/addusertochat");
+            }
+            try {
+                rc.AddParam(Constants.USERNAME, username);
+                rc.AddParam(Constants.PASSWORD, password);
+                rc.AddParam(Constants.CHATID, tmpcid.toString());
+                rc.AddParam(Constants.USERID, tmpuid.toString());
+
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_USERADDEDTOCHAT);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
     private void handleActionSendImageMessage(String ChatName, int ChatID, String Message) {
+
+        // First Insert Message into local Chat
+        String imgname = uploadImageMessage(ChatName, ChatID, Message);
+
+        if (imgname != null && !imgname.isEmpty()) {
+            // Second move the Image to the right Location
+            moveFileToDestination(Message, Constants.IMAGEDIR, imgname);
+        }
+    }
+
+    private String uploadImageMessage(String ChatName, int ChatID, String Message) {
+        String serverfilename = null;
         if (CheckServer()) {
             RestClient rcsend;
             if (!server.endsWith("/")) {
@@ -168,32 +200,60 @@ public class MeBaService extends IntentService {
                 rcsend.setFilename(Message);
 
                 String ret = rcsend.ExecuteRequestUploadXML(rcsend.BevorExecutePost());
-                /* if (rcsend.getResponseCode() == HttpStatus.SC_OK) {
-                    Serializer sersendtxtmsg = new Persister();
-                    Reader readersendtxtmsg = new StringReader(ret);
 
-                    OutSendTextMessage ressend = sersendtxtmsg.read(OutSendTextMessage.class, readersendtxtmsg, false);
+                if (rcsend.getResponseCode() == HttpStatus.SC_OK) {
+                    Serializer sersendtxtmsg = new Persister();
+                    Reader readersendimgmsg = new StringReader(ret);
+
+                    OutSendImageMessage ressend = sersendtxtmsg.read(OutSendImageMessage.class, readersendimgmsg, false);
 
                     if (ressend == null) {
                         ErrorHelper eh = new ErrorHelper(this);
-                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
                         if (ressend.getErrortext() != null && !ressend.getErrortext().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(this);
                             eh.CheckErrorText(ressend.getErrortext());
                         } else {
-                            if (ressend.getTextID() != null && ressend.getTextID() > 0) {
-                                OutInsertMessageIntoChat ins = insertMessageIntoChatAndDB(ChatName, ressend.getTextID(), ChatID, Constants.TYP_IMAGE, Message);
+                            if (ressend.getImageID() != null && ressend.getImageID() > 0) {
+                                serverfilename = ressend.getImageFileName();
+                                OutInsertMessageIntoChat ins = insertMessageIntoChatAndDB(ChatName, ressend.getImageID(), ChatID, Constants.TYP_IMAGE, ressend.getImageFileName());
                             }
                         }
                     }
-                } */
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        return serverfilename;
     }
 
+    private void moveFileToDestination(String origFile, String subdir, String serverfilename) {
+        File source = new File(origFile);
+
+        // Where to store it.
+        String destFile = directory;
+        // Add SubDir for Images, videos or files
+        if (destFile.endsWith("/")) {
+            destFile += subdir;
+        } else {
+            destFile += "/" + subdir;
+        }
+
+        if (destFile.endsWith("/")) {
+            destFile += serverfilename;
+        } else {
+            destFile += "/" + serverfilename;
+        }
+
+        File destination = new File(destFile);
+        try {
+            FileUtils.copyFile(source, destination);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void handleActionSendTextMessage(String ChatName, int ChatID, String TextMessage) {
         if (CheckServer()) {
@@ -218,7 +278,7 @@ public class MeBaService extends IntentService {
 
                     if (ressend == null) {
                         ErrorHelper eh = new ErrorHelper(this);
-                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
                         if (ressend.getErrortext() != null && !ressend.getErrortext().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(this);
@@ -252,7 +312,7 @@ public class MeBaService extends IntentService {
             rcinsert.AddParam(Constants.USERNAME, username);
             rcinsert.AddParam(Constants.PASSWORD, password);
 
-            rcinsert.AddParam(Constants.CHATNAME, URLEncoder.encode(cid.toString(), "UTF-8"));
+            rcinsert.AddParam(Constants.CHATID, URLEncoder.encode(cid.toString(), "UTF-8"));
             rcinsert.AddParam(Constants.MESSAGEID, URLEncoder.encode(mid.toString(), "UTF-8"));
             rcinsert.AddParam(Constants.MESSAGETYPE, URLEncoder.encode(MessageType, "UTF-8"));
 
@@ -265,14 +325,14 @@ public class MeBaService extends IntentService {
 
                 if (resinsert == null) {
                     ErrorHelper eh = new ErrorHelper(this);
-                    eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                    eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                 } else {
                     if (resinsert.getErrortext() != null && !resinsert.getErrortext().isEmpty()) {
                         ErrorHelper eh = new ErrorHelper(this);
                         eh.CheckErrorText(resinsert.getErrortext());
                     } else {
-                        ldb.insert(userid, username, ChatID, ChatName, Constants.TYP_TEXT, resinsert.getSendTimestamp(), resinsert.getSendTimestamp(), resinsert.getMessageID());
-                        ldb.update(Constants.TYP_TEXT, resinsert.getMessageID(), Message);
+                        ldb.insert(userid, username, ChatID, ChatName, MessageType, resinsert.getSendTimestamp(), resinsert.getSendTimestamp(), resinsert.getMessageID());
+                        ldb.update(MessageType, resinsert.getMessageID(), Message);
                         ret = resinsert;
                     }
                 }
@@ -339,8 +399,6 @@ public class MeBaService extends IntentService {
                 rc = new RestClient(server + "user/authenticate");
             }
             try {
-                //rc.AddParam("username", user);
-                //rc.AddParam("password", password);
                 rc.AddParam(Constants.USERNAME, username);
                 rc.AddParam(Constants.PASSWORD, password);
 
@@ -354,7 +412,7 @@ public class MeBaService extends IntentService {
         }
     }
 
-    private void handleActionListUser() {
+    private void handleActionListUser(String in) {
         if (CheckServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
@@ -365,6 +423,7 @@ public class MeBaService extends IntentService {
             try {
                 rc.AddParam(Constants.USERNAME, username);
                 rc.AddParam(Constants.PASSWORD, password);
+                rc.AddParam(Constants.SEARCH, in);
 
                 String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 if (rc.getResponseCode() == HttpStatus.SC_OK) {
@@ -399,7 +458,7 @@ public class MeBaService extends IntentService {
 
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(this);
-                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
                         if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(this);
@@ -484,7 +543,7 @@ public class MeBaService extends IntentService {
     }
 
     private OutFetchImageMessage FetchImageMessage(int ImgMsgID) {
-        OutFetchImageMessage out = null;
+        OutFetchImageMessage out = new OutFetchImageMessage();
         if (CheckServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
@@ -492,8 +551,21 @@ public class MeBaService extends IntentService {
             } else {
                 rc = new RestClient(server + "image/download");
             }
+            rc.setContext(this.getApplicationContext());
+            rc.AddHeader("Accept", "image/jpeg");
+            rc.setSaveDirectory(directory + "/" + "images/");
+
             try {
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetPath(username, password, ImgMsgID));
+                String savedFilename = rc.ExecuteRequestImage(rc.BevorExecuteGetPath(username, password, ImgMsgID));
+
+                if (savedFilename != null && !savedFilename.isEmpty()) {
+                    out.setImageMessage(savedFilename);
+                    File file = new File(directory + "/" + "images/" + savedFilename);
+                    MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
+
+                } else {
+                    out.setErrortext("ERROR_DOWNLOAD_IMAGE");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -551,7 +623,7 @@ public class MeBaService extends IntentService {
             }
         }
     */
-    public String getServer() {
+    /* public String getServer() {
         return server;
     }
 
@@ -573,7 +645,7 @@ public class MeBaService extends IntentService {
 
     public void setPassword(String password) {
         this.password = password;
-    }
+    } */
 
     /* public int getFreq() {
         return freq;

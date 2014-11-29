@@ -2,6 +2,8 @@ package de.radiohacks.frinmean.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.widget.CursorAdapter;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -31,12 +34,14 @@ public class SingleChatAdapter extends CursorAdapter {
     private int OID = 0;
     private Context mContext;
     private Cursor mCursor;
+    private String directory;
 
-    public SingleChatAdapter(Context context, Cursor cursor, int InOID) {
+    public SingleChatAdapter(Context context, Cursor cursor, int InOID, String dir) {
         super(context, cursor, true);
         this.mContext = context;
         this.mCursor = cursor;
         this.OID = InOID;
+        this.directory = dir;
     }
 
     private int findMsgType(String in) {
@@ -90,18 +95,18 @@ public class SingleChatAdapter extends CursorAdapter {
             case TEXTMSG:
                 ret = li.inflate(R.layout.textmsg, parent, false);
                 if (msgOID == this.OID) {
-                    ret.setBackgroundResource(R.drawable.bubble_yellow);
-                } else {
                     ret.setBackgroundResource(R.drawable.bubble_green);
+                } else {
+                    ret.setBackgroundResource(R.drawable.bubble_yellow);
                 }
                 break;
             case IMAGEMSG:
                 ret = li.inflate(R.layout.imagemsg, parent, false);
                 if (msgOID == this.OID) {
-                    ret.setBackgroundResource(R.drawable.bubble_yellow);
+                    ret.setBackgroundResource(R.drawable.bubble_green);
                     ((RelativeLayout) ret).setGravity(Gravity.END);
                 } else {
-                    ret.setBackgroundResource(R.drawable.bubble_green);
+                    ret.setBackgroundResource(R.drawable.bubble_yellow);
                     ((RelativeLayout) ret).setGravity(Gravity.START);
                 }
                 break;
@@ -136,12 +141,15 @@ public class SingleChatAdapter extends CursorAdapter {
 
                 RelativeLayout bg = (RelativeLayout) view.findViewById(R.id.TextMsgLayout);
                 if (msgOID == this.OID) {
-                    bg.setHorizontalGravity(Gravity.END);
-                    bg.setVerticalGravity(Gravity.END);
+                    TxtOwningUserName.setGravity(Gravity.RIGHT);
+                    TxtReadTimeStamp.setGravity(Gravity.RIGHT);
+                    TxtSendTimeStamp.setGravity(Gravity.RIGHT);
+                    TextMessage.setGravity(Gravity.RIGHT);
                 } else {
-                    // bg.setGravity(Gravity.LEFT);
-                    bg.setHorizontalGravity(Gravity.START);
-                    bg.setVerticalGravity(Gravity.START);
+                    TxtOwningUserName.setGravity(Gravity.LEFT);
+                    TxtReadTimeStamp.setGravity(Gravity.LEFT);
+                    TxtSendTimeStamp.setGravity(Gravity.LEFT);
+                    TextMessage.setGravity(Gravity.LEFT);
                 }
                 break;
             case IMAGEMSG:
@@ -153,6 +161,45 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImgReadTimeStamp.setText(rDate.toString());
                 ImageButton IButton = (ImageButton) view.findViewById(R.id.ImageImageButton);
 
+                IButton.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        //TODO Image anzeigen im fullscreen Modus
+                    }
+                });
+
+                String imgfile = directory;
+                if (imgfile.endsWith("/")) {
+                    imgfile += Constants.IMAGEDIR + "/" + cur.getString(cur.getColumnIndex(Constants.T_ImageMsgValue));
+                } else {
+                    imgfile += "/" + Constants.IMAGEDIR + "/" + cur.getString(cur.getColumnIndex(Constants.T_ImageMsgValue));
+                }
+
+                //TODO prüfen ob Datei wirklich existiert.
+                File ifile = new File(imgfile);
+                if (ifile.exists()) {
+                    Bitmap bmp = BitmapFactory.decodeFile(imgfile);
+                    int imgheight = bmp.getHeight();
+                    int imgwidth = bmp.getWidth();
+                    int IMG_SIZE = 200;
+
+                    int zoom = 0;
+
+                    if (imgheight > imgwidth) {
+                        double faktor = imgheight / IMG_SIZE;
+                        zoom = (int) ((int) imgwidth / faktor);
+                        IButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, zoom, 200, false));
+                        IButton.setMinimumWidth(zoom);
+                        IButton.setMinimumHeight(200);
+                    } else {
+                        double faktor = imgwidth / IMG_SIZE;
+                        zoom = (int) ((int) imgheight / faktor);
+                        IButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, 200, zoom, false));
+                        IButton.setMinimumWidth(200);
+                        IButton.setMinimumHeight(zoom);
+                    }
+                }
                 if (msgOID == this.OID) {
                     ImgOwningUserName.setGravity(Gravity.RIGHT);
                     ImgReadTimeStamp.setGravity(Gravity.RIGHT);

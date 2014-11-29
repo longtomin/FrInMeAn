@@ -27,23 +27,28 @@ public class Constants {
     /*
     Contants for ErrorText
      */
-    public final static String NO_CONNECTION_TO_SERVER = "NO_CONNETION_TO_SERVER";
-    public final static String USER_AUTHENTICATION_FAILED = "USER_AUTHENTICATION_FAILED";
-    public final static String NONE_EXISTING_USER = "NONE_EXISTING_USER";
-    public final static String NONE_EXISTING_CHAT = "NONE_EXISTING_CHAT";
-    public final static String NO_TEXTMESSAGE_GIVEN = "NO_TEXTMESSAGE_GIVEN";
-    public final static String NONE_EXISTING_MESSAGE = "NONE_EXISTING_MESSAGE";
-    public final static String INVALID_MESSAGE_TYPE = "INVALID_MESSAGE_TYPE";
-    public final static String INVALID_EMAIL_ADRESS = "INVALID_EMAIL_ADRESS";
-    public final static String MISSING_CHATNAME = "MISSING_CHATNAME";
-    public final static String NONE_EXISTING_TEXT_MESSAGE = "NONE_EXISTING_TEXT_MESSAGE";
+    public final static String ERROR_NO_CONNECTION_TO_SERVER = "NO_CONNETION_TO_SERVER";
+    public final static String ERROR_USER_AUTHENTICATION_FAILED = "USER_AUTHENTICATION_FAILED";
+    public final static String ERROR_NONE_EXISTING_USER = "NONE_EXISTING_USER";
+    public final static String ERROR_NONE_EXISTING_CHAT = "NONE_EXISTING_CHAT";
+    public final static String ERROR_NO_TEXTMESSAGE_GIVEN = "NO_TEXTMESSAGE_GIVEN";
+    public final static String ERROR_NONE_EXISTING_MESSAGE = "NONE_EXISTING_MESSAGE";
+    public final static String ERROR_INVALID_MESSAGE_TYPE = "INVALID_MESSAGE_TYPE";
+    public final static String ERROR_INVALID_EMAIL_ADRESS = "INVALID_EMAIL_ADRESS";
+    public final static String ERROR_MISSING_CHATNAME = "MISSING_CHATNAME";
+    public final static String ERROR_NONE_EXISTING_TEXT_MESSAGE = "NONE_EXISTING_TEXT_MESSAGE";
 
-    public final static String DB_ERROR = "DATABASE_ERROR";
-    public final static String USER_NOT_ACTIVE = "USER_NOT_ACTIVE";
-    public final static String WRONG_PASSWORD = "WRONG_PASSWORD";
-    public final static String NO_USERNAME_OR_PASSWORD = "NO_USERNAME_OR_PASSWORD";
-    public final static String USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
-    public final static String NO_ACTIVE_CHATS = "NO_ACTIVE_CHATS";
+    public final static String ERROR_DB_ERROR = "DATABASE_ERROR";
+    public final static String ERROR_USER_NOT_ACTIVE = "USER_NOT_ACTIVE";
+    public final static String ERROR_WRONG_PASSWORD = "WRONG_PASSWORD";
+    public final static String ERROR_NO_USERNAME_OR_PASSWORD = "NO_USERNAME_OR_PASSWORD";
+    public final static String ERROR_USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
+    public final static String ERROR_NO_ACTIVE_CHATS = "NO_ACTIVE_CHATS";
+
+    /*
+    Constants for Result Types
+     */
+    public final static String RESULT_USER_ADDED_TO_CHAT = "ADDED";
 
     /*
     Constants for Media Types
@@ -78,6 +83,7 @@ public class Constants {
     public final static String MESSAGEID = "messageid";
     public final static String MESSAGETYPE = "messagetype";
     public final static String IMAGELOCATION = "imagelocation";
+    public final static String SEARCH = "search";
 
     /*
     Constants for Broadcasts
@@ -90,6 +96,7 @@ public class Constants {
     public static final String BROADCAST_CREATECHAT = "de.radiohacks.frinmean.CREATECHAT";
     public static final String BROADCAST_DELETECHAT = "de.radiohacks.frinmean.DELETECHAT";
     public static final String BROADCAST_ADDUSERTOCHAT = "de.radiohacks.frinmean.ADDUSERTOCHAT";
+    public static final String BROADCAST_USERADDEDTOCHAT = "de.radiohacks.frinmean.USERADDEDTOCHAT";
     public static final String BROADCAST_REMOVEUSERFROMCHAT = "de.radiohacks.frinmean.REMOVEUSERFROMCHAT";
     public static final String BROADCAST_LISTUSER = "de.radiohacks.frinmean.LISTUSER";
     public final static String BROADCAST_LISTCHAT = "de.radiohacks.frinmean.LISTCHAT";

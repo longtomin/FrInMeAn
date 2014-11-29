@@ -156,9 +156,9 @@ public class SignUpActivity extends Activity {
             dialog.dismiss();
 
             if (result.getErrortext() != null && !result.getErrortext().isEmpty()) {
-                if (result.getErrortext().equalsIgnoreCase(Constants.USER_ALREADY_EXISTS)) {
+                if (result.getErrortext().equalsIgnoreCase(Constants.ERROR_USER_ALREADY_EXISTS)) {
                     // TODO Sende Request wegen USER_ALREADY_EXISTS und authenthicate wegen Passwortprüfung durchführen.
-                    if (result.getErrortext().equalsIgnoreCase(Constants.USER_ALREADY_EXISTS)) {
+                    if (result.getErrortext().equalsIgnoreCase(Constants.ERROR_USER_ALREADY_EXISTS)) {
                         SharedPreferences shP = PreferenceManager
                                 .getDefaultSharedPreferences(SignUpActivity.this);
                         SharedPreferences.Editor ed = shP.edit();

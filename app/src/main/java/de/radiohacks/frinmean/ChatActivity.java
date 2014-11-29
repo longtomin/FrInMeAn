@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import de.radiohacks.frinmean.adapters.ChatAdapter;
 import de.radiohacks.frinmean.model.Chat;
+import de.radiohacks.frinmean.model.OutAddUserToChat;
 import de.radiohacks.frinmean.model.OutCreateChat;
 import de.radiohacks.frinmean.model.OutListChat;
 import de.radiohacks.frinmean.model.OwningUser;
@@ -45,6 +47,7 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
     private int userid;
     private String chatname;
     private SwipeRefreshLayout swipeLayout;
+
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -141,8 +144,8 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
     private void openCreateChat() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ChatActivity.this);
 
-        alertDialogBuilder.setTitle(this.getTitle());
-        alertDialogBuilder.setMessage(R.string.username);
+        alertDialogBuilder.setTitle(R.string.action_createchat);
+        alertDialogBuilder.setMessage(R.string.chatname);
 
         final EditText input = new EditText(this);
         alertDialogBuilder.setView(input);
@@ -193,9 +196,9 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
         swipeLayout.setRefreshing(false);
     }
 
-    private class ListChatStateReceiver extends BroadcastReceiver {
+    public class ListChatStateReceiver extends BroadcastReceiver {
 
-        private ListChatStateReceiver() {
+        public ListChatStateReceiver() {
             super();
 
             // prevents instantiation by other packages.
@@ -223,7 +226,7 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
                     OutListChat res = serializer.read(OutListChat.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(ChatActivity.this);
-                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
                         if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(ChatActivity.this);
@@ -247,7 +250,7 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
                     OutCreateChat res = serializer.read(OutCreateChat.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(ChatActivity.this);
-                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
                         if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(ChatActivity.this);

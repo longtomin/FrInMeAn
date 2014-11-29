@@ -11,6 +11,7 @@ package de.radiohacks.frinmean.model;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
 
 
 /**
@@ -33,11 +34,12 @@ import org.simpleframework.xml.Element;
  * </pre>
  */
 @Default(DefaultType.FIELD)
+@Root(name = "User")
 public class User {
 
     @Element(name = "Username", required = true)
     protected String username;
-    @Element(required = false, name = "UserID")
+    @Element(required = true, name = "UserID")
     protected int userID;
     @Element(name = "Email", required = true)
     protected String email;

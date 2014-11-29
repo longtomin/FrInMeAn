@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 20
+    compileSdkVersion 21
     buildToolsVersion '20.0.0'
     defaultConfig {
         applicationId 'de.radiohacks.frinmean'
         minSdkVersion 16
-        targetSdkVersion 20
+        targetSdkVersion 21
         versionCode 1
         versionName '1.0'
     }
@@ -36,10 +36,13 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+
     compile 'org.simpleframework:simple-xml:2.7.+'
     compile 'org.apache.httpcomponents:httpmime:4.3.5'
     compile 'org.apache.httpcomponents:httpcore:4.3.3'
-    compile 'com.android.support:appcompat-v7:18.0.+'
-    compile 'com.android.support:support-v4:19.1.0'
+    compile 'commons-io:commons-io:2.4'
+    compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.android.support:support-v4:21.0.0'
     compile 'net.rdrei.android.dirchooser:library:2.1@aar'
+    compile 'com.sun.jersey:jersey-core:1.18.2'
 }

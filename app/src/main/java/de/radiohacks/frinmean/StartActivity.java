@@ -171,7 +171,7 @@ public class StartActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        getPreferenceInfo();
+        /* getPreferenceInfo();
 
         if (server.equalsIgnoreCase("NULL")) {
             Toast.makeText(StartActivity.this, this.getString(R.string.no_server_given), Toast.LENGTH_SHORT).show();
@@ -179,7 +179,7 @@ public class StartActivity extends Activity {
             if (username.equalsIgnoreCase("NULL")
                     || password.equalsIgnoreCase("NULL")) {
                 Toast.makeText(StartActivity.this, this.getString(R.string.no_user_or_password_given), Toast.LENGTH_SHORT).show();
-            } else {
+            } else { */
 
                 /*IntentFilter intfil = new IntentFilter(
                         Constants.BROADCAST_AUTHENTICATE);
@@ -203,7 +203,7 @@ public class StartActivity extends Activity {
 
                 startService(resint); */
 
-                if (!server.endsWith("/")) {
+                /* if (!server.endsWith("/")) {
                     server += "/user/authenticate";
                 } else {
                     server += "user/authenticate";
@@ -211,7 +211,7 @@ public class StartActivity extends Activity {
                 AuthenticateLoader loadFeedData = new AuthenticateLoader();
                 loadFeedData.execute(server);
             }
-        }
+        }*/
     }
 
     @Override
@@ -258,7 +258,7 @@ public class StartActivity extends Activity {
 
             if (result == null) {
                 ErrorHelper eh = new ErrorHelper(StartActivity.this);
-                eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
             } else {
                 if (result.getErrortext() != null && !result.getErrortext().isEmpty()) {
                     ErrorHelper eh = new ErrorHelper(StartActivity.this);

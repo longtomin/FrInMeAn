@@ -1,16 +1,12 @@
 package de.radiohacks.frinmean.service;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.Image;
-import android.net.Uri;
+import android.content.Context;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -18,22 +14,16 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.ByteArrayBuffer;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -53,9 +43,10 @@ public class RestClient {
     private String message;
     private String responseXML;
     private String SaveDirectory;
-    private Bitmap responseImage;
+    // private Bitmap responseImage;
     private String filename;
-    private HttpUriRequest request;
+    // private HttpUriRequest request;
+    private Context mContext;
 
     public RestClient(String urlin) {
         this.url = urlin;
@@ -83,6 +74,14 @@ public class RestClient {
         return sb.toString();
     }
 
+    public void setContext(Context in) {
+        this.mContext = in;
+    }
+
+    public Context getContext() {
+        return mContext;
+    }
+
     public void setUrl(String url) {
         this.url = url;
     }
@@ -103,11 +102,13 @@ public class RestClient {
         return filename;
     }
 
-    public void setFilename(String in) {this.filename = in; }
-
-    public Bitmap getResponseImage() {
-        return responseImage;
+    public void setFilename(String in) {
+        this.filename = in;
     }
+
+    // public Bitmap getResponseImage() {
+    //    return responseImage;
+    //}
 
     public String getErrorMessage() {
         return message;
@@ -222,6 +223,7 @@ public class RestClient {
             httppost.setEntity(multipart);
 
             response = client.execute(httppost);
+            responseCode = response.getStatusLine().getStatusCode();
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {
@@ -243,8 +245,7 @@ public class RestClient {
     }
 
 
-
-        public String ExecuteRequestXML(HttpUriRequest... httpUriRequests) {
+    public String ExecuteRequestXML(HttpUriRequest... httpUriRequests) {
 
         HttpClient client = new DefaultHttpClient();
 
@@ -276,31 +277,8 @@ public class RestClient {
         return responseXML;
     }
 
-    public Bitmap ExecuteRequestImage(HttpUriRequest... httpUriRequests) {
-
- /*       try {
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpResponse httpResponse = null;
-            httpResponse = httpClient.execute(httpUriRequests[0]);
-            StatusLine statusLine = httpResponse.getStatusLine();
-            int statusCode = statusLine.getStatusCode();
-            if (statusCode == 200) {
-                filename = httpResponse.getFirstHeader("filename").getValue();
-                HttpEntity entity = httpResponse.getEntity();
-                byte[] bytes = EntityUtils.toByteArray(entity);
-
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0,
-                        bytes.length);
-                return bitmap;
-            } else {
-                throw new IOException("Download failed, HTTP response code "
-                        + statusCode + " - " + statusLine.getReasonPhrase());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null; */
-
+    public String ExecuteRequestImage(HttpUriRequest... httpUriRequests) {
+        String ret = null;
         HttpClient httpClient = new DefaultHttpClient();
         try {
             HttpResponse httpResponse = null;
@@ -312,30 +290,22 @@ public class RestClient {
             File file = new File(SaveDirectory + filename);
             HttpEntity entity = httpResponse.getEntity();
 
-            if (entity != null) {
-                // BufferedHttpEntity bufHttpEntity = new BufferedHttpEntity(entity);
+            if (responseCode == 200) {
+                InputStream instream1 = entity.getContent();
 
-                BufferedInputStream bis = new BufferedInputStream(httpResponse.getEntity().getContent());
+                OutputStream output = new FileOutputStream(SaveDirectory + filename);
 
-                ByteArrayBuffer baf = new ByteArrayBuffer(50);
-                int current = 0;
-                while ((current = bis.read()) != -1) {
-                    baf.append((byte) current);
+                int read = 0;
+
+                byte[] bytes = new byte[1024];
+                while ((read = instream1.read(bytes)) != -1) {
+                    output.write(bytes, 0, read);
                 }
-
-                FileOutputStream fos = new FileOutputStream(file);
-                fos.write(baf.toByteArray());
-                fos.close();
-
-
-                // Bitmap s = BitmapFactory.decodeStream(instream, null, null);
-
-                //responseImage = BitmapFactory.decodeStream(instream);
-
-                // Closing the input stream will trigger connection release
-                bis.close();
-
-
+                output.close();
+                instream1.close();
+                ret = filename;
+            } else {
+                // TODO Log Eintrag schreiben
             }
         } catch (ClientProtocolException e) {
             httpClient.getConnectionManager().shutdown();
@@ -344,7 +314,7 @@ public class RestClient {
             httpClient.getConnectionManager().shutdown();
             e.printStackTrace();
         }
-        return responseImage;
+        return ret;
     }
 
     public enum RequestMethod {

@@ -11,6 +11,7 @@ package de.radiohacks.frinmean.model;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ import java.util.List;
 @Root(name = "OutListUser", strict = false)
 public class OutListUser {
 
-    @Element(required = false, name = "User")
+    @ElementList(required = false, inline = true, name = "User")
     protected List<User> user;
     @Element(required = false, name = "Errortext")
     protected String errortext;

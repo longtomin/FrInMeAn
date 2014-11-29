@@ -1,7 +1,9 @@
 package de.radiohacks.frinmean;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -33,10 +35,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.radiohacks.frinmean.adapters.SingleChatAdapter;
+import de.radiohacks.frinmean.model.OutAddUserToChat;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
+import de.radiohacks.frinmean.model.OutListUser;
 import de.radiohacks.frinmean.service.ErrorHelper;
 import de.radiohacks.frinmean.service.LocalDBHandler;
 import de.radiohacks.frinmean.service.MeBaService;
@@ -86,17 +92,14 @@ public class SingleChatActivity extends ActionBarActivity {
 
         actionBar.setTitle(ChatName);
 
-//        android.app.ActionBar.LayoutParams lp = new android.app.ActionBar.LayoutParams(android.app.ActionBar.LayoutParams.WRAP_CONTENT, android.app.ActionBar.LayoutParams.WRAP_CONTENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL);
-        //View customNav = LayoutInflater.from(this).inflate(R.menu.single_chat_action, null); // layout which contains your button.
-        //actionBar.setCustomView(customNav, lp);
         actionBar.setDisplayShowCustomEnabled(true);
 
 
-        long time = System.currentTimeMillis() / 1000L;
+        long time = System.currentTimeMillis() / 1000L - (60 * 60 * 24 * 7);
 
         ldb = new LocalDBHandler(this);
         Cursor c = ldb.get(ChatID, time);
-        mAdapter = new SingleChatAdapter(this, c, this.userid);
+        mAdapter = new SingleChatAdapter(this, c, this.userid, directory);
 
         ListView lv = (ListView) findViewById(R.id.singlechatlist);
         lv.setAdapter(mAdapter);
@@ -199,39 +202,17 @@ public class SingleChatActivity extends ActionBarActivity {
                 picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
                 picintent.putExtra(Constants.CHATID, ChatID);
                 picintent.putExtra(Constants.CHATNAME, ChatName);
-                picintent.putExtra(Constants.IMAGELOCATION, data.getData());
+
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                Cursor cursor = this.getContentResolver().query(data.getData(), filePathColumn, null, null, null);
+                cursor.moveToFirst();
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                String filePath = cursor.getString(columnIndex);
+                cursor.close();
+
+                picintent.putExtra(Constants.IMAGELOCATION, filePath);
 
                 startService(picintent);
-
-                /* InputStream stream1 = null;
-                Bitmap bitmap = null;
-                try {
-                    stream1 = getContentResolver().openInputStream(data.getData());
-                    bitmap = BitmapFactory.decodeStream(stream1);
-                    stream.close();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                //bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
-
-                byte[] byte_arr = stream.toByteArray();
-
-                fileBody = new ByteArrayBody(byte_arr, data.getData().toString());
-
-                if (!server.endsWith("/")) {
-                    server += "/image/upload";
-                } else {
-                    server += "image/upload";
-                } */
-                // ImageUploader uploadPicData = new ImageUploader();
-                // uploadPicData.execute(server);
-
-                // Image captured and saved to fileUri specified in the Intent
-
             } else if (resultCode == RESULT_CANCELED) {
                 // User cancelled the image capture
             } else {
@@ -296,15 +277,107 @@ public class SingleChatActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG, "start onCreateOptionsMenu");
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.single_chat_action, menu);
-        // View acbview = View.inflate(this, R.menu.single_chat_action, null);
-        //getActionBar().setCustomView(acbview);
+
+        if (userid == OwningUserID ) {
+            // Inflate OwningUserMenu; this adds items to the action bar if it is present.
+            getMenuInflater().inflate(R.menu.single_chat_action_owninguser, menu);
+        } else {
+            // Inflate menu for Participants; this adds items to the action bar if it is present.
+            getMenuInflater().inflate(R.menu.single_chat_action_participant, menu);
+        }
         Log.d(TAG, "end onCreateOptionsMenu");
         return true;
     }
 
-    public void showPopup() {
+    private void openEnterUserName() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SingleChatActivity.this);
+
+        alertDialogBuilder.setTitle(this.getTitle());
+        alertDialogBuilder.setMessage(R.string.username);
+
+        final EditText input = new EditText(this);
+        alertDialogBuilder.setView(input);
+
+
+        alertDialogBuilder.setPositiveButton(R.string.action_searchuser
+                , new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+                String searchStr = input.getText().toString();
+                Intent listuserIntent = new Intent(SingleChatActivity.this, MeBaService.class);
+                listuserIntent.setAction(Constants.ACTION_LISTUSER);
+                listuserIntent.putExtra(Constants.SEARCH, searchStr);
+                startService(listuserIntent);
+            }
+        });
+        alertDialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // cancel the alert box and put a Toast to the user
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        // show alert
+        alertDialog.show();
+    }
+
+    private void openSelectUserDialog(final OutListUser in) {
+        final CharSequence users[];
+
+        users = new String[in.getUser().size()];
+
+        for (int i = 0; i < in.getUser().size(); i++) {
+            users[i] = String.valueOf(in.getUser().get(i).getUserID()) + " | " + in.getUser().get(i).getUsername() + " | " + in.getUser().get(i).getEmail();
+        }
+
+        final List<Integer> selectedItems = new ArrayList<Integer>(1);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SingleChatActivity.this);
+
+        alertDialogBuilder.setTitle(R.string.option_adduser);
+        alertDialogBuilder.setMultiChoiceItems(users, null, new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                if (isChecked) {
+                    selectedItems.add(which);
+                } else if (selectedItems.contains(which)) {
+                    // Else, if the item is already in the array, remove it
+                    // write your code when user Uchecked the checkbox
+                    selectedItems.remove(Integer.valueOf(which));
+                }
+            }
+        }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                for (int j = 0; j < selectedItems.size(); j++) {
+                    CharSequence tmpuser = users[selectedItems.get(j)];
+                    String stmpuser = tmpuser.toString();
+                    String stmpuid = stmpuser.substring(0, stmpuser.indexOf("|"));
+                    int tmpuserid = Integer.parseInt(stmpuid.trim());
+
+                    Intent adduserIntent = new Intent(SingleChatActivity.this, MeBaService.class);
+                    adduserIntent.setAction(Constants.ACTION_ADDUSERTOCHAT);
+                    adduserIntent.putExtra(Constants.CHATID, ChatID);
+                    adduserIntent.putExtra(Constants.USERID, tmpuserid);
+                    startService(adduserIntent);
+                }
+            }
+        })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        //  Your code when user clicked on Cancel
+
+                    }
+                });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        // show alert
+        alertDialog.show();
+    }
+
+    private void showPopup() {
         View menuItemView = findViewById(R.id.action_show_popup);
         PopupMenu popup = new PopupMenu(this, menuItemView);
         MenuInflater inflate = popup.getMenuInflater();
@@ -333,7 +406,6 @@ public class SingleChatActivity extends ActionBarActivity {
                         return true;
                 }
                 Log.d(TAG, "end Popup onMenuItemClick");
-                // return super.onMenuItemClick(menuItem);
                 return false;
             }
         });
@@ -352,101 +424,21 @@ public class SingleChatActivity extends ActionBarActivity {
             case R.id.action_show_popup:
                 showPopup();
                 return true;
-            case R.id.action_sendcontact:
-//                openCreateChat();
+            case R.id.option_adduser:
+                openEnterUserName();
                 return true;
-            case R.id.action_sendfile:
-//                SendFileAction;
+            case R.id.option_deletechat:
                 return true;
-            case R.id.action_sendpicture:
-                SendPicture();
-                return true;
-            case R.id.action_sendvideo:
-                SendVideo();
-                return true;
-            case R.id.action_settings:
-                Intent su = new Intent(SingleChatActivity.this, SettingsActivity.class);
-                startActivity(su);
+            case R.id.option_removeuser:
                 return true;
         }
         Log.d(TAG, "end onOptionsItemSelected");
         return super.onOptionsItemSelected(item);
     }
 
-/*    private OutFetchTextMessage FetchTextMessage(int ID) {
-        Integer mid = ID;
-        OutFetchTextMessage res = null;
+    public class SingleChatReceiver extends BroadcastReceiver {
 
-        String fetchurl = server;
-        if (!fetchurl.endsWith("/")) fetchurl += "/";
-
-        fetchurl += "user/gettextmessage";
-
-
-        RestClient rc = new RestClient(fetchurl);
-        rc.AddParam("username", username);
-        rc.AddParam("password", password);
-        rc.AddParam("textmessageid", mid.toString());
-
-        try {
-            String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
-            Serializer serializer = new Persister();
-            Reader reader = new StringReader(ret);
-
-            res = serializer.read(OutFetchTextMessage.class, reader, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return res;
-    } */
-
-    /* private class ImageUploader extends AsyncTask<String, Void, OutSendImageMessage> {
-
-        @Override
-        protected void onPostExecute(OutSendImageMessage result) {
-            super.onPostExecute(result);
-
-            if (result.getErrortext() != null && !result.getErrortext().isEmpty()) {
-                ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                eh.CheckErrorText(result.getErrortext());
-            } else {
-                if (result.getImageID() != 0) {
-                    Toast.makeText(SingleChatActivity.this, "Image uploaded.\nID: " + result.getImageID().toString(), Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected OutSendImageMessage doInBackground(String... params) {
-            OutSendImageMessage res = null;
-
-            RestClient rc = new RestClient(params[0]);
-            rc.reqEntity.addPart("file", fileBody);
-            rc.AddParam("username", username);
-            rc.AddParam("password", password);
-
-            try {
-                String ret = rc.ExecuteRequestXML(rc.BevorExecutePost());
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                res = serializer.read(OutSendImageMessage.class, reader, false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return res;
-        }
-    } */
-
-    private class SingleChatReceiver extends BroadcastReceiver {
-
-        private SingleChatReceiver() {
+        public SingleChatReceiver() {
             super();
 
             // prevents instantiation by other packages.
@@ -474,14 +466,16 @@ public class SingleChatActivity extends ActionBarActivity {
                     OutFetchMessageFromChat res = serializer.read(OutFetchMessageFromChat.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
                         if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
                             eh.CheckErrorText(res.getErrortext());
                         } else {
                             if (res.getMessage() != null && !res.getMessage().isEmpty()) {
-                                mAdapter.notifyDataSetChanged();
+                                long newtime = System.currentTimeMillis() / 1000L;
+                                Cursor newc = ldb.get(ChatID, newtime);
+                                mAdapter.changeCursor(newc);
                             }
                         }
                     }
@@ -498,7 +492,7 @@ public class SingleChatActivity extends ActionBarActivity {
                     OutInsertMessageIntoChat res = serializer.read(OutInsertMessageIntoChat.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                        eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
                         if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
@@ -512,6 +506,51 @@ public class SingleChatActivity extends ActionBarActivity {
                         }
                     }
 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_ADDUSERTOCHAT)) {
+                try {
+                    String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    OutListUser res = serializer.read(OutListUser.class, reader, false);
+                    if (res == null) {
+                        ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
+                    } else {
+                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                            ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
+                            eh.CheckErrorText(res.getErrortext());
+                        } else {
+                            openSelectUserDialog(res);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }  else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_USERADDEDTOCHAT)) {
+                try {
+                    String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    OutAddUserToChat res = serializer.read(OutAddUserToChat.class, reader, false);
+                    if (res == null) {
+                        ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
+                    } else {
+                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                            ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
+                            eh.CheckErrorText(res.getErrortext());
+                        } else {
+                            if (res.getResult().equalsIgnoreCase(Constants.RESULT_USER_ADDED_TO_CHAT)) {
+                                Toast.makeText(SingleChatActivity.this.getBaseContext(), getString(R.string.user_added_to_chat), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

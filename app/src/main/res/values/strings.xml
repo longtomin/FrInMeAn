@@ -5,12 +5,15 @@
     <string name="action_settings">Einstellungen</string>
     <string name="action_signup">Anmelden</string>
     <string name="action_createchat">Chat erzeugen</string>
+    <string name="chatname">Chatnamen angeben</string>
+    <string name="action_searchuser">Benutzer suchen</string>
     <string name="action_sendpicture">Bild senden</string>
     <string name="action_sendvideo">Video senden</string>
     <string name="action_sendlocation">Standort senden</string>
     <string name="action_sendfile">Datei senden</string>
     <string name="option_adduser">Benutzer hinzufügen</string>
-    <string name="oprion_removeuser">Benutzer entfernen</string>
+    <string name="option_removeuser">Benutzer entfernen</string>
+    <string name="option_leave_chat">Chat verlassen</string>
     <string name="option_deletechat">Chat löschen</string>
     <string name="action_sendcontact">Kontakt senden</string>
     <string name="title_activity_chat">Chats</string>
@@ -24,6 +27,7 @@
     <string name="cancel">Abbrechen</string>
     <string name="no_server_given">Keine Server in den Einstellungen vorhanden!</string>
     <string name="no_user_or_password_given">Kein Benutzer oder Passwort angegeben, bitte anmelden!</string>
+    <string name="user_added_to_chat">Benutzer wurde dem Chat hinzugefügt.</string>
     <string name="signup_type_same_password_in_password_fields">Passwörter stimmen nicht überein!</string>
     <string name="signup_fill_all_fields">Es müssen alle Felder für den SignUp ausgefüllt werden!</string>
     <string name="signup_user_already_exists_saved">Der Benutzer existiert bereits, wird aber für spätere Authentizifzierung gespeichert!</string>
@@ -51,5 +55,6 @@
     <string name="title_activity_sign_up">SignUpActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_single_chat">SingleChatActivity</string>
+    <string name="title_activity_image_view">ImageViewActivity</string>
 
 </resources>
