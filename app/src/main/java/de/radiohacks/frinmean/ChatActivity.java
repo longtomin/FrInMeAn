@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -28,7 +27,6 @@ import java.util.List;
 
 import de.radiohacks.frinmean.adapters.ChatAdapter;
 import de.radiohacks.frinmean.model.Chat;
-import de.radiohacks.frinmean.model.OutAddUserToChat;
 import de.radiohacks.frinmean.model.OutCreateChat;
 import de.radiohacks.frinmean.model.OutListChat;
 import de.radiohacks.frinmean.model.OwningUser;
@@ -49,7 +47,6 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
     private SwipeRefreshLayout swipeLayout;
 
 
-
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
@@ -57,7 +54,18 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
         mAdapter = new ChatAdapter(this);
         setListAdapter(mAdapter);
 
+        Intent i = getIntent();
+        int tmpuid = i.getIntExtra(Constants.USERID, -1);
         getPreferenceInfo();
+
+        // Check if intent supplied real userid
+        if (tmpuid != -1) {
+            // if userid from authenticate is not stored in preferences set userid
+            // to the userid delivered from the authenticate
+            if (tmpuid != userid) {
+                userid = tmpuid;
+            }
+        }
 
         IntentFilter statusIntentFilter = new IntentFilter(
                 Constants.BROADCAST_LISTCHAT);
@@ -184,6 +192,7 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
         i.putExtra(Constants.CHATNAME, c.getChatname());
         i.putExtra(Constants.OWNINGUSERID, c.getOwningUser().getOwningUserID());
         i.putExtra(Constants.OWNINGUSERNAME, c.getOwningUser().getOwningUserName());
+        i.putExtra(Constants.USERID, userid);
         startActivity(i);
     }
 

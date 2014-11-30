@@ -8,6 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpStatus;
@@ -33,6 +34,7 @@ import de.radiohacks.frinmean.model.OutSendTextMessage;
 
 public class MeBaService extends IntentService {
 
+    private static final String TAG = MeBaService.class.getSimpleName();
     private final IBinder mBinder = new LocalBinder();
     public ConnectivityManager conManager = null;
     private String server;
@@ -52,9 +54,10 @@ public class MeBaService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d(TAG, "start onCreate");
         conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         getPreferenceInfo();
-
+        Log.d(TAG, "end onCreate");
     }
 
     @Override
@@ -67,6 +70,7 @@ public class MeBaService extends IntentService {
     }
 
     protected void getPreferenceInfo() {
+        Log.d(TAG, "start getPreferenceInfo");
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
@@ -77,9 +81,11 @@ public class MeBaService extends IntentService {
         directory = sharedPrefs.getString("prefDirectory", "NULL");
 
         // freq = sharedPrefs.getInt("prefSyncfrequency", -1);
+        Log.d(TAG, "end getPreferenceInfo");
     }
 
-    protected boolean CheckServer() {
+    protected boolean checkServer() {
+        Log.d(TAG, "start checkserver");
         boolean ret = false;
         if (this.server != null && !this.server.equalsIgnoreCase("NULL") && !this.server.isEmpty()) {
             if (this.username != null && !this.username.equalsIgnoreCase("NULL") && !this.username.isEmpty()) {
@@ -88,11 +94,13 @@ public class MeBaService extends IntentService {
                 }
             }
         }
+        Log.d(TAG, "end checkServer");
         return ret;
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.d(TAG, "start onHandleIntent");
         if (intent != null) {
             final String action = intent.getAction();
             if (Constants.ACTION_SIGNUP.equalsIgnoreCase(action)) {
@@ -144,12 +152,14 @@ public class MeBaService extends IntentService {
                 handleActionAddUserToChat(cid, uid);
             }
         }
+        Log.d(TAG, "start onHandleIntent");
     }
 
     private void handleActionAddUserToChat(int ChatID, int UserID) {
+        Log.d(TAG, "start handleActionAddUserToChat");
         Integer tmpcid = ChatID;
         Integer tmpuid = UserID;
-        if (CheckServer()) {
+        if (checkServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
                 rc = new RestClient(server + "/user/addusertochat");
@@ -170,10 +180,12 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "end handleActionAddUserToChat");
     }
 
 
     private void handleActionSendImageMessage(String ChatName, int ChatID, String Message) {
+        Log.d(TAG, "start handleActionSendImageMessage");
 
         // First Insert Message into local Chat
         String imgname = uploadImageMessage(ChatName, ChatID, Message);
@@ -182,11 +194,13 @@ public class MeBaService extends IntentService {
             // Second move the Image to the right Location
             moveFileToDestination(Message, Constants.IMAGEDIR, imgname);
         }
+        Log.d(TAG, "end handleActionSendImageMessage");
     }
 
     private String uploadImageMessage(String ChatName, int ChatID, String Message) {
+        Log.d(TAG, "start uploadImageMessage");
         String serverfilename = null;
-        if (CheckServer()) {
+        if (checkServer()) {
             RestClient rcsend;
             if (!server.endsWith("/")) {
                 rcsend = new RestClient(server + "/image/upload");
@@ -226,10 +240,12 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "end uploadImageMessage");
         return serverfilename;
     }
 
     private void moveFileToDestination(String origFile, String subdir, String serverfilename) {
+        Log.d(TAG, "start moveFileToDestination");
         File source = new File(origFile);
 
         // Where to store it.
@@ -253,10 +269,12 @@ public class MeBaService extends IntentService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Log.d(TAG, "end moveFileToDestination");
     }
 
     private void handleActionSendTextMessage(String ChatName, int ChatID, String TextMessage) {
-        if (CheckServer()) {
+        Log.d(TAG, "start handleActionSendTextMessage");
+        if (checkServer()) {
             RestClient rcsend;
             RestClient rcinsert;
             if (!server.endsWith("/")) {
@@ -294,10 +312,11 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "end handleActionSendTextMessage");
     }
 
     private OutInsertMessageIntoChat insertMessageIntoChatAndDB(String ChatName, int MsgID, int ChatID, String MessageType, String Message) {
-
+        Log.d(TAG, "start insertMessageIntoChatAndDB");
         RestClient rcinsert;
         OutInsertMessageIntoChat ret = null;
 
@@ -342,11 +361,13 @@ public class MeBaService extends IntentService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Log.d(TAG, "end insertMessageIntoChatAndDB");
         return ret;
     }
 
     private void handleActionCreateChat(String ChatName) {
-        if (CheckServer()) {
+        Log.d(TAG, "start handleActionCreateChate");
+        if (checkServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
                 rc = new RestClient(server + "/user/createchat");
@@ -366,10 +387,12 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "end handleActionCreateChat");
     }
 
     private void handleActionListChat() {
-        if (CheckServer()) {
+        Log.d(TAG, "start handleActionListChat");
+        if (checkServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
                 rc = new RestClient(server + "/user/listchat");
@@ -388,10 +411,12 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "end handleActionListChat");
     }
 
     private void handleActionAuthenticate() {
-        if (CheckServer()) {
+        Log.d(TAG, "start handleActionAuthenticate");
+        if (checkServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
                 rc = new RestClient(server + "/user/authenticate");
@@ -410,10 +435,12 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "start handleActionAuthenticate");
     }
 
     private void handleActionListUser(String in) {
-        if (CheckServer()) {
+        Log.d(TAG, "start handleActionListUser");
+        if (checkServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
                 rc = new RestClient(server + "/user/listuser");
@@ -433,10 +460,12 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "end handleActionListUser");
     }
 
     private void handleActionGetMessageFromChat(int cid, long readtime, String CName) {
-        if (CheckServer()) {
+        Log.d(TAG, "start handleActionGetMessageFromChat");
+        if (checkServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
                 rc = new RestClient(server + "/user/getmessagefromchat");
@@ -476,15 +505,17 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "end handleActionGetMessageFromChat");
     }
 
     private void SaveMessageToLDB(List<Message> in, int ChatID, String ChatName) {
+        Log.d(TAG, "start saveMessageToDB");
         for (int j = 0; j < in.size(); j++) {
             Message m = in.get(j);
 
             if (m.getTextMsgID() > 0) {
                 ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getTextMsgID());
-                OutFetchTextMessage oftm = FetchTextMessage(m.getTextMsgID());
+                OutFetchTextMessage oftm = fetchTextMessage(m.getTextMsgID());
                 if (oftm.getErrortext() != null && !oftm.getErrortext().isEmpty()) {
                     //Do notthing we are in the Background working
                 } else {
@@ -497,7 +528,7 @@ public class MeBaService extends IntentService {
             if (m.getImageMsgID() > 0) {
                 ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getImageMsgID());
 
-                OutFetchImageMessage ofim = FetchImageMessage(m.getImageMsgID());
+                OutFetchImageMessage ofim = fetchImageMessage(m.getImageMsgID());
                 if (ofim.getErrortext() != null && !ofim.getErrortext().isEmpty()) {
                     //Do notthing we are in the Background working
                 } else {
@@ -513,11 +544,13 @@ public class MeBaService extends IntentService {
                 ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getLocationMsgID());
             }
         }
+        Log.d(TAG, "end saveMessageToDB");
     }
 
-    private OutFetchTextMessage FetchTextMessage(int TxtMsgID) {
+    private OutFetchTextMessage fetchTextMessage(int TxtMsgID) {
+        Log.d(TAG, "start fetchTestMessage");
         OutFetchTextMessage out = null;
-        if (CheckServer()) {
+        if (checkServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
                 rc = new RestClient(server + "/user/gettextmessage");
@@ -539,12 +572,14 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "end fetchTextMessage");
         return out;
     }
 
-    private OutFetchImageMessage FetchImageMessage(int ImgMsgID) {
+    private OutFetchImageMessage fetchImageMessage(int ImgMsgID) {
+        Log.d(TAG, "start fetchImageMessage");
         OutFetchImageMessage out = new OutFetchImageMessage();
-        if (CheckServer()) {
+        if (checkServer()) {
             RestClient rc;
             if (!server.endsWith("/")) {
                 rc = new RestClient(server + "/image/download");
@@ -570,6 +605,7 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "start fetchImageMessage");
         return out;
     }
 

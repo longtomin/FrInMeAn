@@ -1,6 +1,7 @@
 package de.radiohacks.frinmean.service;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -35,7 +36,7 @@ import java.util.ArrayList;
  */
 public class RestClient {
 
-    public MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+    private static final String TAG = RestClient.class.getSimpleName();
     private ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
     private ArrayList<NameValuePair> headers = new ArrayList<NameValuePair>();
     private String url;
@@ -43,9 +44,7 @@ public class RestClient {
     private String message;
     private String responseXML;
     private String SaveDirectory;
-    // private Bitmap responseImage;
     private String filename;
-    // private HttpUriRequest request;
     private Context mContext;
 
     public RestClient(String urlin) {
@@ -53,6 +52,7 @@ public class RestClient {
     }
 
     private static String convertStreamToString(InputStream is) {
+        Log.d(TAG, "start convertStreamToString");
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
@@ -71,6 +71,7 @@ public class RestClient {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "end convertStreamToString");
         return sb.toString();
     }
 
@@ -106,10 +107,6 @@ public class RestClient {
         this.filename = in;
     }
 
-    // public Bitmap getResponseImage() {
-    //    return responseImage;
-    //}
-
     public String getErrorMessage() {
         return message;
     }
@@ -123,10 +120,13 @@ public class RestClient {
     }
 
     public void AddHeader(String name, String value) {
+        Log.d(TAG, "start AddHeader");
         headers.add(new BasicNameValuePair(name, value));
+        Log.d(TAG, "end AddHeader");
     }
 
     public HttpGet BevorExecuteGetQuery() throws Exception {
+        Log.d(TAG, "start BevoreExecuteGetQuery");
         //add parameters
         String combinedParams = "";
         if (!params.isEmpty()) {
@@ -147,10 +147,12 @@ public class RestClient {
         for (NameValuePair h : headers) {
             request.addHeader(h.getName(), h.getValue());
         }
+        Log.d(TAG, "end BevorExecuteGetQuery");
         return request;
     }
 
     public HttpGet BevorExecuteGetPath(String uid, String pw, int id) throws Exception {
+        Log.d(TAG, "start BevorExecuteGetPath");
         //add parameters
         String combinedParams = "";
 
@@ -166,13 +168,13 @@ public class RestClient {
         for (NameValuePair h : headers) {
             request.addHeader(h.getName(), h.getValue());
         }
+        Log.d(TAG, "end BevorExecuteGetPath");
         return request;
     }
 
 
     public HttpPost BevorExecutePost() throws Exception {
-
-
+        Log.d(TAG, "start BevorExecutePost");
         String combinedParams = "";
         if (!params.isEmpty()) {
             combinedParams += "?";
@@ -199,12 +201,13 @@ public class RestClient {
         if (reqEntity != null) {
             request.setEntity(reqEntity);
         } */
-
+        Log.d(TAG, "start BevorExecutePost");
         return request;
     }
 
 
     public String ExecuteRequestUploadXML(HttpPost... httpposts) {
+        Log.d(TAG, "start ExecuteRequestUploadXML");
 
         HttpClient client = new DefaultHttpClient();
 
@@ -241,12 +244,13 @@ public class RestClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Log.d(TAG, "end ExecuteRequestUploadXML ");
         return responseXML;
     }
 
 
     public String ExecuteRequestXML(HttpUriRequest... httpUriRequests) {
-
+        Log.d(TAG, "start ExecuteRequestXML");
         HttpClient client = new DefaultHttpClient();
 
         HttpResponse httpResponse;
@@ -274,10 +278,12 @@ public class RestClient {
             client.getConnectionManager().shutdown();
             e.printStackTrace();
         }
+        Log.d(TAG, "end ExecuteRequestXML");
         return responseXML;
     }
 
     public String ExecuteRequestImage(HttpUriRequest... httpUriRequests) {
+        Log.d(TAG, "start ExecuteRequestImage");
         String ret = null;
         HttpClient httpClient = new DefaultHttpClient();
         try {
@@ -314,6 +320,7 @@ public class RestClient {
             httpClient.getConnectionManager().shutdown();
             e.printStackTrace();
         }
+        Log.d(TAG, "start ExecuteRequestImage");
         return ret;
     }
 

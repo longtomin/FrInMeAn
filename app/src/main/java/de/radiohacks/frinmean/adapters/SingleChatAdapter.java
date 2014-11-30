@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.widget.CursorAdapter;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import de.radiohacks.frinmean.R;
  */
 public class SingleChatAdapter extends CursorAdapter {
 
+    private static final String TAG = SingleChatAdapter.class.getSimpleName();
     public static final int LAYOUT_ID = R.layout.activity_single_chat;
     private static final int TEXTMSG = 0;
     private static final int IMAGEMSG = 1;
@@ -38,13 +40,16 @@ public class SingleChatAdapter extends CursorAdapter {
 
     public SingleChatAdapter(Context context, Cursor cursor, int InOID, String dir) {
         super(context, cursor, true);
+        Log.d(TAG, "start SingleCjatAdapter");
         this.mContext = context;
         this.mCursor = cursor;
         this.OID = InOID;
         this.directory = dir;
+        Log.d(TAG, "end SingleChatAdapter");
     }
 
     private int findMsgType(String in) {
+        Log.d(TAG, "start findMsgType");
         int ret = -1;
         if (in.equalsIgnoreCase(Constants.TYP_TEXT)) {
             ret = TEXTMSG;
@@ -61,28 +66,34 @@ public class SingleChatAdapter extends CursorAdapter {
         if (in.equalsIgnoreCase(Constants.TYP_LOCATION)) {
             ret = LOCATIONMSG;
         }
-
+        Log.d(TAG, "end findMsgType");
         return ret;
     }
 
     @Override
-    public int getViewTypeCount() {
+    public int getViewTypeCount()
+    {
+        Log.d(TAG, "start & end getViewTypeCount");
         return 5;
     }
 
     @Override
     public int getItemViewType(int position) {
-
+        Log.d(TAG, "start getItemViewType");
         Cursor cursor = getCursor();
         if (cursor.moveToPosition(position)) {
-            return findMsgType(cursor.getString(cursor.getColumnIndex(Constants.T_MessageTyp)));
+            Integer ret = findMsgType(cursor.getString(cursor.getColumnIndex(Constants.T_MessageTyp)));
+            Log.d(TAG, "end getItemViewType " + ret.toString());
+            return ret;
         } else {
+            Log.d(TAG, "start getItemViewType -1");
             return -1;
         }
     }
 
     @Override
     public View newView(Context context, Cursor cur, ViewGroup parent) {
+        Log.d(TAG, "start newView");
         View ret = null;
         int msgTypeInt = -1;
 
@@ -111,12 +122,13 @@ public class SingleChatAdapter extends CursorAdapter {
                 }
                 break;
         }
+        Log.d(TAG, "end newView");
         return ret;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cur) {
-
+        Log.d(TAG, "start bindView");
         String msgType = new String(cur.getString(cur.getColumnIndex(Constants.T_MessageTyp)));
         int msgOID = cur.getInt(cur.getColumnIndex(Constants.T_OwningUserID));
         long sstamp = cur.getLong(cur.getColumnIndex(Constants.T_SendTimestamp));
@@ -211,5 +223,6 @@ public class SingleChatAdapter extends CursorAdapter {
                 }
                 break;
         }
+        Log.d(TAG, "end bindView ");
     }
 }

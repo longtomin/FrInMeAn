@@ -84,8 +84,18 @@ public class SingleChatActivity extends ActionBarActivity {
         ChatName = i.getStringExtra(Constants.CHATNAME);
         OwningUserName = i.getStringExtra(Constants.OWNINGUSERNAME);
         OwningUserID = i.getIntExtra(Constants.OWNINGUSERID, -1);
+        int tmpuid = i.getIntExtra(Constants.USERID, -1);
 
         getPreferenceInfo();
+
+        // Check if intent supplied real userid
+        if (tmpuid != -1) {
+            // if userid from authenticate is not stored in preferences set userid
+            // to the userid delivered from the authenticate
+            if (tmpuid != userid) {
+                userid = tmpuid;
+            }
+        }
 
         ActionBar actionBar = getSupportActionBar();
 //        actionBar.setDisplayHomeAsUpEnabled(true);
@@ -158,6 +168,7 @@ public class SingleChatActivity extends ActionBarActivity {
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "start onResume");
         super.onResume();
         IntentFilter infi = new IntentFilter(Constants.BROADCAST_GETMESSAGEFROMCHAT);
         infi.addAction(Constants.BROADCAST_ADDUSERTOCHAT);
@@ -167,14 +178,17 @@ public class SingleChatActivity extends ActionBarActivity {
         infi.addAction(Constants.BROADCAST_INSERTMESSAGEINTOCHAT);
 
         registerReceiver(mSingleChatReceiver, infi);
+        Log.d(TAG, "end onResume");
     }
 
     @Override
     protected void onPause() {
+        Log.d(TAG, "start onPause");
         super.onPause();
         if (mSingleChatReceiver != null) {
             unregisterReceiver(mSingleChatReceiver);
         }
+        Log.d(TAG, "end onPause");
     }
 
     protected void getPreferenceInfo() {
@@ -278,7 +292,7 @@ public class SingleChatActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG, "start onCreateOptionsMenu");
 
-        if (userid == OwningUserID ) {
+        if (userid == OwningUserID) {
             // Inflate OwningUserMenu; this adds items to the action bar if it is present.
             getMenuInflater().inflate(R.menu.single_chat_action_owninguser, menu);
         } else {
@@ -290,6 +304,7 @@ public class SingleChatActivity extends ActionBarActivity {
     }
 
     private void openEnterUserName() {
+        Log.d(TAG, "start openEnterUserName");
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SingleChatActivity.this);
 
         alertDialogBuilder.setTitle(this.getTitle());
@@ -320,9 +335,11 @@ public class SingleChatActivity extends ActionBarActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
         // show alert
         alertDialog.show();
+        Log.d(TAG, "end openEnterUserName");
     }
 
     private void openSelectUserDialog(final OutListUser in) {
+        Log.d(TAG, "start openSelectUserDialog");
         final CharSequence users[];
 
         users = new String[in.getUser().size()];
@@ -375,9 +392,11 @@ public class SingleChatActivity extends ActionBarActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
         // show alert
         alertDialog.show();
+        Log.d(TAG, "end openSelectUserDialog");
     }
 
     private void showPopup() {
+        Log.d(TAG, "start showPopup");
         View menuItemView = findViewById(R.id.action_show_popup);
         PopupMenu popup = new PopupMenu(this, menuItemView);
         MenuInflater inflate = popup.getMenuInflater();
@@ -410,6 +429,7 @@ public class SingleChatActivity extends ActionBarActivity {
             }
         });
         popup.show();
+        Log.d(TAG, "end showPopup");
     }
 
     @Override
@@ -438,6 +458,7 @@ public class SingleChatActivity extends ActionBarActivity {
 
     public class SingleChatReceiver extends BroadcastReceiver {
 
+        private final String TAG = SingleChatReceiver.class.getSimpleName();
         public SingleChatReceiver() {
             super();
 
@@ -453,11 +474,13 @@ public class SingleChatActivity extends ActionBarActivity {
          */
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "start onReceive");
 
             /*
              * Gets the status from the Intent's extended data, and chooses the appropriate action
              */
             if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_GETMESSAGEFROMCHAT)) {
+                Log.d(TAG, "start broadcast " + Constants.BROADCAST_GETMESSAGEFROMCHAT);
                 try {
                     String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
                     Serializer serializer = new Persister();
@@ -483,7 +506,9 @@ public class SingleChatActivity extends ActionBarActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_GETMESSAGEFROMCHAT);
             } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_INSERTMESSAGEINTOCHAT)) {
+                Log.d(TAG, "start broadcast " + Constants.BROADCAST_INSERTMESSAGEINTOCHAT);
                 try {
                     String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
                     Serializer serializer = new Persister();
@@ -509,7 +534,9 @@ public class SingleChatActivity extends ActionBarActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_INSERTMESSAGEINTOCHAT);
             } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_LISTUSER)) {
+                Log.d(TAG, "start broadcast " + Constants.BROADCAST_LISTUSER);
                 try {
                     String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
                     Serializer serializer = new Persister();
@@ -531,7 +558,9 @@ public class SingleChatActivity extends ActionBarActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }  else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_USERADDEDTOCHAT)) {
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_LISTUSER);
+            } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_USERADDEDTOCHAT)) {
+                Log.d(TAG, "start broadcast " + Constants.BROADCAST_USERADDEDTOCHAT);
                 try {
                     String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
                     Serializer serializer = new Persister();
@@ -554,6 +583,7 @@ public class SingleChatActivity extends ActionBarActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_USERADDEDTOCHAT);
             }
         }
     }
