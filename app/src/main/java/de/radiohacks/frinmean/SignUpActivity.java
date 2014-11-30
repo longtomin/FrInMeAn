@@ -178,7 +178,7 @@ public class SignUpActivity extends Activity {
                         SharedPreferences.Editor ed = shP.edit();
                         ed.putString("prefUsername", username);
                         ed.putString("prefPassword", password);
-                        ed.putInt("prefUserID", result.getUserID());
+                        // ed.putInt("prefUserID", result.getUserID());
                         ed.commit();
                         Toast.makeText(getApplicationContext(), R.string.signup_user_already_exists_saved, Toast.LENGTH_LONG).show();
                     } else {

@@ -350,7 +350,7 @@ public class MeBaService extends IntentService {
                         ErrorHelper eh = new ErrorHelper(this);
                         eh.CheckErrorText(resinsert.getErrortext());
                     } else {
-                        ldb.insert(userid, username, ChatID, ChatName, MessageType, resinsert.getSendTimestamp(), resinsert.getSendTimestamp(), resinsert.getMessageID());
+                        ldb.insert(resinsert.getMessageID(), userid, username, ChatID, ChatName, MessageType, resinsert.getSendTimestamp(), resinsert.getSendTimestamp(), MsgID);
                         ldb.update(MessageType, resinsert.getMessageID(), Message);
                         ret = resinsert;
                     }
@@ -514,34 +514,28 @@ public class MeBaService extends IntentService {
             Message m = in.get(j);
 
             if (m.getTextMsgID() > 0) {
-                ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getTextMsgID());
+                ldb.insert(m.getMessageID(), m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getTextMsgID());
                 OutFetchTextMessage oftm = fetchTextMessage(m.getTextMsgID());
                 if (oftm.getErrortext() != null && !oftm.getErrortext().isEmpty()) {
                     //Do notthing we are in the Background working
                 } else {
-                    ldb.update(m.getMessageTyp(), m.getTextMsgID(), oftm.getTextMessage());
+                    ldb.update(m.getMessageTyp(), m.getMessageID(), oftm.getTextMessage());
                 }
-            }
-            if (m.getContactMsgID() > 0) {
-                ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getContactMsgID());
-            }
-            if (m.getImageMsgID() > 0) {
-                ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getImageMsgID());
+            } else if (m.getContactMsgID() > 0) {
+                ldb.insert(m.getMessageID(), m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getContactMsgID());
+            } else if (m.getImageMsgID() > 0) {
+                ldb.insert(m.getMessageID(), m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getImageMsgID());
 
                 OutFetchImageMessage ofim = fetchImageMessage(m.getImageMsgID());
                 if (ofim.getErrortext() != null && !ofim.getErrortext().isEmpty()) {
                     //Do notthing we are in the Background working
                 } else {
-                    ldb.update(m.getMessageTyp(), m.getTextMsgID(), ofim.getImageMessage());
+                    ldb.update(m.getMessageTyp(), m.getMessageID(), ofim.getImageMessage());
                 }
-
-
-            }
-            if (m.getFileMsgID() > 0) {
-                ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getFileMsgID());
-            }
-            if (m.getLocationMsgID() > 0) {
-                ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getLocationMsgID());
+            } else if (m.getFileMsgID() > 0) {
+                ldb.insert(m.getMessageID(), m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getFileMsgID());
+            } else if (m.getLocationMsgID() > 0) {
+                ldb.insert(m.getMessageID(), m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getLocationMsgID());
             }
         }
         Log.d(TAG, "end saveMessageToDB");

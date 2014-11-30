@@ -55,17 +55,8 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
         setListAdapter(mAdapter);
 
         Intent i = getIntent();
-        int tmpuid = i.getIntExtra(Constants.USERID, -1);
+        userid = i.getIntExtra(Constants.USERID, -1);
         getPreferenceInfo();
-
-        // Check if intent supplied real userid
-        if (tmpuid != -1) {
-            // if userid from authenticate is not stored in preferences set userid
-            // to the userid delivered from the authenticate
-            if (tmpuid != userid) {
-                userid = tmpuid;
-            }
-        }
 
         IntentFilter statusIntentFilter = new IntentFilter(
                 Constants.BROADCAST_LISTCHAT);
@@ -102,7 +93,7 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
         server = sharedPrefs.getString("prefServername", "NULL");
         username = sharedPrefs.getString("prefUsername", "NULL");
         password = sharedPrefs.getString("prefPassword", "NULL");
-        userid = sharedPrefs.getInt("prefUserID", -1);
+        // userid = sharedPrefs.getInt("prefUserID", -1);
     }
 
     @Override
@@ -288,108 +279,4 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
             }
         }
     }
-
-/*    private class ChatLoader extends AsyncTask<String, Void, OutListChat> {
-
-        private final ProgressDialog dialog = new ProgressDialog(ChatActivity.this);
-
-        @Override
-        protected void onPostExecute(OutListChat result) {
-            super.onPostExecute(result);
-            dialog.dismiss();
-
-            if (result == null) {
-                ErrorHelper eh = new ErrorHelper(ChatActivity.this);
-                eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
-            } else {
-                if (result.getErrortext() != null && !result.getErrortext().isEmpty()) {
-                    ErrorHelper eh = new ErrorHelper(ChatActivity.this);
-                    eh.CheckErrorText(result.getErrortext());
-                } else {
-                    if (result.getChat() != null && !result.getChat().isEmpty()) {
-                        mAdapter.setItemList(result.getChat());
-                        mAdapter.notifyDataSetChanged();
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog.setMessage(getString(R.string.fetch_chats));
-            dialog.show();
-        }
-
-        @Override
-        protected OutListChat doInBackground(String... params) {
-            OutListChat res = null;
-
-            RestClient rc = new RestClient(params[0]);
-            rc.AddParam("username", username);
-            rc.AddParam("password", password);
-            try {
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                res = serializer.read(OutListChat.class, reader, false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return res;
-        }
-    }*/
-
-/*    private class ChatCreateLoader extends AsyncTask<String, Void, OutCreateChat> {
-
-        private final ProgressDialog dialog = new ProgressDialog(ChatActivity.this);
-
-        @Override
-        protected void onPostExecute(OutCreateChat result) {
-            super.onPostExecute(result);
-            dialog.dismiss();
-
-            if (result == null) {
-                ErrorHelper eh = new ErrorHelper(ChatActivity.this);
-                eh.CheckErrorText(Constants.NO_CONNECTION_TO_SERVER);
-            } else {
-                if (result.getErrortext() != null && !result.getErrortext().isEmpty()) {
-                    ErrorHelper eh = new ErrorHelper(ChatActivity.this);
-                    eh.CheckErrorText(result.getErrortext());
-                } else {
-                    if (result.getChatname() != null && !result.getChatname().isEmpty()) {
-
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog.setMessage(getString(R.string.action_createchat));
-            dialog.show();
-        }
-
-        @Override
-        protected OutCreateChat doInBackground(String... params) {
-            OutCreateChat res = null;
-
-            RestClient rc = new RestClient(params[0]);
-            rc.AddParam("username", username);
-            rc.AddParam("password", password);
-            rc.AddParam("chatname", chatname);
-            try {
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGet());
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                res = serializer.read(OutCreateChat.class, reader, false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return res;
-        }
-    }*/
 }

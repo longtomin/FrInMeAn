@@ -82,7 +82,7 @@ public class LocalDBHandler extends SQLiteOpenHelper {
     }
 
 
-    public long insert(int InOwningUserID, String InOwningUserName, int InChatID, String InChatName, String InMessageTyp, long InSendTimestamp,
+    public long insert(int BackendID, int InOwningUserID, String InOwningUserName, int InChatID, String InChatName, String InMessageTyp, long InSendTimestamp,
                        long InReadTimestamp, int InMsgID) {
         Log.d(TAG, "start insert");
 
@@ -91,7 +91,7 @@ public class LocalDBHandler extends SQLiteOpenHelper {
 
             SQLiteDatabase db = getWritableDatabase();
             ContentValues values = new ContentValues();
-            values.put(Constants.T_BADBID, InMsgID);
+            values.put(Constants.T_BADBID, BackendID);
             values.put(Constants.T_OwningUserID, InOwningUserID);
             values.put(Constants.T_OwningUserName, InOwningUserName);
             values.put(Constants.T_ChatID, InChatID);
@@ -101,21 +101,17 @@ public class LocalDBHandler extends SQLiteOpenHelper {
             values.put(Constants.T_ReadTimestamp, InReadTimestamp);
             if (InMessageTyp.equalsIgnoreCase(Constants.TYP_TEXT)) {
                 values.put(Constants.T_TextMsgID, InMsgID);
-            }
-            if (InMessageTyp.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+            } else if (InMessageTyp.equalsIgnoreCase(Constants.TYP_IMAGE)) {
                 values.put(Constants.T_ImageMsgID, InMsgID);
-            }
-            if (InMessageTyp.equalsIgnoreCase(Constants.TYP_LOCATION)) {
+            } else if (InMessageTyp.equalsIgnoreCase(Constants.TYP_LOCATION)) {
                 values.put(Constants.T_LocationMsgID, InMsgID);
-            }
-            if (InMessageTyp.equalsIgnoreCase(Constants.TYP_CONTACT)) {
+            } else if (InMessageTyp.equalsIgnoreCase(Constants.TYP_CONTACT)) {
                 values.put(Constants.T_ContactMsgID, InMsgID);
-            }
-            if (InMessageTyp.equalsIgnoreCase(Constants.TYP_FILE)) {
+            } else if (InMessageTyp.equalsIgnoreCase(Constants.TYP_FILE)) {
                 values.put(Constants.T_FileMsgID, InMsgID);
             }
             // Check if Message already exists, if not insert message else update message.
-            int id = getID(InMsgID);
+            int id = getID(BackendID);
             if (id == -1) {
                 rowId = db.insert(TABLE_NAME, null, values);
             } else {
@@ -137,24 +133,16 @@ public class LocalDBHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         if (InMsgTyp.equalsIgnoreCase(Constants.TYP_TEXT)) {
             values.put(Constants.T_TextMsgValue, value);
-            db.update(TABLE_NAME, values, Constants.T_TextMsgID + "=" + InMsgID, null);
-        }
-        if (InMsgTyp.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+        } else if (InMsgTyp.equalsIgnoreCase(Constants.TYP_IMAGE)) {
             values.put(Constants.T_ImageMsgValue, value);
-            db.update(TABLE_NAME, values, Constants.T_ImageMsgID + "=" + InMsgID, null);
-        }
-        if (InMsgTyp.equalsIgnoreCase(Constants.TYP_LOCATION)) {
+        } else if (InMsgTyp.equalsIgnoreCase(Constants.TYP_LOCATION)) {
             values.put(Constants.T_LocationMsgValue, value);
-            db.update(TABLE_NAME, values, Constants.T_LocationMsgID + "=" + InMsgID, null);
-        }
-        if (InMsgTyp.equalsIgnoreCase(Constants.TYP_CONTACT)) {
+        } else if (InMsgTyp.equalsIgnoreCase(Constants.TYP_CONTACT)) {
             values.put(Constants.T_ContactMsgValue, value);
-            db.update(TABLE_NAME, values, Constants.T_ContactMsgID + "=" + InMsgID, null);
-        }
-        if (InMsgTyp.equalsIgnoreCase(Constants.TYP_FILE)) {
+        } else if (InMsgTyp.equalsIgnoreCase(Constants.TYP_FILE)) {
             values.put(Constants.T_FileMsgValue, value);
-            db.update(TABLE_NAME, values, Constants.T_FileMsgID + "=" + InMsgID, null);
         }
+        db.update(TABLE_NAME, values, Constants.T_BADBID + "=" + InMsgID, null);
         Log.d(TAG, "end update");
     }
 

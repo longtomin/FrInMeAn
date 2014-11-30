@@ -157,9 +157,9 @@ public class RestClient {
         String combinedParams = "";
 
         if (url.endsWith("/")) {
-            combinedParams += uid + "/" + pw + "/" + String.valueOf(id);
+            combinedParams += URLEncoder.encode(String.valueOf(uid), "UTF-8") + "/" + URLEncoder.encode(String.valueOf(pw), "UTF-8") + "/" + URLEncoder.encode(String.valueOf(id), "UTF-8");
         } else {
-            combinedParams += "/" + uid + "/" + pw + "/" + String.valueOf(id);
+            combinedParams += "/" + URLEncoder.encode(String.valueOf(uid), "UTF-8") + "/" + URLEncoder.encode(String.valueOf(pw), "UTF-8") + "/" + URLEncoder.encode(String.valueOf(id), "UTF-8");
         }
 
         HttpGet request = new HttpGet(url + combinedParams);
@@ -290,13 +290,13 @@ public class RestClient {
             HttpResponse httpResponse = null;
             httpResponse = httpClient.execute(httpUriRequests[0]);
             responseCode = httpResponse.getStatusLine().getStatusCode();
-            message = httpResponse.getStatusLine().getReasonPhrase();
-            filename = httpResponse.getFirstHeader("filename").getValue();
-
-            File file = new File(SaveDirectory + filename);
-            HttpEntity entity = httpResponse.getEntity();
 
             if (responseCode == 200) {
+                message = httpResponse.getStatusLine().getReasonPhrase();
+                filename = httpResponse.getFirstHeader("filename").getValue();
+                File file = new File(SaveDirectory + filename);
+                HttpEntity entity = httpResponse.getEntity();
+
                 InputStream instream1 = entity.getContent();
 
                 OutputStream output = new FileOutputStream(SaveDirectory + filename);

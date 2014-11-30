@@ -105,7 +105,7 @@ public class SingleChatAdapter extends CursorAdapter {
         switch (findMsgType(msgType)) {
             case TEXTMSG:
                 ret = li.inflate(R.layout.textmsg, parent, false);
-                if (msgOID == this.OID) {
+                if (msgOID == OID) {
                     ret.setBackgroundResource(R.drawable.bubble_green);
                 } else {
                     ret.setBackgroundResource(R.drawable.bubble_yellow);
@@ -113,7 +113,7 @@ public class SingleChatAdapter extends CursorAdapter {
                 break;
             case IMAGEMSG:
                 ret = li.inflate(R.layout.imagemsg, parent, false);
-                if (msgOID == this.OID) {
+                if (msgOID == OID) {
                     ret.setBackgroundResource(R.drawable.bubble_green);
                     ((RelativeLayout) ret).setGravity(Gravity.END);
                 } else {

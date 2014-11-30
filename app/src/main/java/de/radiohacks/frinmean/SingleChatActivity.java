@@ -84,18 +84,9 @@ public class SingleChatActivity extends ActionBarActivity {
         ChatName = i.getStringExtra(Constants.CHATNAME);
         OwningUserName = i.getStringExtra(Constants.OWNINGUSERNAME);
         OwningUserID = i.getIntExtra(Constants.OWNINGUSERID, -1);
-        int tmpuid = i.getIntExtra(Constants.USERID, -1);
+        userid = i.getIntExtra(Constants.USERID, -1);
 
         getPreferenceInfo();
-
-        // Check if intent supplied real userid
-        if (tmpuid != -1) {
-            // if userid from authenticate is not stored in preferences set userid
-            // to the userid delivered from the authenticate
-            if (tmpuid != userid) {
-                userid = tmpuid;
-            }
-        }
 
         ActionBar actionBar = getSupportActionBar();
 //        actionBar.setDisplayHomeAsUpEnabled(true);
@@ -109,7 +100,7 @@ public class SingleChatActivity extends ActionBarActivity {
 
         ldb = new LocalDBHandler(this);
         Cursor c = ldb.get(ChatID, time);
-        mAdapter = new SingleChatAdapter(this, c, this.userid, directory);
+        mAdapter = new SingleChatAdapter(this, c, userid, directory);
 
         ListView lv = (ListView) findViewById(R.id.singlechatlist);
         lv.setAdapter(mAdapter);
@@ -199,7 +190,7 @@ public class SingleChatActivity extends ActionBarActivity {
         server = sharedPrefs.getString("prefServername", "NULL");
         username = sharedPrefs.getString("prefUsername", "NULL");
         password = sharedPrefs.getString("prefPassword", "NULL");
-        userid = sharedPrefs.getInt("prefUserID", 0);
+        // userid = sharedPrefs.getInt("prefUserID", 0);
         directory = sharedPrefs.getString("prefDirectory", "NULL");
         Log.d(TAG, "end getPreferenceInfo");
     }
