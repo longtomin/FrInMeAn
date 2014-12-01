@@ -188,7 +188,6 @@ public class SingleChatAdapter extends CursorAdapter {
                     imgfile += "/" + Constants.IMAGEDIR + "/" + cur.getString(cur.getColumnIndex(Constants.T_ImageMsgValue));
                 }
 
-                //TODO prüfen ob Datei wirklich existiert.
                 File ifile = new File(imgfile);
                 if (ifile.exists()) {
                     Bitmap bmp = BitmapFactory.decodeFile(imgfile);

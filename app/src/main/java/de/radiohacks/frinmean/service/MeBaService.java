@@ -525,7 +525,6 @@ public class MeBaService extends IntentService {
                 ldb.insert(m.getMessageID(), m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getContactMsgID());
             } else if (m.getImageMsgID() > 0) {
                 ldb.insert(m.getMessageID(), m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getImageMsgID());
-
                 OutFetchImageMessage ofim = fetchImageMessage(m.getImageMsgID());
                 if (ofim.getErrortext() != null && !ofim.getErrortext().isEmpty()) {
                     //Do notthing we are in the Background working
