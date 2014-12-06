@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/TextMsgLayout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
-
-    <TableLayout
-        android:id="@+id/TextTableLayout"
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp">
+        android:orientation="horizontal">
 
         <TableRow
             android:layout_width="wrap_content"
@@ -44,8 +37,7 @@
                 android:id="@+id/TextTextMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:ems="10"
+                android:layout_span="2"
                 android:inputType="textMultiLine"
                 android:paddingEnd="5dp"
                 android:paddingStart="5dp"
@@ -62,6 +54,7 @@
                 android:id="@+id/TextReadTimeStamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_span="2"
                 android:inputType="none"
                 android:paddingEnd="5dp"
                 android:paddingStart="5dp"
@@ -70,4 +63,3 @@
 
         </TableRow>
     </TableLayout>
-</RelativeLayout>

@@ -450,6 +450,7 @@ public class SingleChatActivity extends ActionBarActivity {
     public class SingleChatReceiver extends BroadcastReceiver {
 
         private final String TAG = SingleChatReceiver.class.getSimpleName();
+
         public SingleChatReceiver() {
             super();
 

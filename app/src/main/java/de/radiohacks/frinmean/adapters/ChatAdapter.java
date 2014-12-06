@@ -35,7 +35,7 @@ public class ChatAdapter extends ArrayAdapter<Chat> {
     public int getCount() {
         Log.d(TAG, "start getCount");
         if (itemList != null) {
-            Integer ret =  itemList.size();
+            Integer ret = itemList.size();
             Log.d(TAG, "end  ChatAdapter " + ret.toString());
             return ret;
         } else {

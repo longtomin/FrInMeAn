@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import java.io.File;
@@ -27,7 +28,7 @@ import de.radiohacks.frinmean.R;
 public class SingleChatAdapter extends CursorAdapter {
 
     private static final String TAG = SingleChatAdapter.class.getSimpleName();
-    public static final int LAYOUT_ID = R.layout.activity_single_chat;
+    // public static final int LAYOUT_ID = R.layout.activity_single_chat;
     private static final int TEXTMSG = 0;
     private static final int IMAGEMSG = 1;
     private static final int FILEMSG = 2;
@@ -53,17 +54,13 @@ public class SingleChatAdapter extends CursorAdapter {
         int ret = -1;
         if (in.equalsIgnoreCase(Constants.TYP_TEXT)) {
             ret = TEXTMSG;
-        }
-        if (in.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+        } else if (in.equalsIgnoreCase(Constants.TYP_IMAGE)) {
             ret = IMAGEMSG;
-        }
-        if (in.equalsIgnoreCase(Constants.TYP_FILE)) {
+        } else if (in.equalsIgnoreCase(Constants.TYP_FILE)) {
             ret = FILEMSG;
-        }
-        if (in.equalsIgnoreCase(Constants.TYP_CONTACT)) {
+        } else if (in.equalsIgnoreCase(Constants.TYP_CONTACT)) {
             ret = CONTACTMSG;
-        }
-        if (in.equalsIgnoreCase(Constants.TYP_LOCATION)) {
+        } else if (in.equalsIgnoreCase(Constants.TYP_LOCATION)) {
             ret = LOCATIONMSG;
         }
         Log.d(TAG, "end findMsgType");
@@ -71,8 +68,7 @@ public class SingleChatAdapter extends CursorAdapter {
     }
 
     @Override
-    public int getViewTypeCount()
-    {
+    public int getViewTypeCount() {
         Log.d(TAG, "start & end getViewTypeCount");
         return 5;
     }
@@ -95,30 +91,35 @@ public class SingleChatAdapter extends CursorAdapter {
     public View newView(Context context, Cursor cur, ViewGroup parent) {
         Log.d(TAG, "start newView");
         View ret = null;
-        int msgTypeInt = -1;
 
         LayoutInflater li = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        String msgType = new String(cur.getString(cur.getColumnIndex(Constants.T_MessageTyp)));
+        String msgType = cur.getString(cur.getColumnIndex(Constants.T_MessageTyp));
         int msgOID = cur.getInt(cur.getColumnIndex(Constants.T_OwningUserID));
 
         switch (findMsgType(msgType)) {
             case TEXTMSG:
                 ret = li.inflate(R.layout.textmsg, parent, false);
-                if (msgOID == OID) {
+                if (msgOID == this.OID) {
                     ret.setBackgroundResource(R.drawable.bubble_green);
+                    ret.setPadding(0,0,20,0);
+                    ((TableLayout) ret).setGravity(Gravity.END);
                 } else {
                     ret.setBackgroundResource(R.drawable.bubble_yellow);
+                    ret.setPadding(20,0,0,0);
+                    ((TableLayout) ret).setGravity(Gravity.START);
                 }
                 break;
             case IMAGEMSG:
                 ret = li.inflate(R.layout.imagemsg, parent, false);
-                if (msgOID == OID) {
+                if (msgOID == this.OID) {
                     ret.setBackgroundResource(R.drawable.bubble_green);
-                    ((RelativeLayout) ret).setGravity(Gravity.END);
+                    ret.setPadding(0,0,20,0);
+                    ((TableLayout) ret).setGravity(Gravity.END);
                 } else {
                     ret.setBackgroundResource(R.drawable.bubble_yellow);
-                    ((RelativeLayout) ret).setGravity(Gravity.START);
+                    ret.setPadding(20,0,0,0);
+                    ((TableLayout) ret).setGravity(Gravity.START);
                 }
                 break;
         }
@@ -129,7 +130,7 @@ public class SingleChatAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cur) {
         Log.d(TAG, "start bindView");
-        String msgType = new String(cur.getString(cur.getColumnIndex(Constants.T_MessageTyp)));
+        String msgType = cur.getString(cur.getColumnIndex(Constants.T_MessageTyp));
         int msgOID = cur.getInt(cur.getColumnIndex(Constants.T_OwningUserID));
         long sstamp = cur.getLong(cur.getColumnIndex(Constants.T_SendTimestamp));
         Date sDate = new java.util.Date(sstamp * 1000);
@@ -148,20 +149,20 @@ public class SingleChatAdapter extends CursorAdapter {
                 TextView TextMessage = (TextView) view.findViewById(R.id.TextTextMessage);
                 TextMessage.setText(cur.getString(cur.getColumnIndex(Constants.T_TextMsgValue)));
 
-                TxtOwningUserName.setGravity(Gravity.LEFT);
-                TextMessage.setGravity(Gravity.LEFT);
+                TxtOwningUserName.setGravity(Gravity.START);
+                TextMessage.setGravity(Gravity.START);
 
-                RelativeLayout bg = (RelativeLayout) view.findViewById(R.id.TextMsgLayout);
+                // RelativeLayout bg = (RelativeLayout) view.findViewById(R.id.TextMsgLayout);
                 if (msgOID == this.OID) {
-                    TxtOwningUserName.setGravity(Gravity.RIGHT);
-                    TxtReadTimeStamp.setGravity(Gravity.RIGHT);
-                    TxtSendTimeStamp.setGravity(Gravity.RIGHT);
-                    TextMessage.setGravity(Gravity.RIGHT);
+                    TxtOwningUserName.setGravity(Gravity.END);
+                    TxtReadTimeStamp.setGravity(Gravity.END);
+                    TxtSendTimeStamp.setGravity(Gravity.END);
+                    TextMessage.setGravity(Gravity.END);
                 } else {
-                    TxtOwningUserName.setGravity(Gravity.LEFT);
-                    TxtReadTimeStamp.setGravity(Gravity.LEFT);
-                    TxtSendTimeStamp.setGravity(Gravity.LEFT);
-                    TextMessage.setGravity(Gravity.LEFT);
+                    TxtOwningUserName.setGravity(Gravity.START);
+                    TxtReadTimeStamp.setGravity(Gravity.START);
+                    TxtSendTimeStamp.setGravity(Gravity.START);
+                    TextMessage.setGravity(Gravity.START);
                 }
                 break;
             case IMAGEMSG:
@@ -170,7 +171,7 @@ public class SingleChatAdapter extends CursorAdapter {
                 TextView ImgSendTimeStamp = (TextView) view.findViewById(R.id.ImageSendTimeStamp);
                 ImgSendTimeStamp.setText(new SimpleDateFormat("DD.MM.yyyy HH:mm:ss").format(sDate));
                 TextView ImgReadTimeStamp = (TextView) view.findViewById(R.id.ImageReadTimeStamp);
-                ImgReadTimeStamp.setText(rDate.toString());
+                ImgReadTimeStamp.setText(new SimpleDateFormat("DD.MM.yyyy HH:mm:ss").format(rDate));
                 ImageButton IButton = (ImageButton) view.findViewById(R.id.ImageImageButton);
 
                 IButton.setOnClickListener(new View.OnClickListener() {
@@ -212,13 +213,12 @@ public class SingleChatAdapter extends CursorAdapter {
                     }
                 }
                 if (msgOID == this.OID) {
-                    ImgOwningUserName.setGravity(Gravity.RIGHT);
-                    ImgReadTimeStamp.setGravity(Gravity.RIGHT);
-                    ImgSendTimeStamp.setGravity(Gravity.RIGHT);
+                    ImgOwningUserName.setGravity(Gravity.END);
+                    ImgSendTimeStamp.setGravity(Gravity.END);
                 } else {
-                    ImgOwningUserName.setGravity(Gravity.LEFT);
-                    ImgReadTimeStamp.setGravity(Gravity.LEFT);
-                    ImgSendTimeStamp.setGravity(Gravity.LEFT);
+                    ImgOwningUserName.setGravity(Gravity.START);
+                    ImgReadTimeStamp.setGravity(Gravity.START);
+                    ImgSendTimeStamp.setGravity(Gravity.START);
                 }
                 break;
         }
