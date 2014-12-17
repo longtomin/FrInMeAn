@@ -28,6 +28,7 @@ import de.radiohacks.frinmean.model.Message;
 import de.radiohacks.frinmean.model.OutFetchImageMessage;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutFetchTextMessage;
+import de.radiohacks.frinmean.model.OutGetImageMessageMetaData;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutSendImageMessage;
 import de.radiohacks.frinmean.model.OutSendTextMessage;
@@ -221,14 +222,8 @@ public class MeBaService extends IntentService {
 
                     OutSendImageMessage ressend = sersendtxtmsg.read(OutSendImageMessage.class, readersendimgmsg, false);
 
-                    if (ressend == null) {
-                        ErrorHelper eh = new ErrorHelper(this);
-                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
-                    } else {
-                        if (ressend.getErrortext() != null && !ressend.getErrortext().isEmpty()) {
-                            ErrorHelper eh = new ErrorHelper(this);
-                            eh.CheckErrorText(ressend.getErrortext());
-                        } else {
+                    if (ressend != null) {
+                        if (ressend.getErrortext() == null || ressend.getErrortext().isEmpty()) {
                             if (ressend.getImageID() != null && ressend.getImageID() > 0) {
                                 serverfilename = ressend.getImageFileName();
                                 OutInsertMessageIntoChat ins = insertMessageIntoChatAndDB(ChatName, ressend.getImageID(), ChatID, Constants.TYP_IMAGE, ressend.getImageFileName());
@@ -294,14 +289,8 @@ public class MeBaService extends IntentService {
 
                     OutSendTextMessage ressend = sersendtxtmsg.read(OutSendTextMessage.class, readersendtxtmsg, false);
 
-                    if (ressend == null) {
-                        ErrorHelper eh = new ErrorHelper(this);
-                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
-                    } else {
-                        if (ressend.getErrortext() != null && !ressend.getErrortext().isEmpty()) {
-                            ErrorHelper eh = new ErrorHelper(this);
-                            eh.CheckErrorText(ressend.getErrortext());
-                        } else {
+                    if (ressend != null) {
+                        if (ressend.getErrortext() == null || ressend.getErrortext().isEmpty()) {
                             if (ressend.getTextID() != null && ressend.getTextID() > 0) {
                                 OutInsertMessageIntoChat ins = insertMessageIntoChatAndDB(ChatName, ressend.getTextID(), ChatID, Constants.TYP_TEXT, TextMessage);
                             }
@@ -342,14 +331,8 @@ public class MeBaService extends IntentService {
 
                 OutInsertMessageIntoChat resinsert = serinserttxtmsg.read(OutInsertMessageIntoChat.class, readinserttxtmsg, false);
 
-                if (resinsert == null) {
-                    ErrorHelper eh = new ErrorHelper(this);
-                    eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
-                } else {
-                    if (resinsert.getErrortext() != null && !resinsert.getErrortext().isEmpty()) {
-                        ErrorHelper eh = new ErrorHelper(this);
-                        eh.CheckErrorText(resinsert.getErrortext());
-                    } else {
+                if (resinsert != null) {
+                    if (resinsert.getErrortext() == null || resinsert.getErrortext().isEmpty()) {
                         ldb.insert(resinsert.getMessageID(), userid, username, ChatID, ChatName, MessageType, resinsert.getSendTimestamp(), resinsert.getSendTimestamp(), MsgID);
                         ldb.update(MessageType, resinsert.getMessageID(), Message);
                         ret = resinsert;
@@ -485,14 +468,8 @@ public class MeBaService extends IntentService {
 
                     OutFetchMessageFromChat res = serializer.read(OutFetchMessageFromChat.class, reader, false);
 
-                    if (res == null) {
-                        ErrorHelper eh = new ErrorHelper(this);
-                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
-                    } else {
-                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
-                            ErrorHelper eh = new ErrorHelper(this);
-                            eh.CheckErrorText(res.getErrortext());
-                        } else {
+                    if (res != null) {
+                        if (res.getErrortext() == null || res.getErrortext().isEmpty()) {
                             if (res.getMessage() != null && res.getMessage().size() > 0) {
                                 SaveMessageToLDB(res.getMessage(), cid, CName);
                             }
@@ -525,7 +502,7 @@ public class MeBaService extends IntentService {
                 ldb.insert(m.getMessageID(), m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getContactMsgID());
             } else if (m.getImageMsgID() > 0) {
                 ldb.insert(m.getMessageID(), m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), ChatID, ChatName, m.getMessageTyp(), m.getSendTimestamp(), m.getReadTimestamp(), m.getImageMsgID());
-                OutFetchImageMessage ofim = fetchImageMessage(m.getImageMsgID());
+                OutFetchImageMessage ofim = checkAndDownloadImageMessage(m.getImageMsgID());
                 if (ofim.getErrortext() != null && !ofim.getErrortext().isEmpty()) {
                     //Do notthing we are in the Background working
                 } else {
@@ -569,10 +546,63 @@ public class MeBaService extends IntentService {
         return out;
     }
 
+    private OutFetchImageMessage checkAndDownloadImageMessage(int ImgMsgID) {
+        Log.d(TAG, "start fetchImageMessage");
+        OutFetchImageMessage out = new OutFetchImageMessage();
+        OutGetImageMessageMetaData outmeta;
+
+        if (checkServer()) {
+            // First get MetaData from Server to check if File already exists
+            try {
+                RestClient rcmeta;
+                if (!server.endsWith("/")) {
+                    rcmeta = new RestClient(server + "/image/getimagemetadata");
+                } else {
+                    rcmeta = new RestClient(server + "image/getimagemetadata");
+                }
+                Integer imgid = ImgMsgID;
+                rcmeta.AddParam("username", username);
+                rcmeta.AddParam("password", password);
+                rcmeta.AddParam("imageid", URLEncoder.encode(imgid.toString(), "UTF-8"));
+
+                String ret = rcmeta.ExecuteRequestXML(rcmeta.BevorExecuteGetQuery());
+                Serializer serializer = new Persister();
+                Reader reader = new StringReader(ret);
+
+                outmeta = serializer.read(OutGetImageMessageMetaData.class, reader, false);
+
+                if (outmeta != null) {
+                    if (outmeta.getErrortext() == null || outmeta.getErrortext().isEmpty()) {
+                        // No error occured no we can check if the file exists and has the right size
+                        File checkfile = new File(directory + "/" + "images/" + outmeta.getImageMessage());
+                        if (checkfile.exists()) {
+                            if (checkfile.length() != outmeta.getImageSize()) {
+                                // Download File we have the wrong size
+                                out = fetchImageMessage(ImgMsgID);
+                            } else {
+                                // File is already here an has the right size
+                                out.setImageMessage(outmeta.getImageMessage());
+                            }
+                        } else {
+                            // Download File, it is not existing
+                            out = fetchImageMessage(ImgMsgID);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "start fetchImageMessage");
+        return out;
+    }
+
     private OutFetchImageMessage fetchImageMessage(int ImgMsgID) {
         Log.d(TAG, "start fetchImageMessage");
         OutFetchImageMessage out = new OutFetchImageMessage();
+
         if (checkServer()) {
+
             RestClient rc;
             if (!server.endsWith("/")) {
                 rc = new RestClient(server + "/image/download");
@@ -601,7 +631,6 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start fetchImageMessage");
         return out;
     }
-
 
     /*    public void Refresh() {
 

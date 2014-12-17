@@ -37,13 +37,13 @@ public class Constants {
     public final static String ERROR_INVALID_EMAIL_ADRESS = "INVALID_EMAIL_ADRESS";
     public final static String ERROR_MISSING_CHATNAME = "MISSING_CHATNAME";
     public final static String ERROR_NONE_EXISTING_TEXT_MESSAGE = "NONE_EXISTING_TEXT_MESSAGE";
-
     public final static String ERROR_DB_ERROR = "DATABASE_ERROR";
     public final static String ERROR_USER_NOT_ACTIVE = "USER_NOT_ACTIVE";
     public final static String ERROR_WRONG_PASSWORD = "WRONG_PASSWORD";
     public final static String ERROR_NO_USERNAME_OR_PASSWORD = "NO_USERNAME_OR_PASSWORD";
     public final static String ERROR_USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
     public final static String ERROR_NO_ACTIVE_CHATS = "NO_ACTIVE_CHATS";
+    public final static String ERROR_FILE_NOT_FOUND = "FILE_NOT_FOUND";
 
     /*
     Constants for Result Types

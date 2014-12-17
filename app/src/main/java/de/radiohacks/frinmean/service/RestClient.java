@@ -286,21 +286,21 @@ public class RestClient {
         String ret = null;
         HttpClient httpClient = new DefaultHttpClient();
         try {
-            HttpResponse httpResponse = null;
+            HttpResponse httpResponse;
             httpResponse = httpClient.execute(httpUriRequests[0]);
             responseCode = httpResponse.getStatusLine().getStatusCode();
 
             if (responseCode == 200) {
                 message = httpResponse.getStatusLine().getReasonPhrase();
                 filename = httpResponse.getFirstHeader("filename").getValue();
-                File file = new File(SaveDirectory + filename);
+                // File file = new File(SaveDirectory + filename);
                 HttpEntity entity = httpResponse.getEntity();
 
                 InputStream instream1 = entity.getContent();
 
                 OutputStream output = new FileOutputStream(SaveDirectory + filename);
 
-                int read = 0;
+                int read;
 
                 byte[] bytes = new byte[1024];
                 while ((read = instream1.read(bytes)) != -1) {
@@ -323,7 +323,7 @@ public class RestClient {
         return ret;
     }
 
-    public enum RequestMethod {
-        GET, POST
-    }
+    //public enum RequestMethod {
+    //    GET, POST
+    //}
 }

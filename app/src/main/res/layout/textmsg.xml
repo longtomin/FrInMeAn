@@ -1,65 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TableRow
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content">
 
-        <TableRow
+        <TextView
+            android:id="@+id/TextOwningUserName"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:textSize="12dp"
+            android:paddingEnd="5dp"
+            android:paddingStart="5dp"
+            android:layout_marginRight="10dp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/TextOwningUserName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12dp"
-                android:paddingEnd="5dp"
-                android:paddingStart="5dp"
-                android:layout_marginRight="10dp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/TextSendTimeStamp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingEnd="5dp"
-                android:paddingStart="5dp"
-                android:textSize="10dp"
-                android:textStyle="italic" />
-        </TableRow>
-
-        <TableRow
+        <TextView
+            android:id="@+id/TextSendTimeStamp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingEnd="5dp"
+            android:paddingStart="5dp"
+            android:textSize="10dp"
+            android:textStyle="italic" />
+    </TableRow>
 
-            <TextView
-                android:id="@+id/TextTextMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_span="2"
-                android:inputType="textMultiLine"
-                android:paddingEnd="5dp"
-                android:paddingStart="5dp"
-                android:textIsSelectable="true"
-                android:textSize="11dp"
-                android:textStyle="normal" />
-        </TableRow>
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-        <TableRow
+        <TextView
+            android:id="@+id/TextTextMessage"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_span="2"
+            android:inputType="textMultiLine"
+            android:paddingEnd="5dp"
+            android:paddingStart="5dp"
+            android:textIsSelectable="true"
+            android:textSize="11dp"
+            android:textStyle="normal" />
+    </TableRow>
 
-            <TextView
-                android:id="@+id/TextReadTimeStamp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_span="2"
-                android:inputType="none"
-                android:paddingEnd="5dp"
-                android:paddingStart="5dp"
-                android:textSize="10dp"
-                android:textStyle="italic" />
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-        </TableRow>
-    </TableLayout>
+        <TextView
+            android:id="@+id/TextReadTimeStamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_span="2"
+            android:inputType="none"
+            android:paddingEnd="5dp"
+            android:paddingStart="5dp"
+            android:textSize="10dp"
+            android:textStyle="italic" />
+
+    </TableRow>
+</TableLayout>

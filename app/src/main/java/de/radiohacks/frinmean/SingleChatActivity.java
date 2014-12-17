@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.content.LocalBroadcastManager;
@@ -27,7 +26,6 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
@@ -53,19 +51,19 @@ public class SingleChatActivity extends ActionBarActivity {
     private static final String TAG = SingleChatActivity.class.getSimpleName();
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
-    private Uri fileUri;
+    // private Uri fileUri;
 
     private ByteArrayOutputStream stream = new ByteArrayOutputStream();
     private SingleChatReceiver mSingleChatReceiver = new SingleChatReceiver();
     // private MeBaService mService;
     // private boolean mBound = false;
     private SingleChatAdapter mAdapter;
-    private String username;
-    private String password;
+    // private String username;
+    // private String password;
     private String directory;
     private int userid;
-    private ByteArrayBody fileBody;
-    private String server;
+    // private ByteArrayBody fileBody;
+    // private String server;
     private int ChatID;
     private String ChatName;
     private int OwningUserID;
@@ -187,9 +185,9 @@ public class SingleChatActivity extends ActionBarActivity {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        server = sharedPrefs.getString("prefServername", "NULL");
-        username = sharedPrefs.getString("prefUsername", "NULL");
-        password = sharedPrefs.getString("prefPassword", "NULL");
+        //server = sharedPrefs.getString("prefServername", "NULL");
+        //username = sharedPrefs.getString("prefUsername", "NULL");
+        //password = sharedPrefs.getString("prefPassword", "NULL");
         // userid = sharedPrefs.getInt("prefUserID", 0);
         directory = sharedPrefs.getString("prefDirectory", "NULL");
         Log.d(TAG, "end getPreferenceInfo");
@@ -244,16 +242,13 @@ public class SingleChatActivity extends ActionBarActivity {
         // create Intent to take a picture and return control to the calling application
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        // TODO Prefernce mit Speicherort holen und Bilder da ablegen
-        File imagesFolder = new File(Environment.getExternalStorageDirectory(), "MyImages");
-        imagesFolder.mkdirs(); // <----
-        File image = new File(imagesFolder, "image_001.jpg");
+        // Name wird nach dem Upload in den Servernamen umbenannt.
+        File imagesFolder = new File(directory + "/" + Constants.IMAGEDIR);
+        imagesFolder.mkdirs();
+        long imagetime = System.currentTimeMillis() / 1000L;
+        File image = new File(imagesFolder, String.valueOf(imagetime) + ".jpg");
         Uri uriSavedImage = Uri.fromFile(image);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
-
-
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
-
         // start the image capture Intent
         startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
         Log.d(TAG, "end SendPicture");
@@ -263,17 +258,14 @@ public class SingleChatActivity extends ActionBarActivity {
         Log.d(TAG, "start SendVideo");
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 
-        // TODO Prefernce mit Speicherort holen und Bilder da ablegen
         // Name ist der Unix Timestamp um eindeutigkeit zu erzielen.
-        File imagesFolder = new File(Environment.getExternalStorageDirectory(), "MyImages");
-        imagesFolder.mkdirs(); // <----
-        File image = new File(imagesFolder, "image_001.mp4");
+        // Name wird nach dem Upload in den Servernamen umbenannt.
+        File imagesFolder = new File(directory + "/" + Constants.IMAGEDIR);
+        imagesFolder.mkdirs();
+        long imagetime = System.currentTimeMillis() / 1000L;
+        File image = new File(imagesFolder, String.valueOf(imagetime) + ".mp4");
         Uri uriSavedImage = Uri.fromFile(image);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
-
-
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
-
         // start the image capture Intent
         startActivityForResult(intent, CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE);
         Log.d(TAG, "start SendVideo");

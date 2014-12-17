@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
@@ -102,11 +101,11 @@ public class SingleChatAdapter extends CursorAdapter {
                 ret = li.inflate(R.layout.textmsg, parent, false);
                 if (msgOID == this.OID) {
                     ret.setBackgroundResource(R.drawable.bubble_green);
-                    ret.setPadding(0,0,20,0);
+                    ret.setPadding(0, 0, 20, 0);
                     ((TableLayout) ret).setGravity(Gravity.END);
                 } else {
                     ret.setBackgroundResource(R.drawable.bubble_yellow);
-                    ret.setPadding(20,0,0,0);
+                    ret.setPadding(20, 0, 0, 0);
                     ((TableLayout) ret).setGravity(Gravity.START);
                 }
                 break;
@@ -114,11 +113,11 @@ public class SingleChatAdapter extends CursorAdapter {
                 ret = li.inflate(R.layout.imagemsg, parent, false);
                 if (msgOID == this.OID) {
                     ret.setBackgroundResource(R.drawable.bubble_green);
-                    ret.setPadding(0,0,20,0);
+                    ret.setPadding(0, 0, 20, 0);
                     ((TableLayout) ret).setGravity(Gravity.END);
                 } else {
                     ret.setBackgroundResource(R.drawable.bubble_yellow);
-                    ret.setPadding(20,0,0,0);
+                    ret.setPadding(20, 0, 0, 0);
                     ((TableLayout) ret).setGravity(Gravity.START);
                 }
                 break;
