@@ -58,12 +58,14 @@ public class SingleChatActivity extends ActionBarActivity {
     // private MeBaService mService;
     // private boolean mBound = false;
     private SingleChatAdapter mAdapter;
-    // private String username;
+    private String username;
     // private String password;
     private String directory;
     private int userid;
     // private ByteArrayBody fileBody;
     // private String server;
+    private File m_imagefromcamera;
+    private File m_videofromcamera;
     private int ChatID;
     private String ChatName;
     private int OwningUserID;
@@ -186,7 +188,7 @@ public class SingleChatActivity extends ActionBarActivity {
                 .getDefaultSharedPreferences(this);
 
         //server = sharedPrefs.getString("prefServername", "NULL");
-        //username = sharedPrefs.getString("prefUsername", "NULL");
+        username = sharedPrefs.getString("prefUsername", "NULL");
         //password = sharedPrefs.getString("prefPassword", "NULL");
         // userid = sharedPrefs.getInt("prefUserID", 0);
         directory = sharedPrefs.getString("prefDirectory", "NULL");
@@ -206,16 +208,11 @@ public class SingleChatActivity extends ActionBarActivity {
                 picintent.putExtra(Constants.CHATID, ChatID);
                 picintent.putExtra(Constants.CHATNAME, ChatName);
 
-                String[] filePathColumn = {MediaStore.Images.Media.DATA};
-                Cursor cursor = this.getContentResolver().query(data.getData(), filePathColumn, null, null, null);
-                cursor.moveToFirst();
-                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                String filePath = cursor.getString(columnIndex);
-                cursor.close();
+                if (m_imagefromcamera.exists() && m_imagefromcamera.length() >0 ) {
+                    picintent.putExtra(Constants.IMAGELOCATION, m_imagefromcamera.getAbsolutePath());
 
-                picintent.putExtra(Constants.IMAGELOCATION, filePath);
-
-                startService(picintent);
+                    startService(picintent);
+                }
             } else if (resultCode == RESULT_CANCELED) {
                 // User cancelled the image capture
             } else {
@@ -225,9 +222,18 @@ public class SingleChatActivity extends ActionBarActivity {
 
         if (requestCode == CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                // Video captured and saved to fileUri specified in the Intent
-                Toast.makeText(this, "Video saved to:\n" +
-                        data.getData(), Toast.LENGTH_LONG).show();
+                //Start MeBaService
+                Intent vidintent = new Intent(this, MeBaService.class);
+
+                vidintent.setAction(Constants.ACTION_SENDVIDEOMESSAGE);
+                vidintent.putExtra(Constants.CHATID, ChatID);
+                vidintent.putExtra(Constants.CHATNAME, ChatName);
+
+                if (m_videofromcamera.exists() && m_videofromcamera.length() >0 ) {
+                    vidintent.putExtra(Constants.VIDEOLOCATION, m_videofromcamera.getAbsolutePath());
+
+                    startService(vidintent);
+                }
             } else if (resultCode == RESULT_CANCELED) {
                 // User cancelled the video capture
             } else {
@@ -245,9 +251,13 @@ public class SingleChatActivity extends ActionBarActivity {
         // Name wird nach dem Upload in den Servernamen umbenannt.
         File imagesFolder = new File(directory + "/" + Constants.IMAGEDIR);
         imagesFolder.mkdirs();
+
         long imagetime = System.currentTimeMillis() / 1000L;
-        File image = new File(imagesFolder, String.valueOf(imagetime) + ".jpg");
-        Uri uriSavedImage = Uri.fromFile(image);
+        String fname = username.replaceAll("\\s", "");
+        fname += String.valueOf(imagetime) + ".jpg";
+
+        m_imagefromcamera = new File(imagesFolder, fname);
+        Uri uriSavedImage = Uri.fromFile(m_imagefromcamera);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
         // start the image capture Intent
         startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
@@ -263,8 +273,8 @@ public class SingleChatActivity extends ActionBarActivity {
         File imagesFolder = new File(directory + "/" + Constants.IMAGEDIR);
         imagesFolder.mkdirs();
         long imagetime = System.currentTimeMillis() / 1000L;
-        File image = new File(imagesFolder, String.valueOf(imagetime) + ".mp4");
-        Uri uriSavedImage = Uri.fromFile(image);
+        m_videofromcamera = new File(imagesFolder, String.valueOf(imagetime) + ".mp4");
+        Uri uriSavedImage = Uri.fromFile(m_videofromcamera);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
         // start the image capture Intent
         startActivityForResult(intent, CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE);

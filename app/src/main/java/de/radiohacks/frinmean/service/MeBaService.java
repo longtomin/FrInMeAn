@@ -107,51 +107,48 @@ public class MeBaService extends IntentService {
             if (Constants.ACTION_SIGNUP.equalsIgnoreCase(action)) {
                 final String email = intent.getStringExtra(Constants.EMAIL);
 //                handleActionSignup(user, pw, email);
-            }
-            if (Constants.ACTION_AUTHENTICATE.equalsIgnoreCase(action)) {
+            } else if (Constants.ACTION_AUTHENTICATE.equalsIgnoreCase(action)) {
                 handleActionAuthenticate();
-            }
-            if (Constants.ACTION_CHECKNEWMESSAGES.equalsIgnoreCase(
+            } else if (Constants.ACTION_CHECKNEWMESSAGES.equalsIgnoreCase(
                     action)) {
 //                final String param = intent.getStringExtra(EXTRA_PARAM1);
 //                handleActionCheckNewMessages(param);
-            }
-            if (Constants.ACTION_GETMESSAGEFROMCHAT.equalsIgnoreCase(action)) {
+            } else if (Constants.ACTION_GETMESSAGEFROMCHAT.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final long readtime = intent.getLongExtra(Constants.TIMESTAMP, -1);
                 if (cid > 0 && readtime > 0) {
                     handleActionGetMessageFromChat(cid, readtime, ChatName);
                 }
-            }
-            if (Constants.ACTION_LISTCHAT.equalsIgnoreCase(action)) {
+            } else if (Constants.ACTION_LISTCHAT.equalsIgnoreCase(action)) {
                 handleActionListChat();
-            }
-            if (Constants.ACTION_LISTUSER.equalsIgnoreCase(action)) {
+            } else if (Constants.ACTION_LISTUSER.equalsIgnoreCase(action)) {
                 final String search = intent.getStringExtra(Constants.SEARCH);
                 handleActionListUser(search);
-            }
-            if (Constants.ACTION_SENDTEXTMESSAGE.equalsIgnoreCase(action)) {
+            } else if (Constants.ACTION_SENDTEXTMESSAGE.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final String TextMessage = intent.getStringExtra(Constants.TEXTMESSAGE);
                 handleActionSendTextMessage(ChatName, cid, TextMessage);
-            }
-            if (Constants.ACTION_CREATECHAT.equalsIgnoreCase(action)) {
+            } else if (Constants.ACTION_CREATECHAT.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 handleActionCreateChat(ChatName);
-            }
-            if (Constants.ACTION_SENDIMAGEMESSAGE.equalsIgnoreCase(action)) {
+            } else if (Constants.ACTION_SENDIMAGEMESSAGE.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final String ImageLoc = intent.getStringExtra(Constants.IMAGELOCATION);
                 handleActionSendImageMessage(ChatName, cid, ImageLoc);
-            }
-            if (Constants.ACTION_ADDUSERTOCHAT.equalsIgnoreCase(action)) {
+            } else if (Constants.ACTION_ADDUSERTOCHAT.equalsIgnoreCase(action)) {
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final int uid = intent.getIntExtra(Constants.USERID, -1);
                 handleActionAddUserToChat(cid, uid);
+            } else if (Constants.ACTION_SENDVIDEOMESSAGE.equalsIgnoreCase((action))) {
+                final String ChatName = intent.getStringExtra(Constants.CHATNAME);
+                final int cid = intent.getIntExtra(Constants.CHATID, -1);
+                final String VideoLoc = intent.getStringExtra(Constants.VIDEOLOCATION);
+                //handleActionSendVideoMessage(ChatName, cid, VideoLoc);
             }
+
         }
         Log.d(TAG, "start onHandleIntent");
     }
