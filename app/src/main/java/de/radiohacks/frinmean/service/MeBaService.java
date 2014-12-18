@@ -257,7 +257,7 @@ public class MeBaService extends IntentService {
 
         File destination = new File(destFile);
         try {
-            FileUtils.copyFile(source, destination);
+            FileUtils.moveFile(source, destination);
         } catch (IOException e) {
             e.printStackTrace();
         }
