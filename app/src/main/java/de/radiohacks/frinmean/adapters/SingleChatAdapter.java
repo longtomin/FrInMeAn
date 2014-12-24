@@ -87,6 +87,24 @@ public class SingleChatAdapter extends CursorAdapter {
     }
 
     @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        if (!mDataValid) {
+            throw new IllegalStateException("this should only be called when the cursor is valid");
+        }
+        if (!mCursor.moveToPosition(position)) {
+            throw new IllegalStateException("couldn't move cursor to position " + position);
+        }
+        View v;
+        if (convertView == null) {
+            v = newView(mContext, mCursor, parent);
+        } else {
+            v = convertView;
+        }
+        bindView(v, mContext, mCursor);
+        return v;
+    }
+
+    @Override
     public View newView(Context context, Cursor cur, ViewGroup parent) {
         Log.d(TAG, "start newView");
         View ret = null;
