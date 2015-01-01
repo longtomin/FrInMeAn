@@ -12,45 +12,45 @@
             android:id="@+id/singlechatlist"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:stackFromBottom="true"
             android:fadingEdge="vertical"
             android:fadingEdgeLength="10dp"
-            android:transcriptMode="alwaysScroll"
-            android:longClickable="true" />
+            android:longClickable="true"
+            android:stackFromBottom="true"
+            android:transcriptMode="alwaysScroll" />
     </FrameLayout>
 
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
+        android:id="@+id/footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:background="@color/background_material_light"
-        android:id="@+id/footer">
+        android:orientation="horizontal">
 
         <EditText
             android:id="@+id/chatText"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight=".80"
+            android:layout_alignBottom="@+id/chatText"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_alignParentBottom="true"
-            android:layout_alignBottom="@+id/chatText"
-            android:layout_toLeftOf="@+id/buttonSend"
             android:layout_margin="5dp"
+            android:layout_toLeftOf="@+id/buttonSend"
+            android:layout_weight=".80"
+            android:inputType="textMultiLine"
             android:textColor="#000"
-            android:textSize="20sp"
-            android:inputType="textMultiLine" />
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/buttonSend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight=".20"
-            android:layout_alignParentBottom="true"
             android:layout_alignBottom="@+id/chatText"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
+            android:layout_weight=".20"
             android:drawableBottom="@drawable/ic_action_send_now" />
     </LinearLayout>
 </RelativeLayout>

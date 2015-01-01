@@ -32,8 +32,8 @@
         <activity
             android:name="de.radiohacks.frinmean.SingleChatActivity"
             android:label="@string/title_activity_single_chat"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.AppCompat.Light" />
+            android:theme="@style/Theme.AppCompat.Light"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name="net.rdrei.android.dirchooser.DirectoryChooserActivity" />
 
         <service
@@ -45,10 +45,14 @@
             android:name="de.radiohacks.frinmean.SingleChatActivity$SingleChatReceiver"
             android:enabled="true"
             android:exported="false" />
-        <receiver
+        <receiver88
             android:name="de.radiohacks.frinmean.ChatActivity$ListChatStateReceiver"
             android:enabled="true"
             android:exported="false" />
+
+        <provider
+            android:name=".providers.FrinmeanContentProvider"
+            android:authorities="de.radiohacks.frinmean.providers.FrinmeanContentProvider" />
     </application>
 
 </manifest>

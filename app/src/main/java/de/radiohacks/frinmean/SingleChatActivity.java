@@ -1,11 +1,14 @@
 package de.radiohacks.frinmean;
 
 import android.app.AlertDialog;
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -41,17 +44,20 @@ import de.radiohacks.frinmean.model.OutAddUserToChat;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutListUser;
+import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
+import de.radiohacks.frinmean.providers.LocalDBHandler;
 import de.radiohacks.frinmean.service.ErrorHelper;
-import de.radiohacks.frinmean.service.LocalDBHandler;
 import de.radiohacks.frinmean.service.MeBaService;
 
 
-public class SingleChatActivity extends ActionBarActivity {
+public class SingleChatActivity extends ActionBarActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = SingleChatActivity.class.getSimpleName();
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
     private static final int SELECT_IMAGE_ACTIVITY_REQUEST_CODE = 300;
+    private static final int LOADER_ID = 1;
 
     private ByteArrayOutputStream stream = new ByteArrayOutputStream();
     private SingleChatReceiver mSingleChatReceiver = new SingleChatReceiver();
@@ -96,11 +102,14 @@ public class SingleChatActivity extends ActionBarActivity {
         actionBar.setDisplayShowCustomEnabled(true);
 
 
-        long time = System.currentTimeMillis() / 1000L - (60 * 60 * 24 * 7);
+//        long time = System.currentTimeMillis() / 1000L - (60 * 60 * 24 * 7);
 
-        ldb = new LocalDBHandler(this);
-        Cursor c = ldb.get(ChatID, time);
-        mAdapter = new SingleChatAdapter(this, c, userid, directory);
+        //      ldb = new LocalDBHandler(this);
+        //    Cursor c = ldb.get(ChatID, time);
+
+        getLoaderManager().initLoader(LOADER_ID, null, this);
+        mAdapter = new SingleChatAdapter(this, null, userid, directory);
+
 
         ListView lv = (ListView) findViewById(R.id.singlechatlist);
         lv.setAdapter(mAdapter);
@@ -129,7 +138,8 @@ public class SingleChatActivity extends ActionBarActivity {
         intentMyIntentService.setAction(Constants.ACTION_GETMESSAGEFROMCHAT);
         intentMyIntentService.putExtra(Constants.CHATNAME, ChatName);
         intentMyIntentService.putExtra(Constants.CHATID, ChatID);
-        intentMyIntentService.putExtra(Constants.TIMESTAMP, time);
+        // Fetch only unread Messages
+        intentMyIntentService.putExtra(Constants.TIMESTAMP, (long) 0);
 
         startService(intentMyIntentService);
 
@@ -272,7 +282,7 @@ public class SingleChatActivity extends ActionBarActivity {
                 // Image capture failed, advise user
             }
         }
-        Log.d(TAG,"end onActivityResult");
+        Log.d(TAG, "end onActivityResult");
     }
 
     private void SendCameraPicture() {
@@ -477,7 +487,7 @@ public class SingleChatActivity extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        // int id = item.getItemId();
 
         switch (item.getItemId()) {
             case R.id.action_show_popup:
@@ -495,136 +505,166 @@ public class SingleChatActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-public class SingleChatReceiver extends BroadcastReceiver {
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        long time = System.currentTimeMillis() / 1000L - (60 * 60 * 24 * 60);
+        String select = "((" + Constants.T_ChatID + " = " + ChatID + ") AND (" + Constants.T_SendTimestamp + ">" + time + "))";
+        String sort = Constants.T_SendTimestamp + " ASC";
 
-    private final String TAG = SingleChatReceiver.class.getSimpleName();
-
-    public SingleChatReceiver() {
-        super();
-
-        // prevents instantiation by other packages.
+        return new CursorLoader(SingleChatActivity.this, FrinmeanContentProvider.CONTENT_URI,
+                Constants.DB_Columns, select, null, sort);
     }
 
-    /**
-     * This method is called by the system when a broadcast Intent is matched by this class'
-     * intent filters
-     *
-     * @param context An Android context
-     * @param intent  The incoming broadcast Intent
-     */
     @Override
-    public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "start onReceive");
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        switch (loader.getId()) {
+            case LOADER_ID:
+                // The asynchronous load is complete and the data
+                // is now available for use. Only now can we associate
+                // the queried Cursor with the SimpleCursorAdapter.
+                mAdapter.swapCursor(data);
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
+    }
+
+    public class SingleChatReceiver extends BroadcastReceiver {
+
+        private final String TAG = SingleChatReceiver.class.getSimpleName();
+
+        public SingleChatReceiver() {
+            super();
+
+            // prevents instantiation by other packages.
+        }
+
+        /**
+         * This method is called by the system when a broadcast Intent is matched by this class'
+         * intent filters
+         *
+         * @param context An Android context
+         * @param intent  The incoming broadcast Intent
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "start onReceive");
 
             /*
              * Gets the status from the Intent's extended data, and chooses the appropriate action
              */
-        if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_GETMESSAGEFROMCHAT)) {
-            Log.d(TAG, "start broadcast " + Constants.BROADCAST_GETMESSAGEFROMCHAT);
-            try {
-                String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
+            if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_GETMESSAGEFROMCHAT)) {
+                Log.d(TAG, "start broadcast " + Constants.BROADCAST_GETMESSAGEFROMCHAT);
+                try {
+                    String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
 
-                OutFetchMessageFromChat res = serializer.read(OutFetchMessageFromChat.class, reader, false);
-                if (res == null) {
-                    ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                    eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
-                } else {
-                    if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                    OutFetchMessageFromChat res = serializer.read(OutFetchMessageFromChat.class, reader, false);
+                    if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                        eh.CheckErrorText(res.getErrortext());
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
-                        if (res.getMessage() != null && !res.getMessage().isEmpty()) {
-                            long newtime = System.currentTimeMillis() / 1000L;
-                            Cursor newc = ldb.get(ChatID, newtime);
-                            mAdapter.changeCursor(newc);
+                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                            ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
+                            eh.CheckErrorText(res.getErrortext());
+                        } else {
+                            if (res.getMessage() != null && !res.getMessage().isEmpty()) {
+                                getLoaderManager().restartLoader(LOADER_ID, null, SingleChatActivity.this);
+                                //long newtime = System.currentTimeMillis() / 1000L;
+                                //Cursor newc = ldb.get(ChatID, newtime);
+                                //stopManagingCursor(mAdapter.getCursor());
+                                //mAdapter.swapCursor(newc);
+                            }
                         }
                     }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_GETMESSAGEFROMCHAT);
+            } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_INSERTMESSAGEINTOCHAT)) {
+                Log.d(TAG, "start broadcast " + Constants.BROADCAST_INSERTMESSAGEINTOCHAT);
+                try {
+                    String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Log.d(TAG, "end broadcast " + Constants.BROADCAST_GETMESSAGEFROMCHAT);
-        } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_INSERTMESSAGEINTOCHAT)) {
-            Log.d(TAG, "start broadcast " + Constants.BROADCAST_INSERTMESSAGEINTOCHAT);
-            try {
-                String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                OutInsertMessageIntoChat res = serializer.read(OutInsertMessageIntoChat.class, reader, false);
-                if (res == null) {
-                    ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                    eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
-                } else {
-                    if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                    OutInsertMessageIntoChat res = serializer.read(OutInsertMessageIntoChat.class, reader, false);
+                    if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                        eh.CheckErrorText(res.getErrortext());
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
-                        if (res.getMessageID() > 0) {
-                            long newtime = System.currentTimeMillis() / 1000L;
-                            Cursor newc = ldb.get(ChatID, newtime);
-                            mAdapter.changeCursor(newc);
+                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                            ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
+                            eh.CheckErrorText(res.getErrortext());
+                        } else {
+                            if (res.getMessageID() > 0) {
+                                getLoaderManager().restartLoader(LOADER_ID, null, SingleChatActivity.this);
+                                //long newtime = System.currentTimeMillis() / 1000L;
+                                //Cursor newc = ldb.get(ChatID, newtime);
+                                //mAdapter.swapCursor(newc);
+                            }
                         }
                     }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_INSERTMESSAGEINTOCHAT);
+            } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_LISTUSER)) {
+                Log.d(TAG, "start broadcast " + Constants.BROADCAST_LISTUSER);
+                try {
+                    String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Log.d(TAG, "end broadcast " + Constants.BROADCAST_INSERTMESSAGEINTOCHAT);
-        } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_LISTUSER)) {
-            Log.d(TAG, "start broadcast " + Constants.BROADCAST_LISTUSER);
-            try {
-                String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                OutListUser res = serializer.read(OutListUser.class, reader, false);
-                if (res == null) {
-                    ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                    eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
-                } else {
-                    if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                    OutListUser res = serializer.read(OutListUser.class, reader, false);
+                    if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                        eh.CheckErrorText(res.getErrortext());
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
-                        openSelectUserDialog(res);
-                    }
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Log.d(TAG, "end broadcast " + Constants.BROADCAST_LISTUSER);
-        } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_USERADDEDTOCHAT)) {
-            Log.d(TAG, "start broadcast " + Constants.BROADCAST_USERADDEDTOCHAT);
-            try {
-                String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                OutAddUserToChat res = serializer.read(OutAddUserToChat.class, reader, false);
-                if (res == null) {
-                    ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                    eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
-                } else {
-                    if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
-                        ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                        eh.CheckErrorText(res.getErrortext());
-                    } else {
-                        if (res.getResult().equalsIgnoreCase(Constants.RESULT_USER_ADDED_TO_CHAT)) {
-                            Toast.makeText(SingleChatActivity.this.getBaseContext(), getString(R.string.user_added_to_chat), Toast.LENGTH_SHORT).show();
+                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                            ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
+                            eh.CheckErrorText(res.getErrortext());
+                        } else {
+                            openSelectUserDialog(res);
                         }
                     }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_LISTUSER);
+            } else if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_USERADDEDTOCHAT)) {
+                Log.d(TAG, "start broadcast " + Constants.BROADCAST_USERADDEDTOCHAT);
+                try {
+                    String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    OutAddUserToChat res = serializer.read(OutAddUserToChat.class, reader, false);
+                    if (res == null) {
+                        ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
+                    } else {
+                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                            ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
+                            eh.CheckErrorText(res.getErrortext());
+                        } else {
+                            if (res.getResult().equalsIgnoreCase(Constants.RESULT_USER_ADDED_TO_CHAT)) {
+                                Toast.makeText(SingleChatActivity.this.getBaseContext(), getString(R.string.user_added_to_chat), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_USERADDEDTOCHAT);
             }
-            Log.d(TAG, "end broadcast " + Constants.BROADCAST_USERADDEDTOCHAT);
         }
     }
-}
 }

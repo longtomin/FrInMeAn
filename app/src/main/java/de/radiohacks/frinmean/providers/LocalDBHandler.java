@@ -1,10 +1,7 @@
-package de.radiohacks.frinmean.service;
+package de.radiohacks.frinmean.providers;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -19,12 +16,11 @@ public class LocalDBHandler extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
 
-    private static final String TABLE_NAME = "frinme_messages";
     private static final String TABLE_MESSAGE_DROP =
             "DROP TABLE IF EXISTS "
-                    + TABLE_NAME;
+                    + Constants.TABLE_NAME;
     private static final String TABLE_CREATE
-            = "CREATE TABLE " + TABLE_NAME
+            = "CREATE TABLE " + Constants.TABLE_NAME
             + " (" + Constants.T_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + Constants.T_BADBID + " INTEGER, "
             + Constants.T_OwningUserID + " INTEGER, "
@@ -38,6 +34,8 @@ public class LocalDBHandler extends SQLiteOpenHelper {
             + Constants.T_TextMsgValue + " VARCHAR(10000), "
             + Constants.T_ImageMsgID + " INTEGER, "
             + Constants.T_ImageMsgValue + " VARCHAR(256), "
+            + Constants.T_VideoMsgID + " INTEGER, "
+            + Constants.T_VideoMsgValue + " VARCHAR(256), "
             + Constants.T_FileMsgID + " INTEGER, "
             + Constants.T_FileMsgValue + " VARCHAR(256), "
             + Constants.T_LocationMsgID + " INTEGER, "
@@ -45,7 +43,7 @@ public class LocalDBHandler extends SQLiteOpenHelper {
             + Constants.T_ContactMsgID + " INTEGER, "
             + Constants.T_ContactMsgValue + " VARCHAR(250));";
     private static final String INDEX_NAME = "frinme_messages_idx";
-    private static final String INDEX_CREATE = "CREATE INDEX " + INDEX_NAME + " on " + TABLE_NAME + " (" + Constants.T_ChatID + ", " + Constants.T_SendTimestamp + ");";
+    private static final String INDEX_CREATE = "CREATE INDEX " + INDEX_NAME + " on " + Constants.TABLE_NAME + " (" + Constants.T_ChatID + ", " + Constants.T_SendTimestamp + ");";
 
 
     public LocalDBHandler(Context context) {
@@ -69,11 +67,11 @@ public class LocalDBHandler extends SQLiteOpenHelper {
         Log.d(TAG, "end onUpgrade");
     }
 
-    private int getID(int inid) {
+    /* private int getID(int inid) {
         Log.d(TAG, "start getID");
         int ret = -1;
         SQLiteDatabase db = getWritableDatabase();
-        Cursor c = db.query(TABLE_NAME, new String[]{Constants.T_BADBID}, Constants.T_BADBID + " =?", new String[]{Integer.toString(inid)}, null, null, null, null);
+        Cursor c = db.query(Constants.TABLE_NAME, new String[]{Constants.T_BADBID}, Constants.T_BADBID + " =?", new String[]{Integer.toString(inid)}, null, null, null, null);
         if (c.moveToFirst()) {
             ret = c.getInt(c.getColumnIndex(Constants.T_BADBID));
         }
@@ -113,9 +111,9 @@ public class LocalDBHandler extends SQLiteOpenHelper {
             // Check if Message already exists, if not insert message else update message.
             int id = getID(BackendID);
             if (id == -1) {
-                rowId = db.insert(TABLE_NAME, null, values);
+                rowId = db.insert(Constants.TABLE_NAME, null, values);
             } else {
-                rowId = db.update(TABLE_NAME, values, Constants.T_BADBID + "=?", new String[]{Integer.toString(id)});
+                rowId = db.update(Constants.TABLE_NAME, values, Constants.T_BADBID + "=?", new String[]{Integer.toString(id)});
             }
 
         } catch (SQLiteException e) {
@@ -142,7 +140,7 @@ public class LocalDBHandler extends SQLiteOpenHelper {
         } else if (InMsgTyp.equalsIgnoreCase(Constants.TYP_FILE)) {
             values.put(Constants.T_FileMsgValue, value);
         }
-        db.update(TABLE_NAME, values, Constants.T_BADBID + "=" + InMsgID, null);
+        db.update(Constants.TABLE_NAME, values, Constants.T_BADBID + "=" + InMsgID, null);
         Log.d(TAG, "end update");
     }
 
@@ -156,29 +154,8 @@ public class LocalDBHandler extends SQLiteOpenHelper {
         long timestamp = CalcDate(start);
 
         SQLiteDatabase db = getReadableDatabase();
-        // SQLiteDatabase db = getWritableDatabase();
-        /*String SELECT_QUERY = "SELECT " + Constants.T_ID + ", "
-                + Constants.T_BADBID + ", "
-                + Constants.T_OwningUserName + ", "
-                + Constants.T_OwningUserID + ", "
-                + Constants.T_MessageTyp + ", "
-                + Constants.T_SendTimestamp + ", "
-                + Constants.T_ReadTimestamp + ", "
-                + Constants.T_TextMsgID + ", "
-                + Constants.T_TextMsgValue + ", "
-                + Constants.T_ImageMsgID + ", "
-                + Constants.T_ImageMsgValue + ", "
-                + Constants.T_FileMsgID + ", "
-                + Constants.T_FileMsgValue + ", "
-                + Constants.T_LocationMsgID + ", "
-                + Constants.T_LocationMsgValue + ", "
-                + Constants.T_ContactMsgID + ", "
-                + Constants.T_ContactMsgValue +
-                " FROM " + TABLE_NAME + " WHERE " + Constants.T_ChatID + " = " + chatid + " AND " + Constants.T_SendTimestamp +
-                " > " + timestamp + " ORDER BY " + Constants.T_SendTimestamp + " ASC";*/
         Log.d(TAG, "end get");
-        return db.rawQuery("Select * from " + TABLE_NAME + " WHERE " + Constants.T_ChatID + " = " + chatid + " AND " + Constants.T_SendTimestamp +
+        return db.rawQuery("Select * from " + Constants.TABLE_NAME + " WHERE " + Constants.T_ChatID + " = " + chatid + " AND " + Constants.T_SendTimestamp +
                 " > " + timestamp + " ORDER BY " + Constants.T_SendTimestamp + " ASC", null);
-        //return db.query(TABLE_NAME_MESSAGES, null, MESSAGE_SENDER + " LIKE ? OR " + MESSAGE_SENDER + " LIKE ?", sender , null, null, _ID + " ASC");
-    }
+    } */
 }

@@ -27,22 +27,17 @@ import de.radiohacks.frinmean.R;
 public class SingleChatAdapter extends CursorAdapter {
 
     private static final String TAG = SingleChatAdapter.class.getSimpleName();
-    // public static final int LAYOUT_ID = R.layout.activity_single_chat;
     private static final int TEXTMSG = 0;
     private static final int IMAGEMSG = 1;
     private static final int FILEMSG = 2;
     private static final int CONTACTMSG = 3;
     private static final int LOCATIONMSG = 4;
     private int OID = 0;
-    private Context mContext;
-    private Cursor mCursor;
     private String directory;
 
     public SingleChatAdapter(Context context, Cursor cursor, int InOID, String dir) {
         super(context, cursor, true);
-        Log.d(TAG, "start SingleCjatAdapter");
-        this.mContext = context;
-        this.mCursor = cursor;
+        Log.d(TAG, "start SingleChatAdapter");
         this.OID = InOID;
         this.directory = dir;
         Log.d(TAG, "end SingleChatAdapter");

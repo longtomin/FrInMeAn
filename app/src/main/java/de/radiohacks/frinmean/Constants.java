@@ -60,6 +60,7 @@ public class Constants {
     public final static String TYP_LOCATION = "LOCATION";
     public final static String TYP_CONTACT = "CONTACT";
     public final static String TYP_FILE = "FILE";
+    public final static String TYP_VIDEO = "VIDEO";
 
     /*
     Constants for Directories
@@ -118,6 +119,7 @@ public class Constants {
             + "/" + android.os.Build.ID + ")";
 
     public static final String DATABASE_NAME = "Frinme.db";
+    public static final String TABLE_NAME = "frinme_messages";
     public static final String T_ID = "_id"; // int(10)
     public static final String T_BADBID = "ID"; // int(10)
     public static final String T_OwningUserID = "OwningUserID"; //int(10)
@@ -131,10 +133,38 @@ public class Constants {
     public static final String T_TextMsgValue = "TextMsgValue";  // varchar(10000)
     public static final String T_ImageMsgID = "ImageMsgID"; // int(10) unsigned DEFAULT NULL
     public static final String T_ImageMsgValue = "ImageMsgValue"; // varchar(256)
+    public static final String T_VideoMsgID = "VideoMsgID"; // int(10) unsigned DEFAULT NULL
+    public static final String T_VideoMsgValue = "VideoMsgValue"; // varchar(256)
     public static final String T_FileMsgID = "FileMsgID"; // int(10) unsigned DEFAULT NULL,
     public static final String T_FileMsgValue = "FileMsgValue"; // varchar(256) Pfad zur lokalein DateULT NULL,
     public static final String T_LocationMsgID = "LocationMsgID"; // int(10) unsigned DEFAULT NULL,
     public static final String T_LocationMsgValue = "LocationMsgValue"; // varchar(50)
     public static final String T_ContactMsgID = "ContactMsgID"; // int(10) unsgned DEFAULT NULL,
     public static final String T_ContactMsgValue = "ContactMsgValue"; // varchar(250)
+
+    /*
+    String Arrays for the Content Provider
+     */
+    public static final String[] DB_Columns = {
+            T_ID,
+            T_BADBID,
+            T_OwningUserID,
+            T_OwningUserName,
+            T_ChatID,
+            T_ChatName,
+            T_MessageTyp,
+            T_SendTimestamp,
+            T_ReadTimestamp,
+            T_TextMsgID,
+            T_TextMsgValue,
+            T_ImageMsgID,
+            T_ImageMsgValue,
+            T_FileMsgID,
+            T_FileMsgValue,
+            T_LocationMsgID,
+            T_LocationMsgValue,
+            T_ContactMsgID,
+            T_ContactMsgValue};
 }
+
+

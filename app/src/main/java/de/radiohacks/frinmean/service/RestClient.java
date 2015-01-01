@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
@@ -36,6 +35,8 @@ import java.util.ArrayList;
 public class RestClient {
 
     private static final String TAG = RestClient.class.getSimpleName();
+    private static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
+    private static final String ENCODING_GZIP = "gzip";
     private ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
     private ArrayList<NameValuePair> headers = new ArrayList<NameValuePair>();
     private String url;
@@ -48,6 +49,7 @@ public class RestClient {
 
     public RestClient(String urlin) {
         this.url = urlin;
+        headers.add(new BasicNameValuePair(HEADER_ACCEPT_ENCODING, ENCODING_GZIP));
     }
 
     private static String convertStreamToString(InputStream is) {
@@ -56,10 +58,10 @@ public class RestClient {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
 
-        String line = null;
+        String line;
         try {
             while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -74,29 +76,29 @@ public class RestClient {
         return sb.toString();
     }
 
-    public void setContext(Context in) {
-        this.mContext = in;
-    }
-
     public Context getContext() {
         return mContext;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setContext(Context in) {
+        this.mContext = in;
     }
 
-    public String getSaveDirectory() {
-        return SaveDirectory;
-    }
+    // public void setUrl(String url) {
+    //     this.url = url;
+    // }
+
+    //public String getSaveDirectory() {
+    //    return SaveDirectory;
+    //}
 
     public void setSaveDirectory(String in) {
         this.SaveDirectory = in;
     }
 
-    public String getResponseXML() {
-        return responseXML;
-    }
+    //public String getResponseXML() {
+    //    return responseXML;
+    //}
 
     public String getFilename() {
         return filename;
@@ -106,9 +108,9 @@ public class RestClient {
         this.filename = in;
     }
 
-    public String getErrorMessage() {
-        return message;
-    }
+    //public String getErrorMessage() {
+    //    return message;
+    //}
 
     public int getResponseCode() {
         return responseCode;
@@ -205,7 +207,7 @@ public class RestClient {
     }
 
 
-    public String ExecuteRequestUploadXML(HttpPost... httpposts) {
+    public String ExecuteRequestUploadXML(HttpPost... httpposts) throws ClientProtocolException {
         Log.d(TAG, "start ExecuteRequestUploadXML");
 
         HttpClient client = new DefaultHttpClient();
@@ -236,10 +238,6 @@ public class RestClient {
                 // Closing the input stream will trigger connection release
                 instream.close();
             }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -270,9 +268,6 @@ public class RestClient {
                 instream.close();
             }
 
-        } catch (ClientProtocolException e) {
-            client.getConnectionManager().shutdown();
-            e.printStackTrace();
         } catch (IOException e) {
             client.getConnectionManager().shutdown();
             e.printStackTrace();
@@ -310,11 +305,8 @@ public class RestClient {
                 instream1.close();
                 ret = filename;
             } else {
-                // TODO Log Eintrag schreiben
+                Log.d(TAG, "HTTP Responsecode = " + String.valueOf(responseCode));
             }
-        } catch (ClientProtocolException e) {
-            httpClient.getConnectionManager().shutdown();
-            e.printStackTrace();
         } catch (IOException e) {
             httpClient.getConnectionManager().shutdown();
             e.printStackTrace();

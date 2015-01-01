@@ -2,23 +2,23 @@
     xmlns:yourapp="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_show_popup"
-        android:orderInCategory="100"
         android:icon="@drawable/ic_action_attachment"
+        android:orderInCategory="100"
         android:title=""
         yourapp:showAsAction="always" />
     <item
         android:id="@+id/option_adduser"
         android:orderInCategory="600"
-        yourapp:showAsAction="never"
-        android:title="@string/option_adduser" />
+        android:title="@string/option_adduser"
+        yourapp:showAsAction="never" />
     <item
         android:id="@+id/option_removeuser"
         android:orderInCategory="700"
-        yourapp:showAsAction="never"
-        android:title="@string/option_removeuser" />
+        android:title="@string/option_removeuser"
+        yourapp:showAsAction="never" />
     <item
         android:id="@+id/option_deletechat"
         android:orderInCategory="800"
-        yourapp:showAsAction="never"
-        android:title="@string/option_deletechat" />
+        android:title="@string/option_deletechat"
+        yourapp:showAsAction="never" />
 </menu>
