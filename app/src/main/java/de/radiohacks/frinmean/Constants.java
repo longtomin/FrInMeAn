@@ -165,6 +165,33 @@ public class Constants {
             T_LocationMsgValue,
             T_ContactMsgID,
             T_ContactMsgValue};
+
+    /*
+    Integer-ID of the Database Rows
+     */
+
+    public static final int ID__id = 0;
+    public static final int ID_ID = 1;
+    public static final int ID_OwningUserID = 2;
+    public static final int ID_OwningUserName = 3;
+    public static final int ID_ChatID = 4;
+    public static final int ID_ChatName = 5;
+    public static final int ID_MessageType = 6;
+    public static final int ID_SendTimeStamp = 7;
+    public static final int ID_ReadTimeStamp = 8;
+    public static final int ID_TextMsgID = 9;
+    public static final int ID_TextMsgValue = 10;
+    public static final int ID_ImageMsgID = 11;
+    public static final int ID_ImageMsgValue = 12;
+    public static final int ID_VideoMsgID = 13;
+    public static final int ID_VideoMsgValue = 14;
+    public static final int ID_FileMsgID = 15;
+    public static final int ID_FileMsgValue = 16;
+    public static final int ID_LocationMsgID = 17;
+    public static final int ID_LocationMsgValue = 18;
+    public static final int ID_ContactMsgID = 19;
+    public static final int ID_ContactMsgValue = 20;
+
 }
 
 

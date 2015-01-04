@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/user_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxHeight="50dp"
+        android:maxWidth="50dp"
+        android:minHeight="50dp"
+        android:minWidth="50dp"
+        android:nestedScrollingEnabled="false"
+        android:src="@drawable/iconuser" />
+
+    <RelativeLayout
+        android:id="@+id/TextMessageContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/user_img"
+        android:background="@drawable/bubble_green">
+
+        <TextView
+            android:id="@+id/TextOwningUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/TextTextMessage"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="12dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/TextSendTimeStamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/TextOwningUserName"
+            android:layout_toRightOf="@+id/TextOwningUserName"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="10sp"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/TextTextMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="false"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/TextSendTimeStamp"
+            android:layout_centerInParent="true"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textIsSelectable="true"
+            android:textSize="12sp"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/TextReadTimeStamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/TextTextMessage"
+            android:inputType="none"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="10sp"
+            android:textStyle="italic" />
+    </RelativeLayout>
+</LinearLayout>

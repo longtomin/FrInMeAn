@@ -23,4 +23,52 @@
 
     <style name="ButtonBarButton" />
 
+    <style name="de_frinmean_style_TextOwnMsg" parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:background">@drawable/bubble_green</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:gravity">right</item>
+        <item name="android:layout_gravity">right</item>
+    </style>
+
+    <style name="de_frinmean_style_TextForeignMsg" parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:background">@drawable/bubble_yellow</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:gravity">left</item>
+        <item name="android:layout_gravity">left</item>
+    </style>
+
+    <style name="de_frinmean_style_ImageOwnMsg" parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:background">@drawable/bubble_green</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:gravity">right</item>
+        <item name="android:layout_gravity">right</item>
+    </style>
+
+    <style name="de_frinmean_style_ImageForeignMsg" parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:background">@drawable/bubble_yellow</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:gravity">left</item>
+        <item name="android:layout_gravity">left</item>
+    </style>
+
 </resources>
