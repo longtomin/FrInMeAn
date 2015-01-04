@@ -1,64 +1,69 @@
 package de.radiohacks.frinmean;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
-
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.List;
-
 import de.radiohacks.frinmean.adapters.ChatAdapter;
-import de.radiohacks.frinmean.model.Chat;
-import de.radiohacks.frinmean.model.OutCreateChat;
-import de.radiohacks.frinmean.model.OutListChat;
-import de.radiohacks.frinmean.model.OwningUser;
-import de.radiohacks.frinmean.service.ErrorHelper;
+import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.MeBaService;
 
 
-public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnRefreshListener {
-    //implements SwipeRefreshLayout.OnRefreshListener {
+public class ChatActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private ListChatStateReceiver mListChatStateReceiver = new ListChatStateReceiver();
+    private static final int CHAT_LOADER_ID = 2000;
+    // private ListChatStateReceiver mListChatStateReceiver = new ListChatStateReceiver();
     private ChatAdapter mAdapter;
-    private String username;
-    private String password;
-    private String server;
+    //private String username;
+    //private String password;
+    //private String server;
     private int userid;
     private String chatname;
     private SwipeRefreshLayout swipeLayout;
-
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        mAdapter = new ChatAdapter(this);
-        setListAdapter(mAdapter);
+        getLoaderManager().initLoader(CHAT_LOADER_ID, null, this);
+        mAdapter = new ChatAdapter(this, null);
+        ListView list = (ListView) findViewById(R.id.chatlist);
+        list.setAdapter(mAdapter);
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+
+                Intent i = new Intent(ChatActivity.this, SingleChatActivity.class);
+                i.putExtra(Constants.CHATID, cursor.getInt(Constants.ID_CHAT_BADBID));
+                i.putExtra(Constants.CHATNAME, cursor.getString(Constants.ID_CHAT_ChatName));
+                i.putExtra(Constants.OWNINGUSERID, cursor.getInt(Constants.ID_CHAT_OwningUserID));
+                i.putExtra(Constants.OWNINGUSERNAME, cursor.getString(Constants.ID_CHAT_OwningUserName));
+                i.putExtra(Constants.USERID, userid);
+                startActivity(i);
+            }
+        });
 
         Intent i = getIntent();
         userid = i.getIntExtra(Constants.USERID, -1);
-        getPreferenceInfo();
+        //getPreferenceInfo();
 
-        IntentFilter statusIntentFilter = new IntentFilter(
+        /*IntentFilter statusIntentFilter = new IntentFilter(
                 Constants.BROADCAST_LISTCHAT);
         statusIntentFilter.addAction(Constants.BROADCAST_CREATECHAT);
 
@@ -70,35 +75,23 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
         // Registers the DownloadStateReceiver and its intent filters
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mListChatStateReceiver,
-                statusIntentFilter);
+                statusIntentFilter); */
 
         //Start MeBaService
         Intent intentMyIntentService = new Intent(this, MeBaService.class);
         intentMyIntentService.setAction(Constants.ACTION_LISTCHAT);
         startService(intentMyIntentService);
 
-        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
-        swipeLayout.setOnRefreshListener(this);
-
-        swipeLayout.setColorSchemeColors(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
-        /* swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light); */
     }
 
-    protected void getPreferenceInfo() {
+    /*protected void getPreferenceInfo() {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
         server = sharedPrefs.getString("prefServername", "NULL");
         username = sharedPrefs.getString("prefUsername", "NULL");
         password = sharedPrefs.getString("prefPassword", "NULL");
-        // userid = sharedPrefs.getInt("prefUserID", -1);
-    }
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -107,22 +100,22 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
         return true;
     }
 
-    @Override
+    /*@Override
     protected void onResume() {
         super.onResume();
         IntentFilter infi = new IntentFilter(Constants.BROADCAST_LISTCHAT);
         infi.addAction(Constants.BROADCAST_CREATECHAT);
 
         registerReceiver(mListChatStateReceiver, infi);
-    }
+    } */
 
-    @Override
+    /* @Override
     protected void onPause() {
         super.onPause();
         if (mListChatStateReceiver != null) {
             unregisterReceiver(mListChatStateReceiver);
         }
-    }
+    }*/
 
 
     @Override
@@ -177,30 +170,44 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
         alertDialog.show();
     }
 
-    @Override
+/*    @Override
     protected void onListItemClick(ListView list, View view, int position, long id) {
         super.onListItemClick(list, view, position, id);
 
-        Chat c = mAdapter.getItem(position);
+        Cursor c = (Cursor) mAdapter.getItem(position);
         Intent i = new Intent(ChatActivity.this, SingleChatActivity.class);
-        i.putExtra(Constants.CHATID, c.getChatID());
-        i.putExtra(Constants.CHATNAME, c.getChatname());
-        i.putExtra(Constants.OWNINGUSERID, c.getOwningUser().getOwningUserID());
-        i.putExtra(Constants.OWNINGUSERNAME, c.getOwningUser().getOwningUserName());
+        i.putExtra(Constants.CHATID, c.getInt(Constants.ID_CHAT_ChatID));
+        i.putExtra(Constants.CHATNAME, c.getString(Constants.ID_CHAT_ChatName));
+        i.putExtra(Constants.OWNINGUSERID, c.getInt(Constants.ID_CHAT_OwningUserID));
+        i.putExtra(Constants.OWNINGUSERNAME, c.getString(Constants.ID_CHAT_OwningUserName));
         i.putExtra(Constants.USERID, userid);
         startActivity(i);
+    } */
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(ChatActivity.this, FrinmeanContentProvider.CHAT_CONTENT_URI,
+                Constants.CHAT_DB_Columns, null, null, null);
     }
 
     @Override
-    public void onRefresh() {
-        swipeLayout.setRefreshing(true);
-        Intent iRefresh = new Intent(this, MeBaService.class);
-        iRefresh.setAction(Constants.ACTION_LISTCHAT);
-        startService(iRefresh);
-        swipeLayout.setRefreshing(false);
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        switch (loader.getId()) {
+            case CHAT_LOADER_ID:
+                // The asynchronous load is complete and the data
+                // is now available for use. Only now can we associate
+                // the queried Cursor with the SimpleCursorAdapter.
+                mAdapter.swapCursor(data);
+                break;
+        }
     }
 
-    public class ListChatStateReceiver extends BroadcastReceiver {
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
+    }
+
+    /* public class ListChatStateReceiver extends BroadcastReceiver {
 
         public ListChatStateReceiver() {
             super();
@@ -208,19 +215,9 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
             // prevents instantiation by other packages.
         }
 
-        /**
-         * This method is called by the system when a broadcast Intent is matched by this class'
-         * intent filters
-         *
-         * @param context An Android context
-         * @param intent  The incoming broadcast Intent
-         */
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            /*
-             * Gets the status from the Intent's extended data, and chooses the appropriate action
-             */
             if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_LISTCHAT)) {
                 try {
                     String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
@@ -282,5 +279,5 @@ public class ChatActivity extends ListActivity implements SwipeRefreshLayout.OnR
                 }
             }
         }
-    }
+    }*/
 }

@@ -1,37 +1,31 @@
 package de.radiohacks.frinmean.adapters;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.R;
-import de.radiohacks.frinmean.model.Chat;
 
 
 /**
  * Created by thomas on 27.08.14.
  */
-public class ChatAdapter extends ArrayAdapter<Chat> {
+public class ChatAdapter extends CursorAdapter {
 
     private static final String TAG = ChatAdapter.class.getSimpleName();
-    private List<Chat> itemList = new ArrayList<Chat>();
-    private Context context;
 
-    public ChatAdapter(Context ctx) {
-        super(ctx, R.layout.activity_chat);
-        Log.d(TAG, "start ChatAdapter");
-        this.context = ctx;
-        Log.d(TAG, "end ChatAdapter");
+    public ChatAdapter(Context context, Cursor cursor) {
+        super(context, cursor, true);
+        Log.d(TAG, "start & End ChatAdapter");
     }
 
-    @Override
+/*    @Override
     public int getCount() {
         Log.d(TAG, "start getCount");
         if (itemList != null) {
@@ -47,6 +41,7 @@ public class ChatAdapter extends ArrayAdapter<Chat> {
     @Override
     public Chat getItem(int position) {
         Log.d(TAG, "start getItem");
+
         if (itemList != null) {
             Log.d(TAG, "end getItem != null");
             return itemList.get(position);
@@ -89,13 +84,21 @@ public class ChatAdapter extends ArrayAdapter<Chat> {
         Log.d(TAG, "end getView");
         return v;
 
+    } */
+
+    @Override
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        return inflater.inflate(R.layout.chatitem, null);
     }
 
-    public List<Chat> getItemList() {
-        return itemList;
-    }
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
+        TextView text = (TextView) view.findViewById(R.id.chatName);
+        String tmp = cursor.getString(Constants.ID_CHAT_ChatName);
+        text.setText(tmp);
 
-    public void setItemList(List<Chat> itemList) {
-        this.itemList = itemList;
+        TextView text1 = (TextView) view.findViewById(R.id.owningUserName);
+        text1.setText(cursor.getString(Constants.ID_CHAT_OwningUserName));
     }
 }

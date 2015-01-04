@@ -8,31 +8,17 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ChatActivity">
 
-    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/swipe_container"
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <ListView
+            android:id="@+id/chatlist"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <ListView
-                android:id="@android:id/list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fadingEdge="vertical"
-                android:fadingEdgeLength="10dp"
-                android:longClickable="true" />
-
-            <TextView
-                android:id="@android:id/empty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/no_chats" />
-
-        </LinearLayout>
-    </android.support.v4.widget.SwipeRefreshLayout>
+            android:fadingEdge="vertical"
+            android:fadingEdgeLength="10dp"
+            android:longClickable="false" />
+    </FrameLayout>
 </RelativeLayout>

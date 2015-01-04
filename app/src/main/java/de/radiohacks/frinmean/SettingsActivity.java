@@ -37,6 +37,7 @@ public class SettingsActivity extends PreferenceActivity {
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
     private static final int REQUEST_DIRECTORY = 0;
+    private static final int REQUEST_USER_THUMBNAIL = 1;
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -178,6 +179,20 @@ public class SettingsActivity extends PreferenceActivity {
             }
         });
 
+        /*Preference ownPicture = (Preference) findPreference("prefOwnImage");
+        ownPicture.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                final Intent chooserIntent = new Intent(
+                        SettingsActivity.this,
+                        ThumbnailActivity.class);
+                chooserIntent.putExtra(Constants.THUMBNAIL_TYPE,Constants.THUMBNAIL_USER);
+                startActivityForResult(chooserIntent, REQUEST_USER_THUMBNAIL);
+                return true;
+            }
+        });*/
+
+
         // Add 'notifications' preferences, and a corresponding header.
         PreferenceCategory fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle(R.string.pref_header_notifications);
@@ -263,6 +278,8 @@ public class SettingsActivity extends PreferenceActivity {
                     }
                 }
             }
+        } else if (requestCode == REQUEST_USER_THUMBNAIL) {
+
         }
     }
 

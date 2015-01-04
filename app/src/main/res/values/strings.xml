@@ -35,6 +35,7 @@
     <string name="not_connected_to_service">Keine Verbindung zum Hintergrund Service</string>
     <string name="not_connected_to_network">Keine Internet Verbindung</string>
     <string name="DirecotryChooser">Ablageort auswählen</string>
+    <string name="SelectOwnImage">Eigenes Bild auswählen</string>
 
     <!-- String for ErrorText FROM SERVER -->
     <string name="ERROR_NO_CONNECTION_TO_SERVER">Keine Verbindung zum Server!</string>
@@ -55,7 +56,7 @@
     <string name="ERROR_NO_ACTIVE_CHATS">Keine aktiven Chats vorhanden!</string>
     <string name="ERROR_FILE_NOT_FOUND">Datei existiert auf dem Server nicht!</string>
     <string name="title_activity_sign_up">SignUpActivity</string>
-    <string name="hello_world">Hello world!</string>
+    <!-- <string name="hello_world">Hello world!</string> -->
     <string name="title_activity_single_chat">SingleChatActivity</string>
     <string name="title_activity_image_view">ImageViewActivity</string>
 

@@ -57,7 +57,7 @@ public class SingleChatActivity extends ActionBarActivity implements
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
     private static final int SELECT_IMAGE_ACTIVITY_REQUEST_CODE = 300;
-    private static final int LOADER_ID = 1;
+    private static final int MESSAGE_LOADER_ID = 1000;
 
     private ByteArrayOutputStream stream = new ByteArrayOutputStream();
     private SingleChatReceiver mSingleChatReceiver = new SingleChatReceiver();
@@ -107,7 +107,7 @@ public class SingleChatActivity extends ActionBarActivity implements
         //      ldb = new LocalDBHandler(this);
         //    Cursor c = ldb.get(ChatID, time);
 
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getLoaderManager().initLoader(MESSAGE_LOADER_ID, null, this);
         mAdapter = new SingleChatAdapter(this, null, userid, directory);
 
 
@@ -508,17 +508,17 @@ public class SingleChatActivity extends ActionBarActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         long time = System.currentTimeMillis() / 1000L - (60 * 60 * 24 * 60);
-        String select = "((" + Constants.T_ChatID + " = " + ChatID + ") AND (" + Constants.T_SendTimestamp + ">" + time + "))";
-        String sort = Constants.T_SendTimestamp + " ASC";
+        String select = "((" + Constants.T_MESSAGES_ChatID + " = " + ChatID + ") AND (" + Constants.T_MESSAGES_SendTimestamp + ">" + time + "))";
+        String sort = Constants.T_MESSAGES_SendTimestamp + " ASC";
 
-        return new CursorLoader(SingleChatActivity.this, FrinmeanContentProvider.CONTENT_URI,
-                Constants.DB_Columns, select, null, sort);
+        return new CursorLoader(SingleChatActivity.this, FrinmeanContentProvider.MESSAES_CONTENT_URI,
+                Constants.MESSAGES_DB_Columns, select, null, sort);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         switch (loader.getId()) {
-            case LOADER_ID:
+            case MESSAGE_LOADER_ID:
                 // The asynchronous load is complete and the data
                 // is now available for use. Only now can we associate
                 // the queried Cursor with the SimpleCursorAdapter.
@@ -573,7 +573,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                             eh.CheckErrorText(res.getErrortext());
                         } else {
                             if (res.getMessage() != null && !res.getMessage().isEmpty()) {
-                                getLoaderManager().restartLoader(LOADER_ID, null, SingleChatActivity.this);
+                                getLoaderManager().restartLoader(MESSAGE_LOADER_ID, null, SingleChatActivity.this);
                                 //long newtime = System.currentTimeMillis() / 1000L;
                                 //Cursor newc = ldb.get(ChatID, newtime);
                                 //stopManagingCursor(mAdapter.getCursor());
@@ -603,7 +603,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                             eh.CheckErrorText(res.getErrortext());
                         } else {
                             if (res.getMessageID() > 0) {
-                                getLoaderManager().restartLoader(LOADER_ID, null, SingleChatActivity.this);
+                                getLoaderManager().restartLoader(MESSAGE_LOADER_ID, null, SingleChatActivity.this);
                                 //long newtime = System.currentTimeMillis() / 1000L;
                                 //Cursor newc = ldb.get(ChatID, newtime);
                                 //mAdapter.swapCursor(newc);

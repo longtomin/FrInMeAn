@@ -73,7 +73,7 @@ public class SingleChatAdapter extends CursorAdapter {
         Log.d(TAG, "start getItemViewType");
         Cursor cursor = getCursor();
         if (cursor.moveToPosition(position)) {
-            Integer ret = findMsgType(cursor.getString(Constants.ID_MessageType));
+            Integer ret = findMsgType(cursor.getString(Constants.ID_MESSAGES_MessageType));
             Log.d(TAG, "end getItemViewType " + ret.toString());
             return ret;
         } else {
@@ -82,32 +82,13 @@ public class SingleChatAdapter extends CursorAdapter {
         }
     }
 
-    /*@Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (!mDataValid) {
-            throw new IllegalStateException("this should only be called when the cursor is valid");
-        }
-        if (!mCursor.moveToPosition(position)) {
-            throw new IllegalStateException("couldn't move cursor to position " + position);
-        }
-
-        View v;
-        if (convertView == null) {
-            v = newView(mContext, mCursor, parent);
-        } else {
-            v = convertView;
-        }
-        bindView(v, mContext, mCursor);
-        return v;
-    }*/
-
     @Override
     public View newView(Context context, Cursor cur, ViewGroup parent) {
         Log.d(TAG, "start newView");
         View ret = null;
 
-        String msgType = cur.getString(Constants.ID_MessageType);
-        String msgOID = cur.getString(Constants.ID_OwningUserID);
+        String msgType = cur.getString(Constants.ID_MESSAGES_MessageType);
+        String msgOID = cur.getString(Constants.ID_MESSAGES_OwningUserID);
         boolean mine = msgOID.equalsIgnoreCase(String.valueOf(OID));
         LayoutInflater li = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -140,13 +121,13 @@ public class SingleChatAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cur) {
         Log.d(TAG, "start bindView");
-        String msgType = cur.getString(Constants.ID_MessageType);
-        int msgOID = cur.getInt(Constants.ID_OwningUserID);
-        long sstamp = cur.getLong(Constants.ID_SendTimeStamp);
+        String msgType = cur.getString(Constants.ID_MESSAGES_MessageType);
+        int msgOID = cur.getInt(Constants.ID_MESSAGES_OwningUserID);
+        long sstamp = cur.getLong(Constants.ID_MESSAGES_SendTimeStamp);
         Date sDate = new java.util.Date(sstamp * 1000);
-        long rstamp = cur.getLong(Constants.ID_ReadTimeStamp);
+        long rstamp = cur.getLong(Constants.ID_MESSAGES_ReadTimeStamp);
         Date rDate = new java.util.Date(rstamp * 1000);
-        String OName = cur.getString(Constants.ID_OwningUserName);
+        String OName = cur.getString(Constants.ID_MESSAGES_OwningUserName);
 
         switch (findMsgType(msgType)) {
             case TEXTMSG:
@@ -157,7 +138,7 @@ public class SingleChatAdapter extends CursorAdapter {
                 TextView TxtReadTimeStamp = (TextView) view.findViewById(R.id.TextReadTimeStamp);
                 TxtReadTimeStamp.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
                 TextView TextMessage = (TextView) view.findViewById(R.id.TextTextMessage);
-                TextMessage.setText(cur.getString(Constants.ID_TextMsgValue));
+                TextMessage.setText(cur.getString(Constants.ID_MESSAGES_TextMsgValue));
 
                 TxtOwningUserName.setGravity(Gravity.START);
                 TextMessage.setGravity(Gravity.START);
@@ -194,9 +175,9 @@ public class SingleChatAdapter extends CursorAdapter {
 
                 String imgfile = directory;
                 if (imgfile.endsWith("/")) {
-                    imgfile += Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_ImageMsgValue);
+                    imgfile += Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 } else {
-                    imgfile += "/" + Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_ImageMsgValue);
+                    imgfile += "/" + Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 }
 
                 File ifile = new File(imgfile);

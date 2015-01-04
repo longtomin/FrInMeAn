@@ -11,7 +11,6 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -30,12 +29,14 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import de.radiohacks.frinmean.Constants;
+import de.radiohacks.frinmean.model.Chat;
 import de.radiohacks.frinmean.model.Message;
 import de.radiohacks.frinmean.model.OutFetchImageMessage;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutFetchTextMessage;
 import de.radiohacks.frinmean.model.OutGetImageMessageMetaData;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
+import de.radiohacks.frinmean.model.OutListChat;
 import de.radiohacks.frinmean.model.OutSendImageMessage;
 import de.radiohacks.frinmean.model.OutSendTextMessage;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
@@ -44,7 +45,7 @@ public class MeBaService extends IntentService implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = MeBaService.class.getSimpleName();
-    private final IBinder mBinder = new LocalBinder();
+    // private final IBinder mBinder = new LocalBinder();
     public ConnectivityManager conManager = null;
     private String server;
     private String username;
@@ -53,7 +54,7 @@ public class MeBaService extends IntentService implements
     private String directory;
     // private int freq;
     // private LocalDBHandler ldb = null;
-    private BroadcastNotifier mBroadcaster = new BroadcastNotifier(this);
+    private BroadcastNotifier mBroadcaster = null;
 
     public MeBaService() {
         super("MeBaService");
@@ -64,14 +65,15 @@ public class MeBaService extends IntentService implements
         super.onCreate();
         Log.d(TAG, "start onCreate");
         conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        mBroadcaster = new BroadcastNotifier(MeBaService.this);
         getPreferenceInfo();
         Log.d(TAG, "end onCreate");
     }
 
-    @Override
+    /*@Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
+    }*/
 
     public boolean isNetworkConnected() {
         return conManager.getActiveNetworkInfo().isConnected();
@@ -340,35 +342,34 @@ public class MeBaService extends IntentService implements
                 if (resinsert != null) {
                     if (resinsert.getErrortext() == null || resinsert.getErrortext().isEmpty()) {
                         ContentValues valuesins = new ContentValues();
-                        valuesins.put(Constants.T_BADBID, resinsert.getMessageID());
-                        valuesins.put(Constants.T_OwningUserID, userid);
-                        valuesins.put(Constants.T_OwningUserName, username);
-                        valuesins.put(Constants.T_ChatID, ChatID);
-                        valuesins.put(Constants.T_ChatName, ChatName);
-                        valuesins.put(Constants.T_MessageTyp, MessageType);
-                        valuesins.put(Constants.T_SendTimestamp, resinsert.getSendTimestamp());
-                        valuesins.put(Constants.T_ReadTimestamp, resinsert.getSendTimestamp());
+                        valuesins.put(Constants.T_MESSAGES_BADBID, resinsert.getMessageID());
+                        valuesins.put(Constants.T_MESSAGES_OwningUserID, userid);
+                        valuesins.put(Constants.T_MESSAGES_OwningUserName, username);
+                        valuesins.put(Constants.T_MESSAGES_ChatID, ChatID);
+                        valuesins.put(Constants.T_MESSAGES_MessageTyp, MessageType);
+                        valuesins.put(Constants.T_MESSAGES_SendTimestamp, resinsert.getSendTimestamp());
+                        valuesins.put(Constants.T_MESSAGES_ReadTimestamp, resinsert.getSendTimestamp());
                         if (MessageType.equalsIgnoreCase(Constants.TYP_TEXT)) {
-                            valuesins.put(Constants.T_TextMsgID, MsgID);
-                            valuesins.put(Constants.T_TextMsgValue, Message);
+                            valuesins.put(Constants.T_MESSAGES_TextMsgID, MsgID);
+                            valuesins.put(Constants.T_MESSAGES_TextMsgValue, Message);
                         } else if (MessageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                            valuesins.put(Constants.T_ImageMsgID, MsgID);
-                            valuesins.put(Constants.T_ImageMsgValue, Message);
+                            valuesins.put(Constants.T_MESSAGES_ImageMsgID, MsgID);
+                            valuesins.put(Constants.T_MESSAGES_ImageMsgValue, Message);
                         } else if (MessageType.equalsIgnoreCase(Constants.TYP_LOCATION)) {
-                            valuesins.put(Constants.T_LocationMsgID, MsgID);
-                            valuesins.put(Constants.T_LocationMsgValue, Message);
+                            valuesins.put(Constants.T_MESSAGES_LocationMsgID, MsgID);
+                            valuesins.put(Constants.T_MESSAGES_LocationMsgValue, Message);
                         } else if (MessageType.equalsIgnoreCase(Constants.TYP_CONTACT)) {
-                            valuesins.put(Constants.T_ContactMsgID, MsgID);
-                            valuesins.put(Constants.T_ContactMsgValue, Message);
+                            valuesins.put(Constants.T_MESSAGES_ContactMsgID, MsgID);
+                            valuesins.put(Constants.T_MESSAGES_ContactMsgValue, Message);
                         } else if (MessageType.equalsIgnoreCase(Constants.TYP_FILE)) {
-                            valuesins.put(Constants.T_FileMsgID, MsgID);
-                            valuesins.put(Constants.T_FileMsgValue, Message);
+                            valuesins.put(Constants.T_MESSAGES_FileMsgID, MsgID);
+                            valuesins.put(Constants.T_MESSAGES_FileMsgValue, Message);
                         } else if (MessageType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                            valuesins.put(Constants.T_VideoMsgID, MsgID);
-                            valuesins.put(Constants.T_VideoMsgValue, Message);
+                            valuesins.put(Constants.T_MESSAGES_VideoMsgID, MsgID);
+                            valuesins.put(Constants.T_MESSAGES_VideoMsgValue, Message);
                         }
-                        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CONTENT_URI);
-                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+                        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                     }
                 }
             }
@@ -397,7 +398,7 @@ public class MeBaService extends IntentService implements
 
                 String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_CREATECHAT);
+                    handleActionListChat();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -421,7 +422,18 @@ public class MeBaService extends IntentService implements
 
                 String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_LISTCHAT);
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    OutListChat res = serializer.read(OutListChat.class, reader, false);
+                    if (res != null) {
+                        if (res.getErrortext() == null || res.getErrortext().isEmpty()) {
+                            if (res.getChat() != null && !res.getChat().isEmpty()) {
+                                SaveChatsToLDB(res.getChat());
+                            }
+                        }
+                    }
+                    // mBroadcaster.notifyProgress(ret, Constants.BROADCAST_LISTCHAT);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -518,71 +530,86 @@ public class MeBaService extends IntentService implements
         Log.d(TAG, "end handleActionGetMessageFromChat");
     }
 
+    private void SaveChatsToLDB(List<Chat> in) {
+        Log.d(TAG, "start SaveChatsToLDB");
+        for (int j = 0; j < in.size(); j++) {
+            Chat c = in.get(j);
+            ContentValues valuesins = new ContentValues();
+            valuesins.put(Constants.T_CHAT_BADBID, c.getChatID());
+            valuesins.put(Constants.T_CHAT_OwningUserID, c.getOwningUser().getOwningUserID());
+            valuesins.put(Constants.T_CHAT_OwningUserName, c.getOwningUser().getOwningUserName());
+            valuesins.put(Constants.T_CHAT_ChatName, c.getChatname());
+            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
+            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CHAT_CONTENT_URI, valuesins);
+            client.release();
+        }
+        Log.d(TAG, "end saveChatsToLDB");
+    }
+
     private void SaveMessageToLDB(List<Message> in, int ChatID, String ChatName) {
-        Log.d(TAG, "start saveMessageToDB");
+        Log.d(TAG, "start SaveMessageToLDB");
         for (int j = 0; j < in.size(); j++) {
             Message m = in.get(j);
             ContentValues valuesins = new ContentValues();
-            valuesins.put(Constants.T_BADBID, m.getMessageID());
-            valuesins.put(Constants.T_OwningUserID, m.getOwningUser().getOwningUserID());
-            valuesins.put(Constants.T_OwningUserName, m.getOwningUser().getOwningUserName());
-            valuesins.put(Constants.T_ChatID, ChatID);
-            valuesins.put(Constants.T_ChatName, ChatName);
-            valuesins.put(Constants.T_MessageTyp, m.getMessageTyp());
-            valuesins.put(Constants.T_SendTimestamp, m.getSendTimestamp());
-            valuesins.put(Constants.T_ReadTimestamp, m.getReadTimestamp());
+            valuesins.put(Constants.T_MESSAGES_BADBID, m.getMessageID());
+            valuesins.put(Constants.T_MESSAGES_OwningUserID, m.getOwningUser().getOwningUserID());
+            valuesins.put(Constants.T_MESSAGES_OwningUserName, m.getOwningUser().getOwningUserName());
+            valuesins.put(Constants.T_MESSAGES_ChatID, ChatID);
+            valuesins.put(Constants.T_MESSAGES_MessageTyp, m.getMessageTyp());
+            valuesins.put(Constants.T_MESSAGES_SendTimestamp, m.getSendTimestamp());
+            valuesins.put(Constants.T_MESSAGES_ReadTimestamp, m.getReadTimestamp());
             if (m.getMessageTyp().equalsIgnoreCase(Constants.TYP_TEXT)) {
-                valuesins.put(Constants.T_TextMsgID, m.getTextMsgID());
+                valuesins.put(Constants.T_MESSAGES_TextMsgID, m.getTextMsgID());
                 OutFetchTextMessage oftm = fetchTextMessage(m.getTextMsgID());
                 if (oftm.getErrortext() == null || oftm.getErrortext().isEmpty()) {
-                    valuesins.put(Constants.T_TextMsgValue, oftm.getTextMessage());
-                    ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CONTENT_URI);
-                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+                    valuesins.put(Constants.T_MESSAGES_TextMsgValue, oftm.getTextMessage());
+                    ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                     client.release();
                 }
             } else if (m.getMessageTyp().equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                valuesins.put(Constants.T_ImageMsgID, m.getTextMsgID());
+                valuesins.put(Constants.T_MESSAGES_ImageMsgID, m.getTextMsgID());
                 OutFetchImageMessage ofim = checkAndDownloadImageMessage(m.getImageMsgID());
                 if (ofim.getErrortext() == null || ofim.getErrortext().isEmpty()) {
-                    valuesins.put(Constants.T_ImageMsgValue, ofim.getImageMessage());
-                    ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CONTENT_URI);
-                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+                    valuesins.put(Constants.T_MESSAGES_ImageMsgValue, ofim.getImageMessage());
+                    ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                     client.release();
                 }
             } else if (m.getMessageTyp().equalsIgnoreCase(Constants.TYP_CONTACT)) {
-                valuesins.put(Constants.T_ContactMsgID, m.getTextMsgID());
-                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+                valuesins.put(Constants.T_MESSAGES_ContactMsgID, m.getTextMsgID());
+                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 client.release();
 //                OutFetchContactMessage ofcm = checkAndDownloadImageMessage(m.getImageMsgID());
 //                if (ofcm.getErrortext() == null || ofcm.getErrortext().isEmpty()) {
-//                    valuesins.put(Constants.T_ContactMsgValue, ofcm.getImageMessage());
+//                    valuesins.put(Constants.T_MESSAGES_ContactMsgValue, ofcm.getImageMessage());
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
             } else if (m.getMessageTyp().equalsIgnoreCase(Constants.TYP_FILE)) {
-                valuesins.put(Constants.T_FileMsgID, m.getTextMsgID());
-                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+                valuesins.put(Constants.T_MESSAGES_FileMsgID, m.getTextMsgID());
+                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 client.release();
 //                OutFetchFileMessage offm = checkAndDownloadImageMessage(m.getImageMsgID());
 //                if (offm.getErrortext() == null || offm.getErrortext().isEmpty()) {
-//                    valuesins.put(Constants.T_ContactMsgValue, offm.getImageMessage());
+//                    valuesins.put(Constants.T_MESSAGES_ContactMsgValue, offm.getImageMessage());
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
             } else if (m.getMessageTyp().equalsIgnoreCase(Constants.TYP_LOCATION)) {
-                valuesins.put(Constants.T_LocationMsgID, m.getTextMsgID());
-                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+                valuesins.put(Constants.T_MESSAGES_LocationMsgID, m.getTextMsgID());
+                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 client.release();
 //                OutFetchLocationMessage oflm = checkAndDownloadImageMessage(m.getImageMsgID());
 //                if (oflm.getErrortext() == null || oflm.getErrortext().isEmpty()) {
-//                    valuesins.put(Constants.T_ContactMsgValue, oflm.getImageMessage());
+//                    valuesins.put(Constants.T_MESSAGES_ContactMsgValue, oflm.getImageMessage());
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
             } else if (m.getMessageTyp().equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                valuesins.put(Constants.T_VideoMsgID, m.getTextMsgID());
-                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+                valuesins.put(Constants.T_MESSAGES_VideoMsgID, m.getTextMsgID());
+                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 client.release();
 //                OutFetchVideoMessage ofvm = checkAndDownloadImageMessage(m.getImageMsgID());
 //                if (ofvm.getErrortext() == null || ofvm.getErrortext().isEmpty()) {
@@ -591,7 +618,7 @@ public class MeBaService extends IntentService implements
 //                }
             }
         }
-        Log.d(TAG, "end saveMessageToDB");
+        Log.d(TAG, "end saveMessageToLDB");
     }
 
     private OutFetchTextMessage fetchTextMessage(int TxtMsgID) {

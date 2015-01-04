@@ -169,6 +169,8 @@ public class SignUpActivity extends Activity {
             super.onPostExecute(result);
             dialog.dismiss();
 
+            // TODO zuerst Result prüfen ob es null ist
+
             if (result.getErrortext() != null && !result.getErrortext().isEmpty()) {
                 if (result.getErrortext().equalsIgnoreCase(Constants.ERROR_USER_ALREADY_EXISTS)) {
                     // TODO Sende Request wegen USER_ALREADY_EXISTS und authenthicate wegen Passwortprüfung durchführen.

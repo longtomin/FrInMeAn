@@ -21,6 +21,10 @@
         android:key="prefDirectory"
         android:title="@string/DirecotryChooser" />
 
+    <Preference
+        android:key="prefOwnImage"
+        android:title="@string/SelectOwnImage" />
+
     <EditTextPreference
         android:capitalize="words"
         android:inputType="textCapWords"

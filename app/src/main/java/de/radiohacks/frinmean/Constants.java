@@ -52,6 +52,14 @@ public class Constants {
     public final static String RESULT_USER_ADDED_TO_CHAT = "ADDED";
 
     /*
+    Constants for Thumbnail Picutres
+     */
+
+    public final static String THUMBNAIL_TYPE = "THUMBNAIL_TYPE";
+    public final static String THUMBNAIL_USER = "USER_THUMBNAIL";
+    public final static String THUMBNAUL_CHAT = "CHAT_THUMBNAIL";
+
+    /*
     Constants for Media Types
      */
 
@@ -119,79 +127,92 @@ public class Constants {
             + "/" + android.os.Build.ID + ")";
 
     public static final String DATABASE_NAME = "Frinme.db";
-    public static final String TABLE_NAME = "frinme_messages";
-    public static final String T_ID = "_id"; // int(10)
-    public static final String T_BADBID = "ID"; // int(10)
-    public static final String T_OwningUserID = "OwningUserID"; //int(10)
-    public static final String T_OwningUserName = "OwingUserName"; // varchar(45)"// int(10)
-    public static final String T_ChatID = "ChatID";
-    public static final String T_ChatName = "ChatName"; // varchar(50)
-    public static final String T_MessageTyp = "MessageTyp";// varchar(10)
-    public static final String T_SendTimestamp = "SendTimeStamp"; // datetime NOT NULL,
-    public static final String T_ReadTimestamp = "ReadTimeStamp"; // datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    public static final String T_TextMsgID = "TextMsgID"; // int(10) unsigned DEFAULT NULL,
-    public static final String T_TextMsgValue = "TextMsgValue";  // varchar(10000)
-    public static final String T_ImageMsgID = "ImageMsgID"; // int(10) unsigned DEFAULT NULL
-    public static final String T_ImageMsgValue = "ImageMsgValue"; // varchar(256)
-    public static final String T_VideoMsgID = "VideoMsgID"; // int(10) unsigned DEFAULT NULL
-    public static final String T_VideoMsgValue = "VideoMsgValue"; // varchar(256)
-    public static final String T_FileMsgID = "FileMsgID"; // int(10) unsigned DEFAULT NULL,
-    public static final String T_FileMsgValue = "FileMsgValue"; // varchar(256) Pfad zur lokalein DateULT NULL,
-    public static final String T_LocationMsgID = "LocationMsgID"; // int(10) unsigned DEFAULT NULL,
-    public static final String T_LocationMsgValue = "LocationMsgValue"; // varchar(50)
-    public static final String T_ContactMsgID = "ContactMsgID"; // int(10) unsgned DEFAULT NULL,
-    public static final String T_ContactMsgValue = "ContactMsgValue"; // varchar(250)
-
+    public static final String MESSAGES_TABLE_NAME = "frinme_messages";
+    public static final String CHAT_TABLE_NAME = "frinme_chats";
+    public static final String T_MESSAGES_ID = "_id"; // int(10)
+    public static final String T_MESSAGES_BADBID = "ID"; // int(10)
+    public static final String T_MESSAGES_OwningUserID = "OwningUserID"; //int(10)
+    public static final String T_MESSAGES_OwningUserName = "OwingUserName"; // varchar(45)"// int(10)
+    public static final String T_MESSAGES_ChatID = "ChatID";
+    public static final String T_MESSAGES_MessageTyp = "MessageTyp";// varchar(10)
+    public static final String T_MESSAGES_SendTimestamp = "SendTimeStamp"; // datetime NOT NULL,
+    public static final String T_MESSAGES_ReadTimestamp = "ReadTimeStamp"; // datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+    public static final String T_MESSAGES_TextMsgID = "TextMsgID"; // int(10) unsigned DEFAULT NULL,
+    public static final String T_MESSAGES_TextMsgValue = "TextMsgValue";  // varchar(10000)
+    public static final String T_MESSAGES_ImageMsgID = "ImageMsgID"; // int(10) unsigned DEFAULT NULL
+    public static final String T_MESSAGES_ImageMsgValue = "ImageMsgValue"; // varchar(256)
+    public static final String T_MESSAGES_VideoMsgID = "VideoMsgID"; // int(10) unsigned DEFAULT NULL
+    public static final String T_MESSAGES_VideoMsgValue = "VideoMsgValue"; // varchar(256)
+    public static final String T_MESSAGES_FileMsgID = "FileMsgID"; // int(10) unsigned DEFAULT NULL,
+    public static final String T_MESSAGES_FileMsgValue = "FileMsgValue"; // varchar(256) Pfad zur lokalein DateULT NULL,
+    public static final String T_MESSAGES_LocationMsgID = "LocationMsgID"; // int(10) unsigned DEFAULT NULL,
+    public static final String T_MESSAGES_LocationMsgValue = "LocationMsgValue"; // varchar(50)
+    public static final String T_MESSAGES_ContactMsgID = "ContactMsgID"; // int(10) unsgned DEFAULT NULL,
+    public static final String T_MESSAGES_ContactMsgValue = "ContactMsgValue"; // varchar(250)
     /*
     String Arrays for the Content Provider
      */
-    public static final String[] DB_Columns = {
-            T_ID,
-            T_BADBID,
-            T_OwningUserID,
-            T_OwningUserName,
-            T_ChatID,
-            T_ChatName,
-            T_MessageTyp,
-            T_SendTimestamp,
-            T_ReadTimestamp,
-            T_TextMsgID,
-            T_TextMsgValue,
-            T_ImageMsgID,
-            T_ImageMsgValue,
-            T_FileMsgID,
-            T_FileMsgValue,
-            T_LocationMsgID,
-            T_LocationMsgValue,
-            T_ContactMsgID,
-            T_ContactMsgValue};
+    public static final String[] MESSAGES_DB_Columns = {
+            T_MESSAGES_ID,
+            T_MESSAGES_BADBID,
+            T_MESSAGES_OwningUserID,
+            T_MESSAGES_OwningUserName,
+            T_MESSAGES_ChatID,
+            T_MESSAGES_MessageTyp,
+            T_MESSAGES_SendTimestamp,
+            T_MESSAGES_ReadTimestamp,
+            T_MESSAGES_TextMsgID,
+            T_MESSAGES_TextMsgValue,
+            T_MESSAGES_ImageMsgID,
+            T_MESSAGES_ImageMsgValue,
+            T_MESSAGES_FileMsgID,
+            T_MESSAGES_FileMsgValue,
+            T_MESSAGES_LocationMsgID,
+            T_MESSAGES_LocationMsgValue,
+            T_MESSAGES_ContactMsgID,
+            T_MESSAGES_ContactMsgValue};
+    public static final String T_CHAT_ID = "_id"; // int(10)
+    public static final String T_CHAT_BADBID = "ID"; // int(10)
+    public static final String T_CHAT_OwningUserID = "OwningUserID"; //int(10)
+    public static final String T_CHAT_OwningUserName = "OwingUserName"; // varchar(45)"// int(10)
+    public static final String T_CHAT_ChatName = "ChatName"; // varchar(50)
+    public static final String[] CHAT_DB_Columns = {
+            T_CHAT_ID,
+            T_CHAT_BADBID,
+            T_CHAT_OwningUserID,
+            T_CHAT_OwningUserName,
+            T_CHAT_ChatName};
 
     /*
     Integer-ID of the Database Rows
      */
 
-    public static final int ID__id = 0;
-    public static final int ID_ID = 1;
-    public static final int ID_OwningUserID = 2;
-    public static final int ID_OwningUserName = 3;
-    public static final int ID_ChatID = 4;
-    public static final int ID_ChatName = 5;
-    public static final int ID_MessageType = 6;
-    public static final int ID_SendTimeStamp = 7;
-    public static final int ID_ReadTimeStamp = 8;
-    public static final int ID_TextMsgID = 9;
-    public static final int ID_TextMsgValue = 10;
-    public static final int ID_ImageMsgID = 11;
-    public static final int ID_ImageMsgValue = 12;
-    public static final int ID_VideoMsgID = 13;
-    public static final int ID_VideoMsgValue = 14;
-    public static final int ID_FileMsgID = 15;
-    public static final int ID_FileMsgValue = 16;
-    public static final int ID_LocationMsgID = 17;
-    public static final int ID_LocationMsgValue = 18;
-    public static final int ID_ContactMsgID = 19;
-    public static final int ID_ContactMsgValue = 20;
+    public static final int ID_MESSAGES__id = 0;
+    public static final int ID_MESSAGES_BADBID = 1;
+    public static final int ID_MESSAGES_OwningUserID = 2;
+    public static final int ID_MESSAGES_OwningUserName = 3;
+    public static final int ID_MESSAGES_ChatID = 4;
+    public static final int ID_MESSAGES_MessageType = 5;
+    public static final int ID_MESSAGES_SendTimeStamp = 6;
+    public static final int ID_MESSAGES_ReadTimeStamp = 7;
+    public static final int ID_MESSAGES_TextMsgID = 8;
+    public static final int ID_MESSAGES_TextMsgValue = 9;
+    public static final int ID_MESSAGES_ImageMsgID = 10;
+    public static final int ID_MESSAGES_ImageMsgValue = 11;
+    public static final int ID_MESSAGES_VideoMsgID = 12;
+    public static final int ID_MESSAGES_VideoMsgValue = 13;
+    public static final int ID_MESSAGES_FileMsgID = 14;
+    public static final int ID_MESSAGES_FileMsgValue = 15;
+    public static final int ID_MESSAGES_LocationMsgID = 16;
+    public static final int ID_MESSAGES_LocationMsgValue = 17;
+    public static final int ID_MESSAGES_ContactMsgID = 18;
+    public static final int ID_MESSAGES_ContactMsgValue = 19;
 
+    public static final int ID_CHAT__id = 0;
+    public static final int ID_CHAT_BADBID = 1;
+    public static final int ID_CHAT_OwningUserID = 2;
+    public static final int ID_CHAT_OwningUserName = 3;
+    public static final int ID_CHAT_ChatName = 4;
 }
 
 

@@ -44,10 +44,10 @@
             android:name="de.radiohacks.frinmean.SingleChatActivity$SingleChatReceiver"
             android:enabled="true"
             android:exported="false" />
-        <receiver88
+        <!-- <receiver88
             android:name="de.radiohacks.frinmean.ChatActivity$ListChatStateReceiver"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false" /> -->
         <provider
             android:name=".providers.FrinmeanContentProvider"
             android:authorities="de.radiohacks.frinmean.providers.FrinmeanContentProvider" />
