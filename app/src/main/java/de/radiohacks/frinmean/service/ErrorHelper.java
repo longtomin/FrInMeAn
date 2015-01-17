@@ -24,8 +24,6 @@ public class ErrorHelper {
         if (!Text.isEmpty()) {
             if (Text.equalsIgnoreCase(Constants.ERROR_NO_CONNECTION_TO_SERVER)) {
                 Toast.makeText(ErrorHelper.this.ctx, ctx.getString(R.string.ERROR_NO_CONNECTION_TO_SERVER), Toast.LENGTH_SHORT).show();
-            } else if (Text.equalsIgnoreCase(Constants.ERROR_USER_AUTHENTICATION_FAILED)) {
-                Toast.makeText(ErrorHelper.this.ctx, ctx.getString(R.string.ERROR_USER_AUTHENTICATION_FAILED), Toast.LENGTH_SHORT).show();
             } else if (Text.equalsIgnoreCase(Constants.ERROR_NONE_EXISTING_USER)) {
                 Toast.makeText(ErrorHelper.this.ctx, ctx.getString(R.string.ERROR_NONE_EXISTING_USER), Toast.LENGTH_SHORT).show();
             } else if (Text.equalsIgnoreCase(Constants.ERROR_NONE_EXISTING_CHAT)) {

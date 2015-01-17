@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -112,6 +113,16 @@ public class SingleChatActivity extends ActionBarActivity implements
 
 
         ListView lv = (ListView) findViewById(R.id.singlechatlist);
+
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+                // ToDo Dialog mit Loeschen oder weiterleiten
+                return false;
+            }
+        });
+
         lv.setAdapter(mAdapter);
 
         IntentFilter statusIntentFilter = new IntentFilter(

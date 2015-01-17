@@ -713,7 +713,7 @@ public class MeBaService extends IntentService implements
             } else {
                 rc = new RestClient(server + "image/download");
             }
-            rc.setContext(this.getApplicationContext());
+//            rc.setContext(this.getApplicationContext());
             rc.AddHeader("Accept", "image/jpeg");
             rc.setSaveDirectory(directory + "/" + "images/");
 

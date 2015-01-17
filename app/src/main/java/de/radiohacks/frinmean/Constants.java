@@ -28,23 +28,73 @@ public class Constants {
     /*
     Contants for ErrorText
      */
+
     public final static String ERROR_NO_CONNECTION_TO_SERVER = "NO_CONNETION_TO_SERVER";
-    public final static String ERROR_USER_AUTHENTICATION_FAILED = "USER_AUTHENTICATION_FAILED";
     public final static String ERROR_NONE_EXISTING_USER = "NONE_EXISTING_USER";
     public final static String ERROR_NONE_EXISTING_CHAT = "NONE_EXISTING_CHAT";
     public final static String ERROR_NO_TEXTMESSAGE_GIVEN = "NO_TEXTMESSAGE_GIVEN";
+    public static final String ERROR_NO_IMAGEMESSAGE_GIVEN = "NO_IMAGEMESSAGE_GIVEN";
     public final static String ERROR_NONE_EXISTING_MESSAGE = "NONE_EXISTING_MESSAGE";
     public final static String ERROR_INVALID_MESSAGE_TYPE = "INVALID_MESSAGE_TYPE";
     public final static String ERROR_INVALID_EMAIL_ADRESS = "INVALID_EMAIL_ADRESS";
     public final static String ERROR_MISSING_CHATNAME = "MISSING_CHATNAME";
     public final static String ERROR_NONE_EXISTING_TEXT_MESSAGE = "NONE_EXISTING_TEXT_MESSAGE";
+    public final static String ERROR_TYPE_NOT_FOUND = "TYPE_NOT_FOUND";
+    public final static String ERROR_FILE_NOT_FOUND = "FILE_NOT_FOUND";
+    public final static String ERROR_NOT_MESSAGE_OWNER = "NOT_MESSAGE_OWNER";
+    public final static String ERROR_NOT_CHAT_OWNER = "NOT_CHAT_OWNER";
     public final static String ERROR_DB_ERROR = "DATABASE_ERROR";
     public final static String ERROR_USER_NOT_ACTIVE = "USER_NOT_ACTIVE";
     public final static String ERROR_WRONG_PASSWORD = "WRONG_PASSWORD";
     public final static String ERROR_NO_USERNAME_OR_PASSWORD = "NO_USERNAME_OR_PASSWORD";
     public final static String ERROR_USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
     public final static String ERROR_NO_ACTIVE_CHATS = "NO_ACTIVE_CHATS";
-    public final static String ERROR_FILE_NOT_FOUND = "FILE_NOT_FOUND";
+    public final static String ERROR_USER_ALREADY_IN_CHAT = "USER_ALREADY_IN_CHAT";
+
+        /*
+    Contants for ResultText
+     */
+
+    public final static String RESULT_USER_ADDED = "USER_ADDED";
+    public final static String RESULT_SIGNUP_SUCCESSFUL = "SIGNUP_SUCCESSFUL";
+
+        /*
+    Contants for AuthenticationText
+     */
+
+    public final static String AUTHENTICATE_TRUE = "TRUE";
+    public final static String AUTHENTICATE_FALSE = "FALSE";
+
+        /*
+    Constants for Media Types
+     */
+
+    public final static String TYP_TEXT = "TEXT";
+    public final static String TYP_IMAGE = "IMAGE";
+    public final static String TYP_LOCATION = "LOCATION";
+    public final static String TYP_CONTACT = "CONTACT";
+    public final static String TYP_FILE = "FILE";
+    public final static String TYP_VIDEO = "VIDEO";
+
+    /* Where should the content go to on the Server */
+    public static final String SERVER_UPLOAD_LOCATION_FOLDER = "/opt/frinme-data/";
+
+    /* Constants for the query Parameter names */
+    public static final String QPusername = "username";
+    public static final String QPpassword = "password";
+    public static final String QPemail = "email";
+    public static final String QPchatname = "chatname";
+    public static final String QPchatid = "chatid";
+    public static final String QPuserid = "userid";
+    public static final String QPsearch = "search";
+    public static final String QPtextmessage = "textmessage";
+    public static final String QPtextmessageid = "textmessageid";
+    public static final String QPmessageid = "messageid";
+    public static final String QPmessagetype = "messagetype";
+    public static final String QPtimestamp = "timestamp";
+    public static final String QPimageid = "imageid";
+    public static final String QPvideoid = "videoid";
+
 
     /*
     Constants for Result Types
@@ -59,16 +109,6 @@ public class Constants {
     public final static String THUMBNAIL_USER = "USER_THUMBNAIL";
     public final static String THUMBNAUL_CHAT = "CHAT_THUMBNAIL";
 
-    /*
-    Constants for Media Types
-     */
-
-    public final static String TYP_TEXT = "TEXT";
-    public final static String TYP_IMAGE = "IMAGE";
-    public final static String TYP_LOCATION = "LOCATION";
-    public final static String TYP_CONTACT = "CONTACT";
-    public final static String TYP_FILE = "FILE";
-    public final static String TYP_VIDEO = "VIDEO";
 
     /*
     Constants for Directories

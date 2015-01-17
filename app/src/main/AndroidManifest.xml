@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name="de.radiohacks.frinmean.FrinmeanApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:installLocation="preferExternal"

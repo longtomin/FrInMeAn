@@ -19,6 +19,7 @@ import org.simpleframework.xml.core.Persister;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -64,8 +65,8 @@ public class SignUpActivity extends Activity {
                             ) {
                         if (passwordText.getText().toString().equals(passwordAgainText.getText().toString())) {
                             username = usernameText.getText().toString();
-                            //password = hashPassword(passwordText.getText().toString());
-                            password = passwordText.getText().toString();
+                            password = hashPassword(passwordText.getText().toString());
+                            // password = passwordText.getText().toString();
                             email = eMailText.getText().toString();
 
                             SignUpLoader loadFeedData = new SignUpLoader();
@@ -135,28 +136,33 @@ public class SignUpActivity extends Activity {
 
     protected String hashPassword(String in) {
         Log.d(TAG, "start hashPassword");
-        String ret = null;
+
+        StringBuffer hexString = new StringBuffer();
+
+        MessageDigest digest = null;
         try {
-            // Create MD5 Hash
-            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
-            digest.update(password.getBytes());
-            byte messageDigest[] = digest.digest();
+            digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(in.getBytes("UTF-8"));
 
-            StringBuffer MD5Hash = new StringBuffer();
-            for (int i = 0; i < messageDigest.length; i++) {
-                String h = Integer.toHexString(0xFF & messageDigest[i]);
-                while (h.length() < 2)
-                    h = "0" + h;
-                MD5Hash.append(h);
+            for (int i = 0; i < hash.length; i++) {
+
+                String hex = Integer.toHexString(0xff & hash[i]);
+
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+
+                hexString.append(hex);
             }
-
-            ret = MD5Hash.toString();
 
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
+
         Log.d(TAG, "end hashPassword ");
-        return ret;
+        return hexString.toString();
     }
 
     private class SignUpLoader extends AsyncTask<String, Void, OutSignUp> {

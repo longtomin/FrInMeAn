@@ -1,6 +1,5 @@
 package de.radiohacks.frinmean.service;
 
-import android.content.Context;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
@@ -11,6 +10,10 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -25,7 +28,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+
+import de.radiohacks.frinmean.FrinmeanApplication;
+import de.radiohacks.frinmean.myssl.CustomSSLSocketFactory;
 
 //import java.net.URL;
 
@@ -45,11 +63,11 @@ public class RestClient {
     private String responseXML;
     private String SaveDirectory;
     private String filename;
-    private Context mContext;
 
     public RestClient(String urlin) {
         this.url = urlin;
         headers.add(new BasicNameValuePair(HEADER_ACCEPT_ENCODING, ENCODING_GZIP));
+
     }
 
     private static String convertStreamToString(InputStream is) {
@@ -76,29 +94,9 @@ public class RestClient {
         return sb.toString();
     }
 
-    public Context getContext() {
-        return mContext;
-    }
-
-    public void setContext(Context in) {
-        this.mContext = in;
-    }
-
-    // public void setUrl(String url) {
-    //     this.url = url;
-    // }
-
-    //public String getSaveDirectory() {
-    //    return SaveDirectory;
-    //}
-
     public void setSaveDirectory(String in) {
         this.SaveDirectory = in;
     }
-
-    //public String getResponseXML() {
-    //    return responseXML;
-    //}
 
     public String getFilename() {
         return filename;
@@ -107,10 +105,6 @@ public class RestClient {
     public void setFilename(String in) {
         this.filename = in;
     }
-
-    //public String getErrorMessage() {
-    //    return message;
-    //}
 
     public int getResponseCode() {
         return responseCode;
@@ -210,7 +204,14 @@ public class RestClient {
     public String ExecuteRequestUploadXML(HttpPost... httpposts) throws ClientProtocolException {
         Log.d(TAG, "start ExecuteRequestUploadXML");
 
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = null;
+
+        char check = url.charAt(4);
+        if (check == 's' || check == 'S') {
+            client = getSSLClient();
+        } else {
+            client = new DefaultHttpClient();
+        }
 
         HttpResponse response;
 
@@ -248,7 +249,15 @@ public class RestClient {
 
     public String ExecuteRequestXML(HttpUriRequest... httpUriRequests) {
         Log.d(TAG, "start ExecuteRequestXML");
-        HttpClient client = new DefaultHttpClient();
+
+        HttpClient client = null;
+
+        char check = url.charAt(4);
+        if (check == 's' || check == 'S') {
+            client = getSSLClient();
+        } else {
+            client = new DefaultHttpClient();
+        }
 
         HttpResponse httpResponse;
 
@@ -279,10 +288,18 @@ public class RestClient {
     public String ExecuteRequestImage(HttpUriRequest... httpUriRequests) {
         Log.d(TAG, "start ExecuteRequestImage");
         String ret = null;
-        HttpClient httpClient = new DefaultHttpClient();
+        HttpClient client = null;
+
+        char check = url.charAt(4);
+        if (check == 's' || check == 'S') {
+            client = getSSLClient();
+        } else {
+            client = new DefaultHttpClient();
+        }
+
         try {
             HttpResponse httpResponse;
-            httpResponse = httpClient.execute(httpUriRequests[0]);
+            httpResponse = client.execute(httpUriRequests[0]);
             responseCode = httpResponse.getStatusLine().getStatusCode();
 
             if (responseCode == 200) {
@@ -308,14 +325,58 @@ public class RestClient {
                 Log.d(TAG, "HTTP Responsecode = " + String.valueOf(responseCode));
             }
         } catch (IOException e) {
-            httpClient.getConnectionManager().shutdown();
+            client.getConnectionManager().shutdown();
             e.printStackTrace();
         }
         Log.d(TAG, "start ExecuteRequestImage");
         return ret;
     }
 
-    //public enum RequestMethod {
-    //    GET, POST
-    //}
+    private HttpClient getSSLClient() {
+        HttpClient client = null;
+        SSLContext ctx;
+
+        try {
+            // Load CAs from an InputStream
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            InputStream caInput = FrinmeanApplication.loadCertAsInputStream();
+            Certificate ca;
+            try {
+                ca = cf.generateCertificate(caInput);
+                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+            } finally {
+                caInput.close();
+            }
+
+            // Create a KeyStore containing our trusted CAs
+            String keyStoreType = KeyStore.getDefaultType();
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca", ca);
+
+            // Create a TrustManager that trusts the CAs in our KeyStore
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+            tmf.init(keyStore);
+
+            // Create an SSLContext that uses our TrustManager
+            ctx = SSLContext.getInstance("TLS");
+            ctx.init(null, tmf.getTrustManagers(), null);
+
+            HttpClient tmpclient = new DefaultHttpClient();
+
+            SSLSocketFactory ssf = new CustomSSLSocketFactory(ctx);
+            ssf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            ClientConnectionManager ccm = tmpclient.getConnectionManager();
+            SchemeRegistry sr = ccm.getSchemeRegistry();
+            sr.register(new Scheme("https", ssf, 443));
+            client = new DefaultHttpClient(ccm,
+                    tmpclient.getParams());
+
+        } catch (NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException | KeyStoreException | CertificateException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return client;
+    }
 }
