@@ -253,6 +253,17 @@ public class Constants {
     public static final int ID_CHAT_OwningUserID = 2;
     public static final int ID_CHAT_OwningUserName = 3;
     public static final int ID_CHAT_ChatName = 4;
+
+    /*
+    Constants for Preferences
+     */
+
+    public static final String PrefServerport = "prefServerport";
+    public static final String PrefServername = "prefServername";
+    public static final String PrefHTTPSCommunication = "prefHTTPSCommunication";
+    public static final String PrefUsername = "prefUsername";
+    public static final String PrefPassword = "prefPassword";
+    public static final String PrefDirectory = "prefDirectory";
 }
 
 

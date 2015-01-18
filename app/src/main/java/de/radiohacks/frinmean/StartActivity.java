@@ -28,7 +28,10 @@ public class StartActivity extends Activity {
     private static final String TAG = StartActivity.class.getSimpleName();
     private String username;
     private String password;
-    private String server;
+    private String server = "NULL";
+    private int port = 80;
+    private boolean https = true;
+    private String CommunicationURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +48,9 @@ public class StartActivity extends Activity {
                     || password.equalsIgnoreCase("NULL")) {
                 Toast.makeText(StartActivity.this, this.getString(R.string.no_user_or_password_given), Toast.LENGTH_SHORT).show();
             } else {
-                if (!server.endsWith("/")) {
-                    server += "/user/authenticate";
-                } else {
-                    server += "user/authenticate";
-                }
+                buildServerURL();
                 AuthenticateLoader loadFeedData = new AuthenticateLoader();
-                loadFeedData.execute(server);
+                loadFeedData.execute(CommunicationURL + "user/authenticate");
             }
         }
         Log.d(TAG, "end onCreate");
@@ -62,10 +61,26 @@ public class StartActivity extends Activity {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        server = sharedPrefs.getString("prefServername", "NULL");
-        username = sharedPrefs.getString("prefUsername", "NULL");
-        password = sharedPrefs.getString("prefPassword", "NULL");
+        this.server = sharedPrefs.getString(Constants.PrefServername, "NULL");
+        this.https = sharedPrefs.getBoolean(Constants.PrefHTTPSCommunication, true);
+        if (this.https) {
+            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "443"));
+        } else {
+            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "80"));
+        }
+        this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
+        this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         Log.d(TAG, "end getPferefenceInfo");
+    }
+
+    protected void buildServerURL() {
+        this.CommunicationURL = "";
+        if (this.https) {
+            this.CommunicationURL += "https://";
+        } else {
+            this.CommunicationURL += "http://";
+        }
+        this.CommunicationURL += server + ":" + port + "/frinmeba/";
     }
 
     @Override
@@ -155,7 +170,7 @@ public class StartActivity extends Activity {
             Log.d(TAG, "start doInBackground");
             OutAuthenticate res = null;
 
-            RestClient rc = new RestClient(params[0]);
+            RestClient rc = new RestClient(params[0], https, port);
             rc.AddParam("username", username);
             rc.AddParam("password", password);
             try {

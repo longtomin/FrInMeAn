@@ -17,6 +17,21 @@
         android:singleLine="true"
         android:title="@string/pref_title_servername" />
 
+    <EditTextPreference
+        android:defaultValue="443"
+        android:inputType="numberDecimal"
+        android:key="prefServerport"
+        android:maxLines="1"
+        android:numeric="integer"
+        android:title="@string/pref_title_serverport" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="prefHTTPSCommunication"
+        android:switchTextOff="@string/pref_title_http"
+        android:switchTextOn="@string/pref_title_https"
+        android:title="@string/pref_title_communication" />
+
     <Preference
         android:key="prefDirectory"
         android:title="@string/DirecotryChooser" />

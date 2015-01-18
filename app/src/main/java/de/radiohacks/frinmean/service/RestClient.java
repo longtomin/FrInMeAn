@@ -63,9 +63,13 @@ public class RestClient {
     private String responseXML;
     private String SaveDirectory;
     private String filename;
+    private boolean usehttps;
+    private int port;
 
-    public RestClient(String urlin) {
+    public RestClient(String urlin, boolean inhttps, int inport) {
         this.url = urlin;
+        this.usehttps = inhttps;
+        this.port = inport;
         headers.add(new BasicNameValuePair(HEADER_ACCEPT_ENCODING, ENCODING_GZIP));
 
     }
@@ -206,8 +210,7 @@ public class RestClient {
 
         HttpClient client = null;
 
-        char check = url.charAt(4);
-        if (check == 's' || check == 'S') {
+        if (usehttps) {
             client = getSSLClient();
         } else {
             client = new DefaultHttpClient();
@@ -252,8 +255,7 @@ public class RestClient {
 
         HttpClient client = null;
 
-        char check = url.charAt(4);
-        if (check == 's' || check == 'S') {
+        if (usehttps) {
             client = getSSLClient();
         } else {
             client = new DefaultHttpClient();
@@ -290,8 +292,7 @@ public class RestClient {
         String ret = null;
         HttpClient client = null;
 
-        char check = url.charAt(4);
-        if (check == 's' || check == 'S') {
+        if (usehttps) {
             client = getSSLClient();
         } else {
             client = new DefaultHttpClient();
@@ -369,7 +370,7 @@ public class RestClient {
             ssf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
             ClientConnectionManager ccm = tmpclient.getConnectionManager();
             SchemeRegistry sr = ccm.getSchemeRegistry();
-            sr.register(new Scheme("https", ssf, 443));
+            sr.register(new Scheme("https", ssf, port));
             client = new DefaultHttpClient(ccm,
                     tmpclient.getParams());
 

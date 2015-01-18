@@ -50,6 +50,9 @@ public class MeBaService extends IntentService implements
     private String server;
     private String username;
     private String password;
+    private boolean https;
+    private String CommunicationURL;
+    private int port;
     private int userid;
     private String directory;
     // private int freq;
@@ -67,6 +70,7 @@ public class MeBaService extends IntentService implements
         conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         mBroadcaster = new BroadcastNotifier(MeBaService.this);
         getPreferenceInfo();
+        buildServerURL();
         Log.d(TAG, "end onCreate");
     }
 
@@ -84,14 +88,27 @@ public class MeBaService extends IntentService implements
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        server = sharedPrefs.getString("prefServername", "NULL");
-        username = sharedPrefs.getString("prefUsername", "NULL");
-        password = sharedPrefs.getString("prefPassword", "NULL");
-        userid = sharedPrefs.getInt("prefUserID", -1);
-        directory = sharedPrefs.getString("prefDirectory", "NULL");
+        this.server = sharedPrefs.getString(Constants.PrefServername, "NULL");
+        this.https = sharedPrefs.getBoolean(Constants.PrefHTTPSCommunication, true);
+        if (this.https) {
+            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "443"));
+        } else {
+            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "80"));
+        }
+        this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
+        this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
+        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+        Log.d(TAG, "end getPferefenceInfo");
+    }
 
-        // freq = sharedPrefs.getInt("prefSyncfrequency", -1);
-        Log.d(TAG, "end getPreferenceInfo");
+    protected void buildServerURL() {
+        this.CommunicationURL = "";
+        if (this.https) {
+            this.CommunicationURL += "https://";
+        } else {
+            this.CommunicationURL += "http://";
+        }
+        this.CommunicationURL += server + ":" + port + "/frinmeba/";
     }
 
     protected boolean checkServer() {
@@ -168,11 +185,7 @@ public class MeBaService extends IntentService implements
         Integer tmpuid = UserID;
         if (checkServer()) {
             RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/addusertochat");
-            } else {
-                rc = new RestClient(server + "user/addusertochat");
-            }
+            rc = new RestClient(CommunicationURL + "user/addusertochat", https, port);
             try {
                 rc.AddParam(Constants.USERNAME, username);
                 rc.AddParam(Constants.PASSWORD, password);
@@ -209,11 +222,7 @@ public class MeBaService extends IntentService implements
         String serverfilename = null;
         if (checkServer()) {
             RestClient rcsend;
-            if (!server.endsWith("/")) {
-                rcsend = new RestClient(server + "/image/upload");
-            } else {
-                rcsend = new RestClient(server + "image/upload");
-            }
+            rcsend = new RestClient(CommunicationURL + "image/upload", https, port);
             try {
                 rcsend.AddHeader("enctype", "multipart/form-data");
                 rcsend.AddParam(Constants.USERNAME, username);
@@ -279,11 +288,7 @@ public class MeBaService extends IntentService implements
         if (checkServer()) {
             RestClient rcsend;
             RestClient rcinsert;
-            if (!server.endsWith("/")) {
-                rcsend = new RestClient(server + "/user/sendtextmessage");
-            } else {
-                rcsend = new RestClient(server + "user/sendtextmessage");
-            }
+            rcsend = new RestClient(CommunicationURL + "user/sendtextmessage", https, port);
             try {
                 rcsend.AddParam(Constants.USERNAME, username);
                 rcsend.AddParam(Constants.PASSWORD, password);
@@ -318,11 +323,7 @@ public class MeBaService extends IntentService implements
 //        OutInsertMessageIntoChat ret = null;
 
         try {
-            if (!server.endsWith("/")) {
-                rcinsert = new RestClient(server + "/user/insertmessageintochat");
-            } else {
-                rcinsert = new RestClient(server + "user/insertmessageintochat");
-            }
+            rcinsert = new RestClient(CommunicationURL + "user/insertmessageintochat", https, port);
             Integer cid = ChatID;
             Integer mid = MsgID;
             rcinsert.AddParam(Constants.USERNAME, username);
@@ -386,11 +387,7 @@ public class MeBaService extends IntentService implements
         Log.d(TAG, "start handleActionCreateChate");
         if (checkServer()) {
             RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/createchat");
-            } else {
-                rc = new RestClient(server + "user/createchat");
-            }
+            rc = new RestClient(CommunicationURL + "user/createchat", https, port);
             try {
                 rc.AddParam(Constants.USERNAME, username);
                 rc.AddParam(Constants.PASSWORD, password);
@@ -411,11 +408,7 @@ public class MeBaService extends IntentService implements
         Log.d(TAG, "start handleActionListChat");
         if (checkServer()) {
             RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/listchat");
-            } else {
-                rc = new RestClient(server + "user/listchat");
-            }
+            rc = new RestClient(CommunicationURL + "user/listchat", https, port);
             try {
                 rc.AddParam(Constants.USERNAME, username);
                 rc.AddParam(Constants.PASSWORD, password);
@@ -446,11 +439,7 @@ public class MeBaService extends IntentService implements
         Log.d(TAG, "start handleActionAuthenticate");
         if (checkServer()) {
             RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/authenticate");
-            } else {
-                rc = new RestClient(server + "user/authenticate");
-            }
+            rc = new RestClient(CommunicationURL + "user/authenticate", https, port);
             try {
                 rc.AddParam(Constants.USERNAME, username);
                 rc.AddParam(Constants.PASSWORD, password);
@@ -470,11 +459,7 @@ public class MeBaService extends IntentService implements
         Log.d(TAG, "start handleActionListUser");
         if (checkServer()) {
             RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/listuser");
-            } else {
-                rc = new RestClient(server + "user/listuser");
-            }
+            rc = new RestClient(CommunicationURL + "user/listuser", https, port);
             try {
                 rc.AddParam(Constants.USERNAME, username);
                 rc.AddParam(Constants.PASSWORD, password);
@@ -495,11 +480,7 @@ public class MeBaService extends IntentService implements
         Log.d(TAG, "start handleActionGetMessageFromChat");
         if (checkServer()) {
             RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/getmessagefromchat");
-            } else {
-                rc = new RestClient(server + "user/getmessagefromchat");
-            }
+            rc = new RestClient(CommunicationURL + "user/getmessagefromchat", https, port);
             rc.AddParam(Constants.USERNAME, username);
             rc.AddParam(Constants.PASSWORD, password);
             rc.AddParam(Constants.CHATID, String.valueOf(cid));
@@ -626,11 +607,7 @@ public class MeBaService extends IntentService implements
         OutFetchTextMessage out = null;
         if (checkServer()) {
             RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/user/gettextmessage");
-            } else {
-                rc = new RestClient(server + "user/gettextmessage");
-            }
+            rc = new RestClient(CommunicationURL + "user/gettextmessage", https, port);
             try {
                 Integer mid = TxtMsgID;
                 rc.AddParam("username", username);
@@ -659,11 +636,7 @@ public class MeBaService extends IntentService implements
             // First get MetaData from Server to check if File already exists
             try {
                 RestClient rcmeta;
-                if (!server.endsWith("/")) {
-                    rcmeta = new RestClient(server + "/image/getimagemetadata");
-                } else {
-                    rcmeta = new RestClient(server + "image/getimagemetadata");
-                }
+                rcmeta = new RestClient(CommunicationURL + "image/getimagemetadata", https, port);
                 Integer imgid = ImgMsgID;
                 rcmeta.AddParam("username", username);
                 rcmeta.AddParam("password", password);
@@ -708,12 +681,8 @@ public class MeBaService extends IntentService implements
         if (checkServer()) {
 
             RestClient rc;
-            if (!server.endsWith("/")) {
-                rc = new RestClient(server + "/image/download");
-            } else {
-                rc = new RestClient(server + "image/download");
-            }
-//            rc.setContext(this.getApplicationContext());
+            rc = new RestClient(CommunicationURL + "image/download", https, port);
+
             rc.AddHeader("Accept", "image/jpeg");
             rc.setSaveDirectory(directory + "/" + "images/");
 

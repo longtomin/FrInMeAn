@@ -38,6 +38,9 @@ public class SignUpActivity extends Activity {
     private String password;
     private String email;
     private String server;
+    private boolean https;
+    private int port;
+    private String CommunicationURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,7 @@ public class SignUpActivity extends Activity {
         setTitle(R.string.sign_up);
 
         getPreferenceInfo();
+        buildServerURL();
         if (!server.equalsIgnoreCase("NULL")) {
 
             Button signUpButton = (Button) findViewById(R.id.signUp);
@@ -70,12 +74,7 @@ public class SignUpActivity extends Activity {
                             email = eMailText.getText().toString();
 
                             SignUpLoader loadFeedData = new SignUpLoader();
-
-                            if (!server.endsWith("/")) {
-                                loadFeedData.execute(server + "/user/signup");
-                            } else {
-                                loadFeedData.execute(server + "user/signup");
-                            }
+                            loadFeedData.execute(CommunicationURL + "user/signup");
 
                         } else {
                             Toast.makeText(getApplicationContext(), R.string.signup_type_same_password_in_password_fields, Toast.LENGTH_LONG).show();
@@ -128,10 +127,26 @@ public class SignUpActivity extends Activity {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        server = sharedPrefs.getString("prefServername", "NULL");
-        username = sharedPrefs.getString("prefUsername", "NULL");
-        password = sharedPrefs.getString("prefPassword", "NULL");
-        Log.d(TAG, "end getPreferenceInfo ");
+        this.server = sharedPrefs.getString(Constants.PrefServername, "NULL");
+        this.https = sharedPrefs.getBoolean(Constants.PrefHTTPSCommunication, true);
+        if (this.https) {
+            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "443"));
+        } else {
+            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "80"));
+        }
+        this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
+        this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
+        Log.d(TAG, "end getPferefenceInfo");
+    }
+
+    protected void buildServerURL() {
+        this.CommunicationURL = "";
+        if (this.https) {
+            this.CommunicationURL += "https://";
+        } else {
+            this.CommunicationURL += "http://";
+        }
+        this.CommunicationURL += server + ":" + port + "/frinmeba/";
     }
 
     protected String hashPassword(String in) {
@@ -224,7 +239,7 @@ public class SignUpActivity extends Activity {
             Log.d(TAG, "start doInBackground");
             OutSignUp res = null;
 
-            RestClient rc = new RestClient(params[0]);
+            RestClient rc = new RestClient(params[0], https, port);
             rc.AddParam("username", username);
             rc.AddParam("password", password);
             rc.AddParam("email", email);
