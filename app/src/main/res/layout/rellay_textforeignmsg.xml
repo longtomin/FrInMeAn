@@ -3,13 +3,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingEnd="@dimen/abc_text_size_display_2_material"
-    android:paddingStart="@dimen/abc_text_size_display_1_material">
+    android:padding="5dp">
 
     <RelativeLayout
         android:id="@+id/TextMessageContainer"
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
+        android:layout_toStartOf="@id/user_img"
         android:background="@drawable/bubble_yellow">
 
         <TextView
@@ -74,5 +74,6 @@
         android:minWidth="50dp"
         android:nestedScrollingEnabled="false"
         android:src="@drawable/iconuser" />
+
 
 </LinearLayout>

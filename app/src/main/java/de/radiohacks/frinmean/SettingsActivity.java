@@ -17,6 +17,8 @@ import net.rdrei.android.dirchooser.DirectoryChooserActivity;
 
 import java.io.File;
 
+import de.radiohacks.frinmean.service.MeBaService;
+
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
  * handset devices, settings are presented as a single list. On tablets,
@@ -281,6 +283,15 @@ public class SettingsActivity extends PreferenceActivity {
         } else if (requestCode == REQUEST_USER_THUMBNAIL) {
 
         }
+    }
+
+    @Override
+    protected void onStop() {
+
+        Intent reload = new Intent(this, MeBaService.class);
+        reload.setAction(Constants.ACTION_RELOAD_SETTING);
+        startService(reload);
+        super.onStop();
     }
 
     /**

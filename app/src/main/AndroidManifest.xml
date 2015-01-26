@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
     <application
         android:name="de.radiohacks.frinmean.FrinmeanApplication"
@@ -40,15 +43,31 @@
         <service
             android:name="de.radiohacks.frinmean.service.MeBaService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <!-- This points to a required XML file which describes our SyncAdapter. -->
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+        <service android:name="de.radiohacks.frinmean.account.GenericAccountService">
+            <!-- Required filter used by the system to launch our account service. -->
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <!-- This points to an XMLf ile which describes our account service. -->
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
         <receiver
             android:name="de.radiohacks.frinmean.SingleChatActivity$SingleChatReceiver"
             android:enabled="true"
             android:exported="false" />
-        <!-- <receiver88
-            android:name="de.radiohacks.frinmean.ChatActivity$ListChatStateReceiver"
-            android:enabled="true"
-            android:exported="false" /> -->
         <provider
             android:name=".providers.FrinmeanContentProvider"
             android:authorities="de.radiohacks.frinmean.providers.FrinmeanContentProvider" />

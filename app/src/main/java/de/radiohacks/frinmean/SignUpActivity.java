@@ -14,18 +14,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
-
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import de.radiohacks.frinmean.model.OutSignUp;
 import de.radiohacks.frinmean.service.ErrorHelper;
-import de.radiohacks.frinmean.service.RestClient;
+import de.radiohacks.frinmean.service.RestFunctions;
 
 public class SignUpActivity extends Activity {
 
@@ -237,23 +232,10 @@ public class SignUpActivity extends Activity {
         @Override
         protected OutSignUp doInBackground(String... params) {
             Log.d(TAG, "start doInBackground");
-            OutSignUp res = null;
 
-            RestClient rc = new RestClient(params[0], https, port);
-            rc.AddParam("username", username);
-            rc.AddParam("password", password);
-            rc.AddParam("email", email);
-            try {
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                res = serializer.read(OutSignUp.class, reader, false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            RestFunctions rf = new RestFunctions();
             Log.d(TAG, "end doInBackground");
-            return res;
+            return rf.signup(username, password, email);
         }
     }
 }

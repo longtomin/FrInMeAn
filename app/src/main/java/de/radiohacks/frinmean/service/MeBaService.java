@@ -1,16 +1,12 @@
 package de.radiohacks.frinmean.service;
 
 import android.app.IntentService;
-import android.app.LoaderManager;
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
-import android.os.Binder;
-import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -29,6 +25,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import de.radiohacks.frinmean.Constants;
+import de.radiohacks.frinmean.adapters.SyncAdapter;
 import de.radiohacks.frinmean.model.Chat;
 import de.radiohacks.frinmean.model.Message;
 import de.radiohacks.frinmean.model.OutFetchImageMessage;
@@ -41,10 +38,11 @@ import de.radiohacks.frinmean.model.OutSendImageMessage;
 import de.radiohacks.frinmean.model.OutSendTextMessage;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 
-public class MeBaService extends IntentService implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+public class MeBaService extends IntentService {
 
     private static final String TAG = MeBaService.class.getSimpleName();
+    private static final Object sSyncAdapterLock = new Object();
+    private static SyncAdapter sSyncAdapter = null;
     // private final IBinder mBinder = new LocalBinder();
     public ConnectivityManager conManager = null;
     private String server;
@@ -58,6 +56,7 @@ public class MeBaService extends IntentService implements
     // private int freq;
     // private LocalDBHandler ldb = null;
     private BroadcastNotifier mBroadcaster = null;
+    private RestFunctions rf;
 
     public MeBaService() {
         super("MeBaService");
@@ -69,15 +68,23 @@ public class MeBaService extends IntentService implements
         Log.d(TAG, "start onCreate");
         conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         mBroadcaster = new BroadcastNotifier(MeBaService.this);
+        rf = new RestFunctions();
         getPreferenceInfo();
         buildServerURL();
+
+        synchronized (sSyncAdapterLock) {
+            if (sSyncAdapter == null) {
+                sSyncAdapter = new SyncAdapter(getApplicationContext(), true);
+            }
+        }
+
         Log.d(TAG, "end onCreate");
     }
 
-    /*@Override
+    @Override
     public IBinder onBind(Intent intent) {
-        return mBinder;
-    }*/
+        return sSyncAdapter.getSyncAdapterBinder();
+    }
 
     public boolean isNetworkConnected() {
         return conManager.getActiveNetworkInfo().isConnected();
@@ -168,13 +175,15 @@ public class MeBaService extends IntentService implements
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final int uid = intent.getIntExtra(Constants.USERID, -1);
                 handleActionAddUserToChat(cid, uid);
-            } else if (Constants.ACTION_SENDVIDEOMESSAGE.equalsIgnoreCase((action))) {
+            } else if (Constants.ACTION_SENDVIDEOMESSAGE.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final String VideoLoc = intent.getStringExtra(Constants.VIDEOLOCATION);
                 //handleActionSendVideoMessage(ChatName, cid, VideoLoc);
+            } else if (Constants.ACTION_RELOAD_SETTING.equalsIgnoreCase(action)) {
+                getPreferenceInfo();
+                buildServerURL();
             }
-
         }
         Log.d(TAG, "start onHandleIntent");
     }
@@ -701,74 +710,10 @@ public class MeBaService extends IntentService implements
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start fetchImageMessage");
+        Log.d(TAG, "end fetchImageMessage");
         return out;
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
-
-    /*    public void Refresh() {
-
-            OutCheckNewMessages outcheck = CheckNewMessages();
-
-            if (outcheck.getErrortext() != null && !outcheck.getErrortext().isEmpty()) {
-                //Do notthing we are in the Background working
-            } else {
-                if (outcheck.getChats() != null && outcheck.getChats().size() > 0) {
-                    for (int i = 0; i < outcheck.getChats().size(); i++) {
-                        Chats c = outcheck.getChats().get(i);
-                        OutFetchMessageFromChat of = FetchMessageFromChat(c.getChatID());
-                        if (of.getErrortext() != null && !of.getErrortext().isEmpty()) {
-                            //Do notthing we are in the Background working
-                        } else {
-                            if (of.getMessage() != null && !of.getMessage().isEmpty()) {
-                                for (int j = 0; j < of.getMessage().size(); j++) {
-                                    Message m = of.getMessage().get(j);
-
-                                    long readTime = System.currentTimeMillis() / 1000L;
-
-                                    if (m.getTextMsgID() > 0) {
-                                        ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), c.getChatID(), c.getChatname(), m.getMessageTyp(), m.getSendTimestamp(), readTime, m.getTextMsgID());
-                                        OutFetchTextMessage oftm = FetchTextMessage(m.getTextMsgID());
-                                        if (oftm.getErrortext() != null && !oftm.getErrortext().isEmpty()) {
-                                            //Do notthing we are in the Background working
-                                        } else {
-                                            ldb.update(m.getMessageTyp(), m.getTextMsgID(), oftm.getTextMessage());
-                                        }
-                                    }
-                                    if (m.getContactMsgID() > 0) {
-                                        ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), c.getChatID(), c.getChatname(), m.getMessageTyp(), m.getSendTimestamp(), readTime, m.getContactMsgID());
-                                    }
-                                    if (m.getImageMsgID() > 0) {
-                                        ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), c.getChatID(), c.getChatname(), m.getMessageTyp(), m.getSendTimestamp(), readTime, m.getImageMsgID());
-                                    }
-                                    if (m.getFileMsgID() > 0) {
-                                        ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), c.getChatID(), c.getChatname(), m.getMessageTyp(), m.getSendTimestamp(), readTime, m.getFileMsgID());
-                                    }
-                                    if (m.getLocationMsgID() > 0) {
-                                        ldb.insert(m.getOwningUser().getOwningUserID(), m.getOwningUser().getOwningUserName(), c.getChatID(), c.getChatname(), m.getMessageTyp(), m.getSendTimestamp(), readTime, m.getLocationMsgID());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    */
     /* public String getServer() {
         return server;
     }
@@ -799,12 +744,12 @@ public class MeBaService extends IntentService implements
 
     /* public void setFreq(int freq) {
         this.freq = freq;
-    }*/
+    }
 
     public class LocalBinder extends Binder {
         public MeBaService getService() {
             // Return this instance of LocalService so clients can call public methods
             return MeBaService.this;
         }
-    }
+    }*/
 }

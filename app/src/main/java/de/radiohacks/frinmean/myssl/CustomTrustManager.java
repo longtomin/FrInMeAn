@@ -1,6 +1,5 @@
 package de.radiohacks.frinmean.myssl;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -19,7 +18,12 @@ import javax.net.ssl.X509TrustManager;
 
 import de.radiohacks.frinmean.FrinmeanApplication;
 
-public class CustomX509TrustManager implements X509TrustManager {
+/**
+ * A custom X509TrustManager implementation that trusts a specified server certificate in addition
+ * to those that are in the system TrustStore.
+ * Also handles an out-of-order certificate chain, as is often produced by Apache's mod_ssl
+ */
+public class CustomTrustManager implements X509TrustManager {
 
     private final X509TrustManager originalX509TrustManager;
     private final KeyStore trustStore;
@@ -29,7 +33,7 @@ public class CustomX509TrustManager implements X509TrustManager {
      * @throws NoSuchAlgorithmException
      * @throws KeyStoreException
      */
-    public CustomX509TrustManager(KeyStore trustStore) throws NoSuchAlgorithmException, KeyStoreException {
+    public CustomTrustManager(KeyStore trustStore) throws NoSuchAlgorithmException, KeyStoreException {
         this.trustStore = trustStore;
 
         TrustManagerFactory originalTrustManagerFactory = TrustManagerFactory.getInstance("X509");
@@ -38,26 +42,41 @@ public class CustomX509TrustManager implements X509TrustManager {
         TrustManager[] originalTrustManagers = originalTrustManagerFactory.getTrustManagers();
         originalX509TrustManager = (X509TrustManager) originalTrustManagers[0];
     }
-    /*public void checkClientTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
-    }*/
 
     /**
      * No-op. Never invoked by client, only used in server-side implementations
      *
      * @return
      */
-    @Override
+    public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
+    }
+
+    /**
+     * No-op. Never invoked by client, only used in server-side implementations
+     *
+     * @return
+     */
     public void checkClientTrusted(X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
     }
 
 
-
-    /* @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+    /**
+     * Given the partial or complete certificate chain provided by the peer,
+     * build a certificate path to a trusted root and return if it can be validated and is trusted
+     * for client SSL authentication based on the authentication type. The authentication type is
+     * determined by the actual certificate used. For instance, if RSAPublicKey is used, the authType should be "RSA".
+     * Checking is case-sensitive.
+     * Defers to the default trust manager first, checks the cert supplied in the ctor if that fails.
+     *
+     * @param chain    the server's certificate chain
+     * @param authType the authentication type based on the client certificate
+     * @throws java.security.cert.CertificateException
+     */
+    /* public void checkServerTrusted(X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
         try {
             originalX509TrustManager.checkServerTrusted(chain, authType);
-        } catch (CertificateException originalException) {
+        } catch(CertificateException originalException) {
             try {
                 X509Certificate[] reorderedChain = reorderCertificateChain(chain);
                 CertPathValidator validator = CertPathValidator.getInstance("PKIX");
@@ -66,16 +85,39 @@ public class CustomX509TrustManager implements X509TrustManager {
                 PKIXParameters params = new PKIXParameters(trustStore);
                 params.setRevocationEnabled(false);
                 validator.validate(certPath, params);
-            } catch (Exception ex) {
+            } catch(Exception ex) {
                 throw originalException;
             }
         }
 
     } */
-
     @Override
-    public X509Certificate[] getAcceptedIssuers() {
-        return new X509Certificate[0];
+    public void checkServerTrusted(java.security.cert.X509Certificate[] certs,
+                                   String authType) throws CertificateException {
+
+        // Here you can verify the servers certificate. (e.g. against one which is stored on mobile device)
+
+        InputStream inStream = null;
+        try {
+            inStream = FrinmeanApplication.loadCertAsInputStream();
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            X509Certificate ca = (X509Certificate)
+                    cf.generateCertificate(inStream);
+            inStream.close();
+            //
+            for (X509Certificate cert : certs) {
+                // // Verifing by public key
+                cert.verify(ca.getPublicKey());
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Untrusted Certificate!");
+        } finally {
+            try {
+                inStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -160,39 +202,4 @@ public class CustomX509TrustManager implements X509TrustManager {
 
         return signer;
     }
-
-    public void checkServerTrusted(java.security.cert.X509Certificate[] certs,
-                                   String authType) throws CertificateException {
-
-        // Here you can verify the servers certificate. (e.g. against one which is stored on mobile device)
-
-        InputStream inStream = null;
-        try {
-            inStream = FrinmeanApplication.loadCertAsInputStream();
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            X509Certificate ca = (X509Certificate)
-                    cf.generateCertificate(inStream);
-            inStream.close();
-
-            for (X509Certificate cert : certs) {
-                // // Verifing by public key
-                cert.verify(ca.getPublicKey());
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Untrusted Certificate!");
-        } finally {
-            try {
-                inStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-/*    public X509Certificate[] getAcceptedIssuers() {
-        return null;
-    }
-*/
 }
-
-

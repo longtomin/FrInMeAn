@@ -26,6 +26,11 @@ public class Constants {
     public static final String ACTION_CHECKNEWMESSAGES = "checknewmessages";
 
     /*
+    App own action without correspondance in the backend
+     */
+    public static final String ACTION_RELOAD_SETTING = "reloadsettings";
+
+    /*
     Contants for ErrorText
      */
 
@@ -264,6 +269,11 @@ public class Constants {
     public static final String PrefUsername = "prefUsername";
     public static final String PrefPassword = "prefPassword";
     public static final String PrefDirectory = "prefDirectory";
+
+
+    public static final String PREF_SETUP_COMPLETE = "setup_complete";
+    // Value below must match the account type specified in res/xml/syncadapter.xml
+    public static final String ACCOUNT_TYPE = "de.radiohacks.frinmean.account";
 }
 
 

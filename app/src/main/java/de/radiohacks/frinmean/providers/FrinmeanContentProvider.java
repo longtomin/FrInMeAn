@@ -18,8 +18,12 @@ import de.radiohacks.frinmean.Constants;
 
 public class FrinmeanContentProvider extends ContentProvider {
 
+    public static final String AUTHORITY = "de.radiohacks.frinmean.providers.FrinmeanContentProvider";
+    public static final Uri MESSAES_CONTENT_URI = Uri.parse("content://" + AUTHORITY
+            + "/" + Constants.MESSAGES_TABLE_NAME);
+    public static final Uri CHAT_CONTENT_URI = Uri.parse("content://" + AUTHORITY
+            + "/" + Constants.CHAT_TABLE_NAME);
     private static final String TAG = FrinmeanContentProvider.class.getSimpleName();
-
     // Used for the UriMacher
     private static final int Frinmean_messages = 1000;
     private static final int MESSAGES_ID = 1010;
@@ -40,20 +44,12 @@ public class FrinmeanContentProvider extends ContentProvider {
     private static final int MESSAGES_LocationMsgValue = 1160;
     private static final int MESSAGES_ContactMsgID = 1170;
     private static final int MESSAGES_ContactMsgValue = 1180;
-
     private static final int Frinmean_chats = 2000;
     private static final int CHAT_ID = 2010;
     private static final int CHAT_BADBID = 2020;
     private static final int CHAT_OwningUserID = 2030;
     private static final int CHAT_OwningUserName = 2040;
     private static final int CHAT_ChatName = 2050;
-
-
-    private static final String AUTHORITY = "de.radiohacks.frinmean.providers.FrinmeanContentProvider";
-    public static final Uri MESSAES_CONTENT_URI = Uri.parse("content://" + AUTHORITY
-            + "/" + Constants.MESSAGES_TABLE_NAME);
-    public static final Uri CHAT_CONTENT_URI = Uri.parse("content://" + AUTHORITY
-            + "/" + Constants.CHAT_TABLE_NAME);
     private static final UriMatcher sURIMatcher = new UriMatcher(
             UriMatcher.NO_MATCH);
 

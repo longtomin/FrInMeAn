@@ -12,15 +12,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
-
-import java.io.Reader;
-import java.io.StringReader;
-
 import de.radiohacks.frinmean.model.OutAuthenticate;
 import de.radiohacks.frinmean.service.ErrorHelper;
-import de.radiohacks.frinmean.service.RestClient;
+import de.radiohacks.frinmean.service.RestFunctions;
 
 
 public class StartActivity extends Activity {
@@ -168,12 +162,15 @@ public class StartActivity extends Activity {
         @Override
         protected OutAuthenticate doInBackground(String... params) {
             Log.d(TAG, "start doInBackground");
-            OutAuthenticate res = null;
 
-            RestClient rc = new RestClient(params[0], https, port);
+            RestFunctions rf = new RestFunctions();
+            return rf.authenticate(username, password);
+
+            /* RestClient rc = new RestClient(params[0], https, port);
             rc.AddParam("username", username);
             rc.AddParam("password", password);
             try {
+                String ret = rc.testDirect();
                 String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
                 Serializer serializer = new Persister();
                 Reader reader = new StringReader(ret);
@@ -183,7 +180,7 @@ public class StartActivity extends Activity {
                 e.printStackTrace();
             }
             Log.d(TAG, "end doInBackground");
-            return res;
+            return res; */
         }
     }
 }

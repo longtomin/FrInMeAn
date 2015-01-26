@@ -7,6 +7,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -39,11 +41,14 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import de.radiohacks.frinmean.FrinmeanApplication;
 import de.radiohacks.frinmean.myssl.CustomSSLSocketFactory;
+import de.radiohacks.frinmean.myssl.CustomTrustManager;
 
 //import java.net.URL;
 
@@ -122,6 +127,32 @@ public class RestClient {
         Log.d(TAG, "start AddHeader");
         headers.add(new BasicNameValuePair(name, value));
         Log.d(TAG, "end AddHeader");
+    }
+
+    public HttpDelete BevorExecuteDeleteQuery() throws Exception {
+        Log.d(TAG, "start BevoreExecuteGetQuery");
+        //add parameters
+        String combinedParams = "";
+        if (!params.isEmpty()) {
+            combinedParams += "?";
+            for (NameValuePair p : params) {
+                String paramString = p.getName() + "=" + URLEncoder.encode(p.getValue(), "UTF-8");
+                if (combinedParams.length() > 1) {
+                    combinedParams += "&" + paramString;
+                } else {
+                    combinedParams += paramString;
+                }
+            }
+        }
+
+        HttpDelete request = new HttpDelete(url + combinedParams);
+
+        //add headers
+        for (NameValuePair h : headers) {
+            request.addHeader(h.getName(), h.getValue());
+        }
+        Log.d(TAG, "end BevorExecuteGetQuery");
+        return request;
     }
 
     public HttpGet BevorExecuteGetQuery() throws Exception {
@@ -358,6 +389,7 @@ public class RestClient {
             // Create a TrustManager that trusts the CAs in our KeyStore
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+
             tmf.init(keyStore);
 
             // Create an SSLContext that uses our TrustManager
@@ -379,5 +411,72 @@ public class RestClient {
         }
 
         return client;
+    }
+
+    public String BuildURLString() throws Exception {
+        Log.d(TAG, "start BevoreExecuteGetQuery");
+        //add parameters
+        String combinedParams = "";
+        if (!params.isEmpty()) {
+            combinedParams += "?";
+            for (NameValuePair p : params) {
+                String paramString = p.getName() + "=" + URLEncoder.encode(p.getValue(), "UTF-8");
+                if (combinedParams.length() > 1) {
+                    combinedParams += "&" + paramString;
+                } else {
+                    combinedParams += paramString;
+                }
+            }
+        }
+        return this.url + combinedParams;
+    }
+
+    public String testDirect() {
+
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            InputStream caInput = FrinmeanApplication.loadCertAsInputStream();
+            // InputStream caInput = new BufferedInputStream(new FileInputStream("load-der.crt"));
+            Certificate ca;
+            try {
+                ca = cf.generateCertificate(caInput);
+                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+            } finally {
+                caInput.close();
+            }
+
+// Create a KeyStore containing our trusted CAs
+            String keyStoreType = KeyStore.getDefaultType();
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca", ca);
+
+// Create a TrustManager that trusts the CAs in our KeyStore
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+            tmf.init(keyStore);
+
+            CustomTrustManager ctm = new CustomTrustManager(keyStore);
+
+// Create an SSLContext that uses our TrustManager
+            SSLContext context = SSLContext.getInstance("TLS");
+            // context.init(null, tmf.getTrustManagers(), null);
+            context.init(null, new TrustManager[]{ctm}, null);
+
+// Tell the URLConnection to use a SocketFactory from our SSLContext
+            URL url = new URL(BuildURLString());
+            HttpsURLConnection urlConnection =
+                    (HttpsURLConnection) url.openConnection();
+            urlConnection.setSSLSocketFactory(context.getSocketFactory());
+            InputStream in = urlConnection.getInputStream();
+
+            responseXML = convertStreamToString(in);
+
+        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException | CertificateException | IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return responseXML;
     }
 }
