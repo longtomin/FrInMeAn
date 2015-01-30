@@ -42,37 +42,7 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
         Intent i = getActivity().getIntent();
         userid = i.getIntExtra(Constants.USERID, -1);
-        //getPreferenceInfo();
-
-        /*IntentFilter statusIntentFilter = new IntentFilter(
-                Constants.BROADCAST_LISTCHAT);
-        statusIntentFilter.addAction(Constants.BROADCAST_CREATECHAT);
-
-        // Sets the filter's category to DEFAULT
-        statusIntentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-
-        mListChatStateReceiver = new ListChatStateReceiver();
-
-        // Registers the DownloadStateReceiver and its intent filters
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                mListChatStateReceiver,
-                statusIntentFilter); */
-
-        //Start MeBaService
-        Intent intentMyIntentService = new Intent(getActivity(), MeBaService.class);
-        intentMyIntentService.setAction(Constants.ACTION_LISTCHAT);
-        getActivity().startService(intentMyIntentService);
-
     }
-
-    /*protected void getPreferenceInfo() {
-        SharedPreferences sharedPrefs = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        server = sharedPrefs.getString("prefServername", "NULL");
-        username = sharedPrefs.getString("prefUsername", "NULL");
-        password = sharedPrefs.getString("prefPassword", "NULL");
-    }*/
 
     @Override
     public void onAttach(Activity activity) {

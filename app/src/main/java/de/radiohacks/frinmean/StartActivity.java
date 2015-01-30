@@ -165,22 +165,6 @@ public class StartActivity extends Activity {
 
             RestFunctions rf = new RestFunctions();
             return rf.authenticate(username, password);
-
-            /* RestClient rc = new RestClient(params[0], https, port);
-            rc.AddParam("username", username);
-            rc.AddParam("password", password);
-            try {
-                String ret = rc.testDirect();
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
-
-                res = serializer.read(OutAuthenticate.class, reader, false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Log.d(TAG, "end doInBackground");
-            return res; */
         }
     }
 }

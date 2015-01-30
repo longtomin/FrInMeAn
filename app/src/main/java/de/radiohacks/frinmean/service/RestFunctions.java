@@ -46,8 +46,8 @@ public class RestFunctions {
     private static final String TAG = RestFunctions.class.getSimpleName();
     public ConnectivityManager conManager = null;
     private String server;
-    private String username;
-    private String password;
+    //    private String username;
+//    private String password;
     private boolean https;
     private String CommunicationURL;
     private int port;
@@ -59,7 +59,7 @@ public class RestFunctions {
         buildServerURL();
     }
 
-    public boolean isNetworkConnected() {
+    protected boolean isNetworkConnected() {
         return conManager.getActiveNetworkInfo().isConnected();
     }
 
@@ -75,8 +75,8 @@ public class RestFunctions {
         } else {
             this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "80"));
         }
-        this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
-        this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
+//        this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
+//        this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
@@ -94,11 +94,9 @@ public class RestFunctions {
     protected boolean checkServer() {
         Log.d(TAG, "start checkserver");
         boolean ret = false;
-        if (this.server != null && !this.server.equalsIgnoreCase("NULL") && !this.server.isEmpty()) {
-            if (this.username != null && !this.username.equalsIgnoreCase("NULL") && !this.username.isEmpty()) {
-                if (this.password != null && !this.password.equalsIgnoreCase("NULL") && !this.password.isEmpty()) {
-                    ret = true;
-                }
+        if (this.CommunicationURL != null && !this.CommunicationURL.equalsIgnoreCase("NULL") && !this.CommunicationURL.isEmpty()) {
+            if (isNetworkConnected()) {
+                ret = true;
             }
         }
         Log.d(TAG, "end checkServer");
@@ -638,13 +636,14 @@ public class RestFunctions {
                 rc.AddParam("username", convertB64(inuser));
                 rc.AddParam("password", convertB64(inpassword));
                 rc.AddParam("imageid", URLEncoder.encode(imgid.toString(), "UTF-8"));
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
 
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                Serializer serializer = new Persister();
-                Reader reader = new StringReader(ret);
+                    String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
 
-                out = serializer.read(OutGetImageMessageMetaData.class, reader, false);
-
+                    out = serializer.read(OutGetImageMessageMetaData.class, reader, false);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

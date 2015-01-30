@@ -96,17 +96,11 @@ public class SingleChatActivity extends ActionBarActivity implements
         getPreferenceInfo();
 
         ActionBar actionBar = getSupportActionBar();
-//        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         actionBar.setTitle(ChatName);
 
         actionBar.setDisplayShowCustomEnabled(true);
-
-
-//        long time = System.currentTimeMillis() / 1000L - (60 * 60 * 24 * 7);
-
-        //      ldb = new LocalDBHandler(this);
-        //    Cursor c = ldb.get(ChatID, time);
 
         getLoaderManager().initLoader(MESSAGE_LOADER_ID, null, this);
         mAdapter = new SingleChatAdapter(this, null, userid, directory);
@@ -142,17 +136,6 @@ public class SingleChatActivity extends ActionBarActivity implements
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mSingleChatReceiver,
                 statusIntentFilter);
-
-        //Start MeBaService
-        Intent intentMyIntentService = new Intent(this, MeBaService.class);
-
-        intentMyIntentService.setAction(Constants.ACTION_GETMESSAGEFROMCHAT);
-        intentMyIntentService.putExtra(Constants.CHATNAME, ChatName);
-        intentMyIntentService.putExtra(Constants.CHATID, ChatID);
-        // Fetch only unread Messages
-        intentMyIntentService.putExtra(Constants.TIMESTAMP, (long) 0);
-
-        startService(intentMyIntentService);
 
         Message = (EditText) findViewById(R.id.chatText);
         Button send = (Button) findViewById(R.id.buttonSend);

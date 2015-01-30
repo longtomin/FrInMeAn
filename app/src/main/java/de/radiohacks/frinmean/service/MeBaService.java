@@ -8,34 +8,28 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.util.Log;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpStatus;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.List;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.adapters.SyncAdapter;
-import de.radiohacks.frinmean.model.Chat;
-import de.radiohacks.frinmean.model.Message;
-import de.radiohacks.frinmean.model.OutFetchImageMessage;
-import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
-import de.radiohacks.frinmean.model.OutFetchTextMessage;
-import de.radiohacks.frinmean.model.OutGetImageMessageMetaData;
-import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
-import de.radiohacks.frinmean.model.OutListChat;
+import de.radiohacks.frinmean.adapters.SyncUtils;
+import de.radiohacks.frinmean.model.OutAddUserToChat;
+import de.radiohacks.frinmean.model.OutCreateChat;
+import de.radiohacks.frinmean.model.OutListUser;
 import de.radiohacks.frinmean.model.OutSendImageMessage;
-import de.radiohacks.frinmean.model.OutSendTextMessage;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 
 public class MeBaService extends IntentService {
@@ -137,32 +131,16 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start onHandleIntent");
         if (intent != null) {
             final String action = intent.getAction();
-            if (Constants.ACTION_SIGNUP.equalsIgnoreCase(action)) {
-                final String email = intent.getStringExtra(Constants.EMAIL);
-//                handleActionSignup(user, pw, email);
-            } else if (Constants.ACTION_AUTHENTICATE.equalsIgnoreCase(action)) {
-                handleActionAuthenticate();
-            } else if (Constants.ACTION_CHECKNEWMESSAGES.equalsIgnoreCase(
-                    action)) {
-//                final String param = intent.getStringExtra(EXTRA_PARAM1);
-//                handleActionCheckNewMessages(param);
-            } else if (Constants.ACTION_GETMESSAGEFROMCHAT.equalsIgnoreCase(action)) {
-                final String ChatName = intent.getStringExtra(Constants.CHATNAME);
-                final int cid = intent.getIntExtra(Constants.CHATID, -1);
-                final long readtime = intent.getLongExtra(Constants.TIMESTAMP, -1);
-                if (cid > 0 && readtime > -1) {
-                    handleActionGetMessageFromChat(cid, readtime, ChatName);
-                }
-            } else if (Constants.ACTION_LISTCHAT.equalsIgnoreCase(action)) {
-                handleActionListChat();
-            } else if (Constants.ACTION_LISTUSER.equalsIgnoreCase(action)) {
+            if (Constants.ACTION_LISTUSER.equalsIgnoreCase(action)) {
                 final String search = intent.getStringExtra(Constants.SEARCH);
                 handleActionListUser(search);
             } else if (Constants.ACTION_SENDTEXTMESSAGE.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final String TextMessage = intent.getStringExtra(Constants.TEXTMESSAGE);
-                handleActionSendTextMessage(ChatName, cid, TextMessage);
+                insertMsgIntoDB(cid, Constants.TYP_TEXT, TextMessage);
+                // handleActionSendTextMessage(ChatName, cid, TextMessage);
+                SyncUtils.TriggerRefresh();
             } else if (Constants.ACTION_CREATECHAT.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 handleActionCreateChat(ChatName);
@@ -170,7 +148,8 @@ public class MeBaService extends IntentService {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final String ImageLoc = intent.getStringExtra(Constants.IMAGELOCATION);
-                handleActionSendImageMessage(ChatName, cid, ImageLoc);
+                insertImageMesgIntoDB(cid, ImageLoc);
+                SyncUtils.TriggerRefresh();
             } else if (Constants.ACTION_ADDUSERTOCHAT.equalsIgnoreCase(action)) {
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final int uid = intent.getIntExtra(Constants.USERID, -1);
@@ -190,42 +169,57 @@ public class MeBaService extends IntentService {
 
     private void handleActionAddUserToChat(int ChatID, int UserID) {
         Log.d(TAG, "start handleActionAddUserToChat");
-        Integer tmpcid = ChatID;
-        Integer tmpuid = UserID;
-        if (checkServer()) {
-            RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/addusertochat", https, port);
-            try {
-                rc.AddParam(Constants.USERNAME, username);
-                rc.AddParam(Constants.PASSWORD, password);
-                rc.AddParam(Constants.CHATID, tmpcid.toString());
-                rc.AddParam(Constants.USERID, tmpuid.toString());
 
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_USERADDEDTOCHAT);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        OutAddUserToChat out = rf.addusertochat(username, password, UserID, ChatID);
+        mBroadcaster.notifyProgress(out.getResult(), Constants.BROADCAST_USERADDEDTOCHAT);
+
         Log.d(TAG, "end handleActionAddUserToChat");
     }
 
+    public void copy(File src, File dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
 
-    private void handleActionSendImageMessage(String ChatName, int ChatID, String Message) {
+        // Transfer bytes from in to out
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
+    }
+
+    private void insertImageMesgIntoDB(int ChatID, String Message) {
         Log.d(TAG, "start handleActionSendImageMessage");
 
-        // First Insert Message into local Chat
-        String imgname = uploadImageMessage(ChatName, ChatID, Message);
+        // First check if File is already in the Image Folder with the right size
+        // If not, copy File to the Image Directory with the given Name
+        // Then insert Entry into DB for next sync
 
-        if (imgname != null && !imgname.isEmpty()) {
-            // Second move the Image to the right Location
-            moveFileToDestination(Message, Constants.IMAGEDIR, imgname);
+        File orgFile = new File(Message);
+
+        String localfname = new String();
+        if (directory.endsWith("/")) {
+            localfname += directory + Constants.IMAGEDIR;
+        } else {
+            localfname += directory + "/" + Constants.IMAGEDIR;
         }
+
+        if (!orgFile.getAbsolutePath().equalsIgnoreCase(localfname)) {
+            // Copy file
+            try {
+                copy(orgFile, new File(localfname + "/" + orgFile.getName()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        insertMsgIntoDB(ChatID, Constants.TYP_IMAGE, orgFile.getName());
         Log.d(TAG, "end handleActionSendImageMessage");
     }
 
+    // ToDo Umschreiben, RC nicht ausführen, Nachricht lokal speichern ohne SendTime und BackendID
     private String uploadImageMessage(String ChatName, int ChatID, String Message) {
         Log.d(TAG, "start uploadImageMessage");
         String serverfilename = null;
@@ -251,7 +245,7 @@ public class MeBaService extends IntentService {
                             if (ressend.getImageID() != null && ressend.getImageID() > 0) {
                                 serverfilename = ressend.getImageFileName();
                                 // OutInsertMessageIntoChat ins = insertMessageIntoChatAndDB(ChatName, ressend.getImageID(), ChatID, Constants.TYP_IMAGE, ressend.getImageFileName());
-                                insertMessageIntoChatAndDB(ChatName, ressend.getImageID(), ChatID, Constants.TYP_IMAGE, ressend.getImageFileName());
+                                // insertMessageIntoChatAndDB(ChatName, ressend.getImageID(), ChatID, Constants.TYP_IMAGE, ressend.getImageFileName());
                             }
                         }
                     }
@@ -264,228 +258,72 @@ public class MeBaService extends IntentService {
         return serverfilename;
     }
 
-    private void moveFileToDestination(String origFile, String subdir, String serverfilename) {
-        Log.d(TAG, "start moveFileToDestination");
-        File source = new File(origFile);
+    private void insertMsgIntoDB(int ChatID, String MessageType, String Message) {
+        Log.d(TAG, "start insertMsgIntoDB");
 
-        // Where to store it.
-        String destFile = directory;
-        // Add SubDir for Images, videos or files
-        if (destFile.endsWith("/")) {
-            destFile += subdir;
-        } else {
-            destFile += "/" + subdir;
+        // Insert new Message into local DB and trigger Sync to upload the Information.
+        // To find the not send messages the Backend ID musst be 0 and the
+        // Sendtimestamp musst be 0
+        // The Readtimestamp and the MessageIDs are supplied by the Server
+        // The ChatID is needed to insert the Message into the right Chat afterwards
+
+        ContentValues valuesins = new ContentValues();
+        valuesins.put(Constants.T_MESSAGES_BADBID, 0);
+        valuesins.put(Constants.T_MESSAGES_OwningUserID, userid);
+        valuesins.put(Constants.T_MESSAGES_OwningUserName, username);
+        valuesins.put(Constants.T_MESSAGES_ChatID, ChatID);
+        valuesins.put(Constants.T_MESSAGES_MessageTyp, MessageType);
+        valuesins.put(Constants.T_MESSAGES_SendTimestamp, 0);
+        valuesins.put(Constants.T_MESSAGES_ReadTimestamp, 0);
+        if (MessageType.equalsIgnoreCase(Constants.TYP_TEXT)) {
+            valuesins.put(Constants.T_MESSAGES_TextMsgID, 0);
+            valuesins.put(Constants.T_MESSAGES_TextMsgValue, Message);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+            valuesins.put(Constants.T_MESSAGES_ImageMsgID, 0);
+            valuesins.put(Constants.T_MESSAGES_ImageMsgValue, Message);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_LOCATION)) {
+            valuesins.put(Constants.T_MESSAGES_LocationMsgID, 0);
+            valuesins.put(Constants.T_MESSAGES_LocationMsgValue, Message);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_CONTACT)) {
+            valuesins.put(Constants.T_MESSAGES_ContactMsgID, 0);
+            valuesins.put(Constants.T_MESSAGES_ContactMsgValue, Message);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_FILE)) {
+            valuesins.put(Constants.T_MESSAGES_FileMsgID, 0);
+            valuesins.put(Constants.T_MESSAGES_FileMsgValue, Message);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+            valuesins.put(Constants.T_MESSAGES_VideoMsgID, 0);
+            valuesins.put(Constants.T_MESSAGES_VideoMsgValue, Message);
         }
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+        ((FrinmeanContentProvider) client.getLocalContentProvider()).insert(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
 
-        if (destFile.endsWith("/")) {
-            destFile += serverfilename;
-        } else {
-            destFile += "/" + serverfilename;
-        }
-
-        File destination = new File(destFile);
-        try {
-            FileUtils.moveFile(source, destination);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG, "end moveFileToDestination");
-    }
-
-    private void handleActionSendTextMessage(String ChatName, int ChatID, String TextMessage) {
-        Log.d(TAG, "start handleActionSendTextMessage");
-        if (checkServer()) {
-            RestClient rcsend;
-            RestClient rcinsert;
-            rcsend = new RestClient(CommunicationURL + "user/sendtextmessage", https, port);
-            try {
-                rcsend.AddParam(Constants.USERNAME, username);
-                rcsend.AddParam(Constants.PASSWORD, password);
-                rcsend.AddParam(Constants.TEXTMESSAGE, TextMessage);
-
-                String ret = rcsend.ExecuteRequestXML(rcsend.BevorExecuteGetQuery());
-                if (rcsend.getResponseCode() == HttpStatus.SC_OK) {
-                    Serializer sersendtxtmsg = new Persister();
-                    Reader readersendtxtmsg = new StringReader(ret);
-
-                    OutSendTextMessage ressend = sersendtxtmsg.read(OutSendTextMessage.class, readersendtxtmsg, false);
-
-                    if (ressend != null) {
-                        if (ressend.getErrortext() == null || ressend.getErrortext().isEmpty()) {
-                            if (ressend.getTextID() != null && ressend.getTextID() > 0) {
-                                // OutInsertMessageIntoChat ins = insertMessageIntoChatAndDB(ChatName, ressend.getTextID(), ChatID, Constants.TYP_TEXT, TextMessage);
-                                insertMessageIntoChatAndDB(ChatName, ressend.getTextID(), ChatID, Constants.TYP_TEXT, TextMessage);
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        Log.d(TAG, "end handleActionSendTextMessage");
-    }
-
-    private void insertMessageIntoChatAndDB(String ChatName, int MsgID, int ChatID, String MessageType, String Message) {
-        Log.d(TAG, "start insertMessageIntoChatAndDB");
-        RestClient rcinsert;
-//        OutInsertMessageIntoChat ret = null;
-
-        try {
-            rcinsert = new RestClient(CommunicationURL + "user/insertmessageintochat", https, port);
-            Integer cid = ChatID;
-            Integer mid = MsgID;
-            rcinsert.AddParam(Constants.USERNAME, username);
-            rcinsert.AddParam(Constants.PASSWORD, password);
-
-            rcinsert.AddParam(Constants.CHATID, URLEncoder.encode(cid.toString(), "UTF-8"));
-            rcinsert.AddParam(Constants.MESSAGEID, URLEncoder.encode(mid.toString(), "UTF-8"));
-            rcinsert.AddParam(Constants.MESSAGETYPE, URLEncoder.encode(MessageType, "UTF-8"));
-
-            String retinsert = rcinsert.ExecuteRequestXML(rcinsert.BevorExecuteGetQuery());
-            if (rcinsert.getResponseCode() == HttpStatus.SC_OK) {
-                Serializer serinserttxtmsg = new Persister();
-                Reader readinserttxtmsg = new StringReader(retinsert);
-
-                OutInsertMessageIntoChat resinsert = serinserttxtmsg.read(OutInsertMessageIntoChat.class, readinserttxtmsg, false);
-
-                if (resinsert != null) {
-                    if (resinsert.getErrortext() == null || resinsert.getErrortext().isEmpty()) {
-                        ContentValues valuesins = new ContentValues();
-                        valuesins.put(Constants.T_MESSAGES_BADBID, resinsert.getMessageID());
-                        valuesins.put(Constants.T_MESSAGES_OwningUserID, userid);
-                        valuesins.put(Constants.T_MESSAGES_OwningUserName, username);
-                        valuesins.put(Constants.T_MESSAGES_ChatID, ChatID);
-                        valuesins.put(Constants.T_MESSAGES_MessageTyp, MessageType);
-                        valuesins.put(Constants.T_MESSAGES_SendTimestamp, resinsert.getSendTimestamp());
-                        valuesins.put(Constants.T_MESSAGES_ReadTimestamp, resinsert.getSendTimestamp());
-                        if (MessageType.equalsIgnoreCase(Constants.TYP_TEXT)) {
-                            valuesins.put(Constants.T_MESSAGES_TextMsgID, MsgID);
-                            valuesins.put(Constants.T_MESSAGES_TextMsgValue, Message);
-                        } else if (MessageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                            valuesins.put(Constants.T_MESSAGES_ImageMsgID, MsgID);
-                            valuesins.put(Constants.T_MESSAGES_ImageMsgValue, Message);
-                        } else if (MessageType.equalsIgnoreCase(Constants.TYP_LOCATION)) {
-                            valuesins.put(Constants.T_MESSAGES_LocationMsgID, MsgID);
-                            valuesins.put(Constants.T_MESSAGES_LocationMsgValue, Message);
-                        } else if (MessageType.equalsIgnoreCase(Constants.TYP_CONTACT)) {
-                            valuesins.put(Constants.T_MESSAGES_ContactMsgID, MsgID);
-                            valuesins.put(Constants.T_MESSAGES_ContactMsgValue, Message);
-                        } else if (MessageType.equalsIgnoreCase(Constants.TYP_FILE)) {
-                            valuesins.put(Constants.T_MESSAGES_FileMsgID, MsgID);
-                            valuesins.put(Constants.T_MESSAGES_FileMsgValue, Message);
-                        } else if (MessageType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                            valuesins.put(Constants.T_MESSAGES_VideoMsgID, MsgID);
-                            valuesins.put(Constants.T_MESSAGES_VideoMsgValue, Message);
-                        }
-                        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                    }
-                }
-            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG, "end insertMessageIntoChatAndDB");
-//        return ret;
+        Log.d(TAG, "end insertMsgIntoDB");
     }
 
     private void handleActionCreateChat(String ChatName) {
         Log.d(TAG, "start handleActionCreateChate");
-        if (checkServer()) {
-            RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/createchat", https, port);
-            try {
-                rc.AddParam(Constants.USERNAME, username);
-                rc.AddParam(Constants.PASSWORD, password);
-                rc.AddParam(Constants.CHATNAME, ChatName);
 
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    handleActionListChat();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        OutCreateChat out = rf.createchat(username, password, ChatName);
+
+        if (out.getErrortext() == null || out.getErrortext().isEmpty()) {
+            if ((out.getChatname().equals(ChatName)) && (out.getChatID() > 0)) {
+                // mBroadcaster.notifyProgress(Constants.BROADCAST_CREATECHAT, Constants.BROADCAST_CREATECHAT);
+                SyncUtils.TriggerRefresh();
             }
         }
         Log.d(TAG, "end handleActionCreateChat");
     }
 
-    private void handleActionListChat() {
-        Log.d(TAG, "start handleActionListChat");
-        if (checkServer()) {
-            RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/listchat", https, port);
-            try {
-                rc.AddParam(Constants.USERNAME, username);
-                rc.AddParam(Constants.PASSWORD, password);
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    Serializer serializer = new Persister();
-                    Reader reader = new StringReader(ret);
-
-                    OutListChat res = serializer.read(OutListChat.class, reader, false);
-                    if (res != null) {
-                        if (res.getErrortext() == null || res.getErrortext().isEmpty()) {
-                            if (res.getChat() != null && !res.getChat().isEmpty()) {
-                                SaveChatsToLDB(res.getChat());
-                            }
-                        }
-                    }
-                    // mBroadcaster.notifyProgress(ret, Constants.BROADCAST_LISTCHAT);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        Log.d(TAG, "end handleActionListChat");
-    }
-
-    private void handleActionAuthenticate() {
-        Log.d(TAG, "start handleActionAuthenticate");
-        if (checkServer()) {
-            RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/authenticate", https, port);
-            try {
-                rc.AddParam(Constants.USERNAME, username);
-                rc.AddParam(Constants.PASSWORD, password);
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_AUTHENTICATE);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        Log.d(TAG, "start handleActionAuthenticate");
-    }
-
     private void handleActionListUser(String in) {
         Log.d(TAG, "start handleActionListUser");
-        if (checkServer()) {
-            RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/listuser", https, port);
-            try {
-                rc.AddParam(Constants.USERNAME, username);
-                rc.AddParam(Constants.PASSWORD, password);
-                rc.AddParam(Constants.SEARCH, in);
 
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
-                    mBroadcaster.notifyProgress(ret, Constants.BROADCAST_LISTUSER);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        OutListUser out = rf.listuser(username, password, in);
+        mBroadcaster.notifyProgress(out.toString(), Constants.BROADCAST_LISTUSER);
+
         Log.d(TAG, "end handleActionListUser");
     }
 
-    private void handleActionGetMessageFromChat(int cid, long readtime, String CName) {
+/*    private void handleActionGetMessageFromChat(int cid, long readtime, String CName) {
         Log.d(TAG, "start handleActionGetMessageFromChat");
         if (checkServer()) {
             RestClient rc;
@@ -518,9 +356,10 @@ public class MeBaService extends IntentService {
             }
         }
         Log.d(TAG, "end handleActionGetMessageFromChat");
-    }
+    } */
 
-    private void SaveChatsToLDB(List<Chat> in) {
+    // ToDo Umschreiben, wird im SyncService gemacht, nicht hier
+    /* private void SaveChatsToLDB(List<Chat> in) {
         Log.d(TAG, "start SaveChatsToLDB");
         for (int j = 0; j < in.size(); j++) {
             Chat c = in.get(j);
@@ -534,9 +373,9 @@ public class MeBaService extends IntentService {
             client.release();
         }
         Log.d(TAG, "end saveChatsToLDB");
-    }
+    } */
 
-    private void SaveMessageToLDB(List<Message> in, int ChatID, String ChatName) {
+/*    private void SaveMessageToLDB(List<Message> in, int ChatID, String ChatName) {
         Log.d(TAG, "start SaveMessageToLDB");
         for (int j = 0; j < in.size(); j++) {
             Message m = in.get(j);
@@ -609,9 +448,9 @@ public class MeBaService extends IntentService {
             }
         }
         Log.d(TAG, "end saveMessageToLDB");
-    }
+    } */
 
-    private OutFetchTextMessage fetchTextMessage(int TxtMsgID) {
+    /* private OutFetchTextMessage fetchTextMessage(int TxtMsgID) {
         Log.d(TAG, "start fetchTestMessage");
         OutFetchTextMessage out = null;
         if (checkServer()) {
@@ -634,9 +473,9 @@ public class MeBaService extends IntentService {
         }
         Log.d(TAG, "end fetchTextMessage");
         return out;
-    }
+    } */
 
-    private OutFetchImageMessage checkAndDownloadImageMessage(int ImgMsgID) {
+/*    private OutFetchImageMessage checkAndDownloadImageMessage(int ImgMsgID) {
         Log.d(TAG, "start fetchImageMessage");
         OutFetchImageMessage out = new OutFetchImageMessage();
         OutGetImageMessageMetaData outmeta;
@@ -681,9 +520,9 @@ public class MeBaService extends IntentService {
         }
         Log.d(TAG, "start fetchImageMessage");
         return out;
-    }
+    } */
 
-    private OutFetchImageMessage fetchImageMessage(int ImgMsgID) {
+    /* private OutFetchImageMessage fetchImageMessage(int ImgMsgID) {
         Log.d(TAG, "start fetchImageMessage");
         OutFetchImageMessage out = new OutFetchImageMessage();
 
@@ -712,7 +551,7 @@ public class MeBaService extends IntentService {
         }
         Log.d(TAG, "end fetchImageMessage");
         return out;
-    }
+    } */
 
     /* public String getServer() {
         return server;
