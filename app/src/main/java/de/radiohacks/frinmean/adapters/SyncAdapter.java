@@ -145,7 +145,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         syncListChats();
         syncCheckNewMessages();
         uploadUnsavedMessages();
-        ;
         Log.i(TAG, "Network synchronization complete");
     }
 
@@ -171,7 +170,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (outcheck.getChats() != null && outcheck.getChats().size() > 0) {
                 for (int i = 0; i < outcheck.getChats().size(); i++) {
                     Chats c = outcheck.getChats().get(i);
-                    syncGetMessageFromChat(c.getChatID(), 0, c.getChatname());
+                    if (c.getNumberOfMessages() > 0) {
+                        syncGetMessageFromChat(c.getChatID(), 0, c.getChatname());
+                    }
                 }
             }
         }
@@ -179,7 +180,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
 
-    private void syncGetMessageFromChat(int cid, long readtime, String CName) {
+    public void syncGetMessageFromChat(int cid, long readtime, String CName) {
         Log.d(TAG, "start syncGetMessageFromChat");
 
 
@@ -235,7 +236,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     client.release();
                 }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_IMAGE)) {
-                valuesins.put(T_MESSAGES_ImageMsgID, m.getTextMsgID());
+                valuesins.put(T_MESSAGES_ImageMsgID, m.getImageMsgID());
                 OutGetImageMessageMetaData outmeta = rf.getImageMessageMetaData(username, password, m.getImageMsgID());
 
                 if (outmeta.getErrortext() == null || outmeta.getErrortext().isEmpty()) {
@@ -251,7 +252,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     }
                 }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_CONTACT)) {
-                valuesins.put(T_MESSAGES_ContactMsgID, m.getTextMsgID());
+                valuesins.put(T_MESSAGES_ContactMsgID, m.getContactMsgID());
                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
                 ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 client.release();
@@ -261,7 +262,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_FILE)) {
-                valuesins.put(T_MESSAGES_FileMsgID, m.getTextMsgID());
+                valuesins.put(T_MESSAGES_FileMsgID, m.getFileMsgID());
                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
                 ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 client.release();
@@ -271,7 +272,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_LOCATION)) {
-                valuesins.put(T_MESSAGES_LocationMsgID, m.getTextMsgID());
+                valuesins.put(T_MESSAGES_LocationMsgID, m.getLocationMsgID());
                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
                 ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 client.release();
@@ -281,7 +282,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_VIDEO)) {
-                valuesins.put(T_MESSAGES_VideoMsgID, m.getTextMsgID());
+                valuesins.put(T_MESSAGES_VideoMsgID, m.getVideoMsgID());
                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
                 ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 client.release();

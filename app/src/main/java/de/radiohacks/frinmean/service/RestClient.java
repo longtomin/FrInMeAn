@@ -1,5 +1,6 @@
 package de.radiohacks.frinmean.service;
 
+import android.util.Base64;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
@@ -186,10 +187,16 @@ public class RestClient {
         //add parameters
         String combinedParams = "";
 
+        byte[] datauser;
+        datauser = uid.getBytes("UTF-8");
+        String b64uid = Base64.encodeToString(datauser, Base64.NO_WRAP);
+        datauser = pw.getBytes("UTF-8");
+        String b64pw = Base64.encodeToString(datauser, Base64.NO_WRAP);
+
         if (url.endsWith("/")) {
-            combinedParams += URLEncoder.encode(String.valueOf(uid), "UTF-8") + "/" + URLEncoder.encode(String.valueOf(pw), "UTF-8") + "/" + URLEncoder.encode(String.valueOf(id), "UTF-8");
+            combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(id), "UTF-8");
         } else {
-            combinedParams += "/" + URLEncoder.encode(String.valueOf(uid), "UTF-8") + "/" + URLEncoder.encode(String.valueOf(pw), "UTF-8") + "/" + URLEncoder.encode(String.valueOf(id), "UTF-8");
+            combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(id), "UTF-8");
         }
 
         HttpGet request = new HttpGet(url + combinedParams);

@@ -29,6 +29,7 @@ public class Constants {
     App own action without correspondance in the backend
      */
     public static final String ACTION_RELOAD_SETTING = "reloadsettings";
+    public static final String ACTION_FULLSYNC = "fullsync";
 
     /*
     Contants for ErrorText
@@ -269,6 +270,7 @@ public class Constants {
     public static final String PrefUsername = "prefUsername";
     public static final String PrefPassword = "prefPassword";
     public static final String PrefDirectory = "prefDirectory";
+    public static final String PrefSyncfrequency = "prefSyncfrequency";
 
 
     public static final String PREF_SETUP_COMPLETE = "setup_complete";

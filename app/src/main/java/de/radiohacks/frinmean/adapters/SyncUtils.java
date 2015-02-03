@@ -58,8 +58,8 @@ public class SyncUtils {
             ContentResolver.setSyncAutomatically(mAccount, FrinmeanContentProvider.AUTHORITY, true);
             // Recommend a schedule for automatic synchronization. The system may modify this based
             // on other scheduled syncs and network utilization.
-            ContentResolver.addPeriodicSync(
-                    mAccount, FrinmeanContentProvider.AUTHORITY, new Bundle(), SYNC_FREQUENCY);
+            // ContentResolver.addPeriodicSync(
+            //        mAccount, FrinmeanContentProvider.AUTHORITY, new Bundle(), SYNC_FREQUENCY);
             newAccount = true;
         }
 

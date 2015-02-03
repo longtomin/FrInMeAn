@@ -158,6 +158,14 @@ public class SingleChatActivity extends ActionBarActivity implements
                 }
             }
         });
+
+        Intent picintent = new Intent(this, MeBaService.class);
+        picintent.putExtra(Constants.CHATNAME, ChatName);
+        picintent.putExtra(Constants.CHATID, ChatID);
+
+        picintent.setAction(Constants.ACTION_FULLSYNC);
+        startService(picintent);
+
         Log.d(TAG, "end onCreate");
     }
 

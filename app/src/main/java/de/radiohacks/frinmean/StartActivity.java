@@ -22,6 +22,7 @@ public class StartActivity extends Activity {
     private static final String TAG = StartActivity.class.getSimpleName();
     private String username;
     private String password;
+    private int syncFreq;
     private String server = "NULL";
     private int port = 80;
     private boolean https = true;
@@ -64,6 +65,7 @@ public class StartActivity extends Activity {
         }
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
+        this.syncFreq = Integer.parseInt(sharedPrefs.getString(Constants.PrefSyncfrequency, "-1"));
         Log.d(TAG, "end getPferefenceInfo");
     }
 
@@ -142,6 +144,7 @@ public class StartActivity extends Activity {
                         int uid = result.getUserID();
                         Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
                         startchat.putExtra(Constants.USERID, uid);
+                        startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
                         startActivity(startchat);
                         StartActivity.this.finish();
                     }

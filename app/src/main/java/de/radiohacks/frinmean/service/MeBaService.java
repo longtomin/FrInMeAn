@@ -162,6 +162,10 @@ public class MeBaService extends IntentService {
             } else if (Constants.ACTION_RELOAD_SETTING.equalsIgnoreCase(action)) {
                 getPreferenceInfo();
                 buildServerURL();
+            } else if (Constants.ACTION_FULLSYNC.equalsIgnoreCase(action)) {
+                final String ChatName = intent.getStringExtra(Constants.CHATNAME);
+                final int cid = intent.getIntExtra(Constants.CHATID, -1);
+                sSyncAdapter.syncGetMessageFromChat(cid, 1, ChatName);
             }
         }
         Log.d(TAG, "start onHandleIntent");

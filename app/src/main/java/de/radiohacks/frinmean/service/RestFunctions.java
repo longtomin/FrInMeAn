@@ -636,9 +636,9 @@ public class RestFunctions {
                 rc.AddParam("username", convertB64(inuser));
                 rc.AddParam("password", convertB64(inpassword));
                 rc.AddParam("imageid", URLEncoder.encode(imgid.toString(), "UTF-8"));
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
 
-                    String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 

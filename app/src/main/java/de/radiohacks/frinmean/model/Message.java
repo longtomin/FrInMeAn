@@ -55,26 +55,28 @@ import org.simpleframework.xml.Root;
 @Root(name = "Message", strict = false)
 public class Message {
 
-    @Element(required = false, name = "MessageID")
+    @Element(name = "MessageID", required = true)
     protected int messageID;
     @Element(name = "MessageTyp", required = true)
     protected String messageTyp;
-    @Element(required = false, name = "SendTimestamp")
+    @Element(name = "SendTimestamp", required = true)
     protected long sendTimestamp;
-    @Element(required = false, name = "ReadTimestamp")
+    @Element(name = "ReadTimestamp", required = true)
     protected long readTimestamp;
     @Element(name = "OwningUser", required = true)
     protected OwningUser owningUser;
-    @Element(required = false, name = "TextMsgID")
+    @Element(name = "TextMsgID", required = true)
     protected int textMsgID;
-    @Element(required = false, name = "ImageMsgID")
+    @Element(name = "ImageMsgID", required = true)
     protected int imageMsgID;
-    @Element(required = false, name = "ContactMsgID")
+    @Element(name = "ContactMsgID", required = true)
     protected int contactMsgID;
-    @Element(required = false, name = "LocationMsgID")
+    @Element(name = "LocationMsgID", required = true)
     protected int locationMsgID;
-    @Element(required = false, name = "FileMsgID")
+    @Element(name = "FileMsgID", required = true)
     protected int fileMsgID;
+    @Element(name = "VideoMsgID", required = true)
+    protected int videoMsgID;
 
     public int getMessageID() {
         return messageID;
@@ -154,5 +156,13 @@ public class Message {
 
     public void setFileMsgID(int value) {
         this.fileMsgID = value;
+    }
+
+    public int getVideoMsgID() {
+        return videoMsgID;
+    }
+
+    public void setVideoMsgID(int value) {
+        this.videoMsgID = value;
     }
 }

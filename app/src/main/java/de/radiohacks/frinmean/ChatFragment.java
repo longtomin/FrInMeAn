@@ -42,6 +42,10 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
         Intent i = getActivity().getIntent();
         userid = i.getIntExtra(Constants.USERID, -1);
+        syncFreq = i.getIntExtra(Constants.PrefSyncfrequency, -1);
+        if (syncFreq != -1) {
+            SyncUtils.ChangeSyncFreq(syncFreq);
+        }
     }
 
     @Override
