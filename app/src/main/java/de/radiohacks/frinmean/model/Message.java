@@ -65,17 +65,17 @@ public class Message {
     protected long readTimestamp;
     @Element(name = "OwningUser", required = true)
     protected OwningUser owningUser;
-    @Element(name = "TextMsgID", required = true)
+    @Element(name = "TextMsgID", required = false)
     protected int textMsgID;
-    @Element(name = "ImageMsgID", required = true)
+    @Element(name = "ImageMsgID", required = false)
     protected int imageMsgID;
-    @Element(name = "ContactMsgID", required = true)
+    @Element(name = "ContactMsgID", required = false)
     protected int contactMsgID;
-    @Element(name = "LocationMsgID", required = true)
+    @Element(name = "LocationMsgID", required = false)
     protected int locationMsgID;
-    @Element(name = "FileMsgID", required = true)
+    @Element(name = "FileMsgID", required = false)
     protected int fileMsgID;
-    @Element(name = "VideoMsgID", required = true)
+    @Element(name = "VideoMsgID", required = false)
     protected int videoMsgID;
 
     public int getMessageID() {

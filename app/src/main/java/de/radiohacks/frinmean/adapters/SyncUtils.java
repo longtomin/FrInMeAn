@@ -67,10 +67,10 @@ public class SyncUtils {
         // data has been deleted. (Note that it's possible to clear app data WITHOUT affecting
         // the account list, so wee need to check both.)
         if (newAccount || !setupComplete) {
-            TriggerRefresh();
             PreferenceManager.getDefaultSharedPreferences(context).edit()
                     .putBoolean(Constants.PREF_SETUP_COMPLETE, true).commit();
         }
+        TriggerRefresh();
     }
 
     public static void ChangeSyncFreq(long infreq) {

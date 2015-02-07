@@ -271,6 +271,7 @@ public class Constants {
     public static final String PrefPassword = "prefPassword";
     public static final String PrefDirectory = "prefDirectory";
     public static final String PrefSyncfrequency = "prefSyncfrequency";
+    public static final String PrefUserID = "prefUserID";
 
 
     public static final String PREF_SETUP_COMPLETE = "setup_complete";

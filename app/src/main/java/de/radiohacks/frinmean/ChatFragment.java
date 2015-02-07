@@ -53,7 +53,7 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
         super.onAttach(activity);
 
         // Create account, if needed
-        SyncUtils.CreateSyncAccount(activity);
+        // SyncUtils.CreateSyncAccount(activity);
     }
 
     @Override
@@ -67,7 +67,6 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
         i.putExtra(Constants.CHATID, c.getInt(Constants.ID_CHAT_BADBID));
         i.putExtra(Constants.CHATNAME, c.getString(Constants.ID_CHAT_ChatName));
         i.putExtra(Constants.OWNINGUSERID, c.getInt(Constants.ID_CHAT_OwningUserID));
-        i.putExtra(Constants.OWNINGUSERNAME, c.getString(Constants.ID_CHAT_OwningUserName));
         i.putExtra(Constants.USERID, userid);
         startActivity(i);
 

@@ -33,7 +33,6 @@ import android.widget.Toast;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
@@ -46,7 +45,6 @@ import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutListUser;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
-import de.radiohacks.frinmean.providers.LocalDBHandler;
 import de.radiohacks.frinmean.service.ErrorHelper;
 import de.radiohacks.frinmean.service.MeBaService;
 
@@ -60,25 +58,17 @@ public class SingleChatActivity extends ActionBarActivity implements
     private static final int SELECT_IMAGE_ACTIVITY_REQUEST_CODE = 300;
     private static final int MESSAGE_LOADER_ID = 1000;
 
-    private ByteArrayOutputStream stream = new ByteArrayOutputStream();
     private SingleChatReceiver mSingleChatReceiver = new SingleChatReceiver();
-    // private MeBaService mService;
-    // private boolean mBound = false;
     private SingleChatAdapter mAdapter;
     private String username;
-    // private String password;
     private String directory;
     private int userid;
-    // private ByteArrayBody fileBody;
-    // private String server;
     private File m_imagefromcamera;
     private File m_videofromcamera;
     private int ChatID;
     private String ChatName;
     private int OwningUserID;
-    private String OwningUserName;
     private EditText Message;
-    private LocalDBHandler ldb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +79,6 @@ public class SingleChatActivity extends ActionBarActivity implements
         Intent i = getIntent();
         ChatID = i.getIntExtra(Constants.CHATID, 0);
         ChatName = i.getStringExtra(Constants.CHATNAME);
-        OwningUserName = i.getStringExtra(Constants.OWNINGUSERNAME);
         OwningUserID = i.getIntExtra(Constants.OWNINGUSERID, -1);
         userid = i.getIntExtra(Constants.USERID, -1);
 

@@ -22,11 +22,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.adapters.SyncAdapter;
 import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.model.OutAddUserToChat;
+import de.radiohacks.frinmean.model.OutAuthenticate;
 import de.radiohacks.frinmean.model.OutCreateChat;
 import de.radiohacks.frinmean.model.OutListUser;
 import de.radiohacks.frinmean.model.OutSendImageMessage;
@@ -166,6 +168,8 @@ public class MeBaService extends IntentService {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 sSyncAdapter.syncGetMessageFromChat(cid, 1, ChatName);
+            } else if (Constants.ACTION_AUTHENTICATE.equalsIgnoreCase(action)) {
+                handleActionAuthenticateUser();
             }
         }
         Log.d(TAG, "start onHandleIntent");
@@ -322,7 +326,29 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start handleActionListUser");
 
         OutListUser out = rf.listuser(username, password, in);
+
         mBroadcaster.notifyProgress(out.toString(), Constants.BROADCAST_LISTUSER);
+
+        Log.d(TAG, "end handleActionListUser");
+    }
+
+    private void handleActionAuthenticateUser() {
+        Log.d(TAG, "start handleActionListUser");
+
+        try {
+            OutAuthenticate out = rf.authenticate(username, password);
+
+            Serializer serializer = new Persister();
+            StringWriter OutString = new StringWriter();
+
+            serializer.write(out, OutString);
+
+            mBroadcaster.notifyProgress(OutString.toString(), Constants.BROADCAST_AUTHENTICATE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
 
         Log.d(TAG, "end handleActionListUser");
     }

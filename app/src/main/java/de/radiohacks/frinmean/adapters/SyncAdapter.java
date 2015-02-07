@@ -2,11 +2,15 @@ package de.radiohacks.frinmean.adapters;
 
 import android.accounts.Account;
 import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.database.Cursor;
@@ -19,9 +23,13 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.radiohacks.frinmean.Constants;
+import de.radiohacks.frinmean.R;
+import de.radiohacks.frinmean.SingleChatActivity;
 import de.radiohacks.frinmean.model.Chat;
 import de.radiohacks.frinmean.model.Chats;
 import de.radiohacks.frinmean.model.Message;
@@ -37,14 +45,12 @@ import de.radiohacks.frinmean.model.OutSendTextMessage;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.RestFunctions;
 
+import static de.radiohacks.frinmean.Constants.CHAT_DB_Columns;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_ChatID;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_MessageType;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_TextMsgValue;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES__id;
 import static de.radiohacks.frinmean.Constants.MESSAGES_DB_Columns;
-import static de.radiohacks.frinmean.Constants.PrefDirectory;
-import static de.radiohacks.frinmean.Constants.PrefPassword;
-import static de.radiohacks.frinmean.Constants.PrefUsername;
 import static de.radiohacks.frinmean.Constants.TYP_CONTACT;
 import static de.radiohacks.frinmean.Constants.TYP_FILE;
 import static de.radiohacks.frinmean.Constants.TYP_IMAGE;
@@ -88,6 +94,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private String username;
     private String password;
     private String directory;
+    private int userid;
     private RestFunctions rf;
 
     /**
@@ -116,9 +123,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(getContext());
 
-        this.username = sharedPrefs.getString(PrefUsername, "NULL");
-        this.password = sharedPrefs.getString(PrefPassword, "NULL");
-        this.directory = sharedPrefs.getString(PrefDirectory, "NULL");
+        this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
+        this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
+        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+        this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
+//        this.userid = Integer.parseInt(sharedPrefs.getString(Constants.PrefUserID, "-1"));
         Log.d(TAG, "end getPferefenceInfo");
     }
 
@@ -216,7 +225,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void SaveMessageToLDB(List<Message> in, int ChatID, String ChatName) {
         Log.d(TAG, "start SaveMessageToLDB");
+        HashMap<Integer, Integer> NewMsgInChat = new HashMap<>(1);
         for (int j = 0; j < in.size(); j++) {
+            if (NewMsgInChat.containsKey(ChatID)) {
+                // Another message in the Chat
+                Integer MsgCnt = NewMsgInChat.get(ChatID);
+                MsgCnt++;
+                NewMsgInChat.remove(ChatID);
+                NewMsgInChat.put(ChatID, MsgCnt);
+            } else {
+                // First new Message in this Chat
+                NewMsgInChat.put(ChatID, 1);
+            }
             Message m = in.get(j);
             ContentValues valuesins = new ContentValues();
             valuesins.put(T_MESSAGES_BADBID, m.getMessageID());
@@ -291,6 +311,42 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 //                    valuesins.put(Constants.T_ContactMsgValue, ofvm.getImageMessage());
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
+            }
+        }
+
+        // Now we do the Notification for the User
+        for (Map.Entry<Integer, Integer> e : NewMsgInChat.entrySet()) {
+            int cid = e.getKey();
+            int msgcnt = e.getValue();
+
+            // Get needed Information from ContentProvider
+            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
+            Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.CHAT_CONTENT_URI, CHAT_DB_Columns, T_CHAT_BADBID + " = ?", new String[]{String.valueOf(cid)}, null);
+
+            c.moveToFirst();
+            while (c.moveToNext()) {
+                // Prepare intent which is triggered if the
+                // notification is selected
+                Intent resultIntent = new Intent(this.getContext(),
+                        SingleChatActivity.class);
+                resultIntent.putExtra(Constants.CHATID, c.getInt(Constants.ID_CHAT_BADBID));
+                resultIntent.putExtra(Constants.CHATNAME, c.getString(Constants.ID_CHAT_ChatName));
+                resultIntent.putExtra(Constants.OWNINGUSERID, c.getInt(Constants.ID_CHAT_OwningUserID));
+                resultIntent.putExtra(Constants.USERID, userid);
+
+                PendingIntent pIntent = PendingIntent.getActivity(this.getContext(), 0, resultIntent, 0);
+
+                // Build notification
+                // Actions are just fake
+                Notification noti = new Notification.Builder(this.getContext())
+                        .setContentTitle("FrInMeAn")
+                        .setContentText(String.valueOf(msgcnt) + " neue Nachrichten im Chat " + c.getString(Constants.ID_CHAT_ChatName)).setSmallIcon(R.drawable.notification)
+                        .setContentIntent(pIntent).build();
+                NotificationManager notificationManager = (NotificationManager) this.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                // hide the notification after its selected
+                noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+                notificationManager.notify(0, noti);
             }
         }
         Log.d(TAG, "end saveMessageToLDB");

@@ -1,20 +1,29 @@
 package de.radiohacks.frinmean;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
+
+import java.io.Reader;
+import java.io.StringReader;
+
+import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.model.OutAuthenticate;
 import de.radiohacks.frinmean.service.ErrorHelper;
-import de.radiohacks.frinmean.service.RestFunctions;
+import de.radiohacks.frinmean.service.MeBaService;
 
 
 public class StartActivity extends Activity {
@@ -27,6 +36,7 @@ public class StartActivity extends Activity {
     private int port = 80;
     private boolean https = true;
     private String CommunicationURL;
+    private StartReceiver mStartReceiver = new StartReceiver();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +53,24 @@ public class StartActivity extends Activity {
                     || password.equalsIgnoreCase("NULL")) {
                 Toast.makeText(StartActivity.this, this.getString(R.string.no_user_or_password_given), Toast.LENGTH_SHORT).show();
             } else {
-                buildServerURL();
+                /*buildServerURL();
                 AuthenticateLoader loadFeedData = new AuthenticateLoader();
-                loadFeedData.execute(CommunicationURL + "user/authenticate");
+                loadFeedData.execute(CommunicationURL + "user/authenticate"); */
+                IntentFilter statusIntentFilter = new IntentFilter(
+                        Constants.BROADCAST_AUTHENTICATE);
+                // Sets the filter's category to DEFAULT
+                statusIntentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+
+                mStartReceiver = new StartReceiver();
+
+                // Registers the DownloadStateReceiver and its intent filters
+                LocalBroadcastManager.getInstance(this).registerReceiver(
+                        mStartReceiver,
+                        statusIntentFilter);
+
+                Intent authIntent = new Intent(StartActivity.this, MeBaService.class);
+                authIntent.setAction(Constants.ACTION_AUTHENTICATE);
+                startService(authIntent);
             }
         }
         Log.d(TAG, "end onCreate");
@@ -122,7 +147,77 @@ public class StartActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class AuthenticateLoader extends AsyncTask<String, Void, OutAuthenticate> {
+    public class StartReceiver extends BroadcastReceiver {
+
+        private final String TAG = StartReceiver.class.getSimpleName();
+
+        public StartReceiver() {
+            super();
+
+            // prevents instantiation by other packages.
+        }
+
+        /**
+         * This method is called by the system when a broadcast Intent is matched by this class'
+         * intent filters
+         *
+         * @param context An Android context
+         * @param intent  The incoming broadcast Intent
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "start onReceive");
+
+            /*
+             * Gets the status from the Intent's extended data, and chooses the appropriate action
+             */
+            if (intent.getAction().equalsIgnoreCase(Constants.BROADCAST_AUTHENTICATE)) {
+                Log.d(TAG, "start broadcast " + Constants.BROADCAST_AUTHENTICATE);
+                try {
+                    String ret = intent.getStringExtra(Constants.BROADCAST_DATA);
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    OutAuthenticate res = serializer.read(OutAuthenticate.class, reader, false);
+                    if (res == null) {
+                        ErrorHelper eh = new ErrorHelper(StartActivity.this);
+                        eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
+                    } else {
+                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                            ErrorHelper eh = new ErrorHelper(StartActivity.this);
+                            eh.CheckErrorText(res.getErrortext());
+                        } else {
+                            if (res.getAuthenticated() != null && !res.getAuthenticated().isEmpty()) {
+                                if (res.getAuthenticated().equalsIgnoreCase(Constants.AUTHENTICATE_TRUE)) {
+                                    // Create Acount if needed
+                                    SyncUtils.CreateSyncAccount(StartActivity.this);
+                                    if (syncFreq != -1) {
+                                        SyncUtils.ChangeSyncFreq(syncFreq);
+                                    } else {
+                                        // set Default to 1 hour
+                                        SyncUtils.ChangeSyncFreq(60);
+                                    }
+                                    SyncUtils.TriggerRefresh();
+                                    Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
+                                    startchat.putExtra(Constants.USERID, res.getUserID());
+                                    startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
+                                    startActivity(startchat);
+                                    StartActivity.this.finish();
+                                }
+                            }
+                        }
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_GETMESSAGEFROMCHAT);
+            }
+        }
+    }
+
+
+    /* private class AuthenticateLoader extends AsyncTask<String, Void, OutAuthenticate> {
         private final ProgressDialog dialog = new ProgressDialog(StartActivity.this);
         private final String TAG = AuthenticateLoader.class.getSimpleName();
 
@@ -142,6 +237,15 @@ public class StartActivity extends Activity {
                 } else {
                     if (result.getAuthenticated() != null && result.getAuthenticated().equalsIgnoreCase("TRUE")) {
                         int uid = result.getUserID();
+
+                        SharedPreferences shP = PreferenceManager
+                                .getDefaultSharedPreferences(StartActivity.this);
+                        SharedPreferences.Editor ed = shP.edit();
+                        ed.putString("prefUsername", username);
+                        ed.putString("prefPassword", password);
+                        ed.putInt("prefUserID", result.getUserID());
+                        ed.commit();
+
                         Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
                         startchat.putExtra(Constants.USERID, uid);
                         startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
@@ -169,5 +273,5 @@ public class StartActivity extends Activity {
             RestFunctions rf = new RestFunctions();
             return rf.authenticate(username, password);
         }
-    }
+    } */
 }
