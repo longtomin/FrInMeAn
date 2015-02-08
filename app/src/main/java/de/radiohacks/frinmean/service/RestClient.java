@@ -421,7 +421,7 @@ public class RestClient {
     }
 
     public String BuildURLString() throws Exception {
-        Log.d(TAG, "start BevoreExecuteGetQuery");
+        Log.d(TAG, "start BuildURLString");
         //add parameters
         String combinedParams = "";
         if (!params.isEmpty()) {

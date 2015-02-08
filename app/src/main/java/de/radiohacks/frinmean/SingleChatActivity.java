@@ -45,6 +45,7 @@ import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutListUser;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
+import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.ErrorHelper;
 import de.radiohacks.frinmean.service.MeBaService;
 
@@ -75,6 +76,10 @@ public class SingleChatActivity extends ActionBarActivity implements
         Log.d(TAG, "start onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_chat);
+
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(this));
+        }
 
         Intent i = getIntent();
         ChatID = i.getIntExtra(Constants.CHATID, 0);

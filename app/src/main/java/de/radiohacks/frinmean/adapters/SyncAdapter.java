@@ -323,8 +323,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
             Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.CHAT_CONTENT_URI, CHAT_DB_Columns, T_CHAT_BADBID + " = ?", new String[]{String.valueOf(cid)}, null);
 
-            c.moveToFirst();
-            while (c.moveToNext()) {
+            if (c.moveToFirst()) {
                 // Prepare intent which is triggered if the
                 // notification is selected
                 Intent resultIntent = new Intent(this.getContext(),
@@ -431,7 +430,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
         Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_BADBID + " = ?", new String[]{"0"}, null);
-        c.moveToFirst();
+
+        int x = c.getCount();
+
+        //c.moveToFirst();
+
         while (c.moveToNext()) {
 
             String msgtype = c.getString(ID_MESSAGES_MessageType);

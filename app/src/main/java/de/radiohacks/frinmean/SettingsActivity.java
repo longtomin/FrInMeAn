@@ -17,6 +17,7 @@ import net.rdrei.android.dirchooser.DirectoryChooserActivity;
 
 import java.io.File;
 
+import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.MeBaService;
 
 /**
@@ -120,6 +121,9 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //addPreferencesFromResource(R.xml.pref_general);
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(this));
+        }
 
     }
 

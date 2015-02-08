@@ -22,6 +22,7 @@ import java.io.StringReader;
 
 import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.model.OutAuthenticate;
+import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.ErrorHelper;
 import de.radiohacks.frinmean.service.MeBaService;
 
@@ -43,6 +44,10 @@ public class StartActivity extends Activity {
         Log.d(TAG, "start onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(this));
+        }
 
         getPreferenceInfo();
 
@@ -193,6 +198,7 @@ public class StartActivity extends Activity {
                                     SyncUtils.CreateSyncAccount(StartActivity.this);
                                     if (syncFreq != -1) {
                                         SyncUtils.ChangeSyncFreq(syncFreq);
+                                        //SyncUtils.ChangeSyncFreq(1);
                                     } else {
                                         // set Default to 1 hour
                                         SyncUtils.ChangeSyncFreq(60);

@@ -20,6 +20,7 @@ import android.widget.ListView;
 import de.radiohacks.frinmean.adapters.ChatAdapter;
 import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
+import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.MeBaService;
 
 
@@ -39,6 +40,10 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(getActivity()));
+        }
 
         Intent i = getActivity().getIntent();
         userid = i.getIntExtra(Constants.USERID, -1);

@@ -62,6 +62,11 @@ public class MeBaService extends IntentService {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "start onCreate");
+
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(this));
+        }
+
         conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         mBroadcaster = new BroadcastNotifier(MeBaService.this);
         rf = new RestFunctions();
@@ -73,7 +78,6 @@ public class MeBaService extends IntentService {
                 sSyncAdapter = new SyncAdapter(getApplicationContext(), true);
             }
         }
-
         Log.d(TAG, "end onCreate");
     }
 
@@ -347,7 +351,6 @@ public class MeBaService extends IntentService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
 
 
         Log.d(TAG, "end handleActionListUser");

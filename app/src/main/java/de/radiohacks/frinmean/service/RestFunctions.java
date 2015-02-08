@@ -689,4 +689,32 @@ public class RestFunctions {
         Log.d(TAG, "end fetchImageMessage");
         return out;
     }
+
+    /* @POST
+    @Path("/senderrorreport")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public void sendErrorReport(
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
+
+    public int sendErrorReport(String Message) {
+        Log.d(TAG, "start sendErrorReport");
+        int out = 0;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "user/senderrorreport", https, port);
+            try {
+                rc.AddHeader("enctype", "multipart/form-data");
+                rc.setFilename(Message);
+
+                String ret = rc.ExecuteRequestUploadXML(rc.BevorExecutePost());
+
+                out = rc.getResponseCode();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "end sendImageMessage");
+        return out;
+    }
 }
