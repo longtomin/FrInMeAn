@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -34,6 +35,7 @@ public class SignUpActivity extends Activity {
     private String password;
     private String email;
     private String server;
+    private String directory;
     private boolean https;
     private int port;
     private String CommunicationURL;
@@ -45,11 +47,18 @@ public class SignUpActivity extends Activity {
         setContentView(R.layout.activity_sign_up);
         setTitle(R.string.sign_up);
 
-        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(this));
+        getPreferenceInfo();
+
+        if (directory.equalsIgnoreCase("NULL")) {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+            }
+        } else {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+            }
         }
 
-        getPreferenceInfo();
         buildServerURL();
         if (!server.equalsIgnoreCase("NULL")) {
 
@@ -136,6 +145,7 @@ public class SignUpActivity extends Activity {
         }
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
+        this.directory = sharedPrefs.getString("prefDirectory", "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
 

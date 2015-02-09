@@ -8,8 +8,10 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -41,15 +43,20 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(getActivity()));
-        }
-
         Intent i = getActivity().getIntent();
         userid = i.getIntExtra(Constants.USERID, -1);
         syncFreq = i.getIntExtra(Constants.PrefSyncfrequency, -1);
         if (syncFreq != -1) {
             SyncUtils.ChangeSyncFreq(syncFreq);
+        }
+
+        SharedPreferences sharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(getActivity());
+
+        String directory = sharedPrefs.getString("prefDirectory", "NULL");
+
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
         }
     }
 

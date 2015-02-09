@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.content.LocalBroadcastManager;
@@ -77,10 +78,6 @@ public class SingleChatActivity extends ActionBarActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_chat);
 
-        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(this));
-        }
-
         Intent i = getIntent();
         ChatID = i.getIntExtra(Constants.CHATID, 0);
         ChatName = i.getStringExtra(Constants.CHATNAME);
@@ -88,6 +85,16 @@ public class SingleChatActivity extends ActionBarActivity implements
         userid = i.getIntExtra(Constants.USERID, -1);
 
         getPreferenceInfo();
+
+        if (directory.equalsIgnoreCase("NULL")) {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+            }
+        } else {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+            }
+        }
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -153,12 +160,13 @@ public class SingleChatActivity extends ActionBarActivity implements
             }
         });
 
-        Intent picintent = new Intent(this, MeBaService.class);
+        /* Fuer Testzwecke um den Chat komplett neu zu laden */
+        /* Intent picintent = new Intent(this, MeBaService.class);
         picintent.putExtra(Constants.CHATNAME, ChatName);
         picintent.putExtra(Constants.CHATID, ChatID);
 
         picintent.setAction(Constants.ACTION_FULLSYNC);
-        startService(picintent);
+        startService(picintent); */
 
         Log.d(TAG, "end onCreate");
     }
@@ -504,7 +512,7 @@ public class SingleChatActivity extends ActionBarActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         long time = System.currentTimeMillis() / 1000L - (60 * 60 * 24 * 60);
-        String select = "((" + Constants.T_MESSAGES_ChatID + " = " + ChatID + ") AND (" + Constants.T_MESSAGES_SendTimestamp + ">" + time + "))";
+        String select = "((" + Constants.T_MESSAGES_ChatID + " = " + String.valueOf(ChatID) + ") AND (" + Constants.T_MESSAGES_SendTimestamp + ">" + String.valueOf(time) + "))";
         String sort = Constants.T_MESSAGES_SendTimestamp + " ASC";
 
         return new CursorLoader(SingleChatActivity.this, FrinmeanContentProvider.MESSAES_CONTENT_URI,

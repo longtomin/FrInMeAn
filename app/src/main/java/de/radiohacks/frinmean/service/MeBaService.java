@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -63,14 +64,21 @@ public class MeBaService extends IntentService {
         super.onCreate();
         Log.d(TAG, "start onCreate");
 
-        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(this));
-        }
-
         conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         mBroadcaster = new BroadcastNotifier(MeBaService.this);
         rf = new RestFunctions();
+
         getPreferenceInfo();
+        if (directory.equalsIgnoreCase("NULL")) {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+            }
+        } else {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+            }
+        }
+
         buildServerURL();
 
         synchronized (sSyncAdapterLock) {
@@ -171,7 +179,7 @@ public class MeBaService extends IntentService {
             } else if (Constants.ACTION_FULLSYNC.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
-                sSyncAdapter.syncGetMessageFromChat(cid, 1, ChatName);
+                sSyncAdapter.syncGetMessageFromChat(cid, 0, ChatName);
             } else if (Constants.ACTION_AUTHENTICATE.equalsIgnoreCase(action)) {
                 handleActionAuthenticateUser();
             }

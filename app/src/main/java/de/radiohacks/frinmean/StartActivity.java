@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -32,6 +33,7 @@ public class StartActivity extends Activity {
     private static final String TAG = StartActivity.class.getSimpleName();
     private String username;
     private String password;
+    private String directory;
     private int syncFreq;
     private String server = "NULL";
     private int port = 80;
@@ -45,11 +47,16 @@ public class StartActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(this));
-        }
-
         getPreferenceInfo();
+        if (directory.equalsIgnoreCase("NULL")) {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+            }
+        } else {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+            }
+        }
 
         if (server.equalsIgnoreCase("NULL")) {
             Toast.makeText(StartActivity.this, this.getString(R.string.no_server_given), Toast.LENGTH_SHORT).show();
@@ -96,6 +103,7 @@ public class StartActivity extends Activity {
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         this.syncFreq = Integer.parseInt(sharedPrefs.getString(Constants.PrefSyncfrequency, "-1"));
+        this.directory = sharedPrefs.getString("prefDirectory", "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
 
