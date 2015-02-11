@@ -346,6 +346,7 @@ public class FrinmeanContentProvider extends ContentProvider {
     }
 
     public Uri insertorupdate(Uri uri, ContentValues values) {
+        boolean notifyChange = false;
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
         Uri ret;
@@ -358,6 +359,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                     if (foundID == -1) {
                         // Backend-ID found, make an update
                         id = sqlDB.insert(Constants.MESSAGES_TABLE_NAME, null, values);
+                        notifyChange = true;
                     } else {
                         // Backend-ID not found so insert
                         id = sqlDB.update(Constants.MESSAGES_TABLE_NAME, values,
@@ -366,6 +368,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                 } else {
                     // No Beckend ID given, jsut insert.
                     id = sqlDB.insert(Constants.MESSAGES_TABLE_NAME, null, values);
+                    notifyChange = true;
                 }
                 ret = Uri.parse(Constants.MESSAGES_TABLE_NAME + "/" + id);
                 break;
@@ -376,6 +379,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                     if (foundID == -1) {
                         // Backend-ID found, make an update
                         id = sqlDB.insert(Constants.CHAT_TABLE_NAME, null, values);
+                        notifyChange = true;
                     } else {
                         // Backend-ID not found so insert
                         id = sqlDB.update(Constants.CHAT_TABLE_NAME, values,
@@ -384,13 +388,16 @@ public class FrinmeanContentProvider extends ContentProvider {
                 } else {
                     // No Beckend ID given, jsut insert.
                     id = sqlDB.insert(Constants.CHAT_TABLE_NAME, null, values);
+                    notifyChange = true;
                 }
                 ret = Uri.parse(Constants.CHAT_TABLE_NAME + "/" + id);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+        if (notifyChange) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return ret;
     }
 

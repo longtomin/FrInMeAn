@@ -1,9 +1,11 @@
 package de.radiohacks.frinmean.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.Gravity;
@@ -165,20 +167,26 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImgReadTimeStamp.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
                 ImageButton IButton = (ImageButton) view.findViewById(R.id.ImageImageButton);
 
+                String tmpimg;
+                if (directory.endsWith("/")) {
+                    tmpimg = Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                } else {
+                    tmpimg = "/" + Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                }
+
+                final String imgfile = directory + tmpimg;
                 IButton.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
-                        //TODO Image anzeigen im fullscreen Modus
+                        Intent intent = new Intent();
+                        intent.setAction(android.content.Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.parse(imgfile), "image/*");
+
+                        mContext.startActivity(intent);
                     }
                 });
 
-                String imgfile = directory;
-                if (imgfile.endsWith("/")) {
-                    imgfile += Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                } else {
-                    imgfile += "/" + Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                }
 
                 File ifile = new File(imgfile);
                 if (ifile.exists()) {
@@ -193,14 +201,14 @@ public class SingleChatAdapter extends CursorAdapter {
                         double faktor = imgheight / IMG_SIZE;
                         zoom = (int) ((int) imgwidth / faktor);
                         IButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, zoom, 200, false));
-                        IButton.setMinimumWidth(zoom);
-                        IButton.setMinimumHeight(200);
+                        IButton.setMaxWidth(zoom);
+                        IButton.setMaxHeight(200);
                     } else {
                         double faktor = imgwidth / IMG_SIZE;
                         zoom = (int) ((int) imgheight / faktor);
                         IButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, 200, zoom, false));
-                        IButton.setMinimumWidth(200);
-                        IButton.setMinimumHeight(zoom);
+                        IButton.setMaxWidth(200);
+                        IButton.setMaxHeight(zoom);
                     }
                 }
                 if (msgOID == this.OID) {

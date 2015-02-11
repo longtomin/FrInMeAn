@@ -160,9 +160,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         OutListChat outlistchat = rf.listchat(username, password);
 
-        if (outlistchat.getErrortext() == null || outlistchat.getErrortext().isEmpty()) {
-            if (outlistchat.getChat() != null && !outlistchat.getChat().isEmpty()) {
-                SaveChatsToLDB(outlistchat.getChat());
+        if (outlistchat != null) {
+            if (outlistchat.getErrortext() == null || outlistchat.getErrortext().isEmpty()) {
+                if (outlistchat.getChat() != null && !outlistchat.getChat().isEmpty()) {
+                    SaveChatsToLDB(outlistchat.getChat());
+                }
             }
         }
         Log.d(TAG, "end syncListChats");
@@ -173,6 +175,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         OutCheckNewMessages outcheck = rf.checknewmessages(username, password);
 
+        if (outcheck != null) {
         if (outcheck.getErrortext() == null || outcheck.getErrortext().isEmpty()) {
             if (outcheck.getChats() != null && outcheck.getChats().size() > 0) {
                 for (int i = 0; i < outcheck.getChats().size(); i++) {
@@ -182,6 +185,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     }
                 }
             }
+        }
         }
         Log.d(TAG, "end syncCheckNewMessages");
     }
@@ -256,6 +260,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                             client.release();
                         }
+                    } else {
+                        valuesins.put(T_MESSAGES_ImageMsgValue, outmeta.getImageMessage());
+                        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                        client.release();
                     }
                 }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_CONTACT)) {
@@ -337,9 +346,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private boolean checkfileexists(String fname, long fsize) {
 
         boolean ret = false;
+        File checkfile = null;
 
-        File checkfile = new File(directory + "/" + "images/" + fname);
+        if (directory.endsWith("/")) {
+            checkfile = new File(directory + Constants.IMAGEDIR + "/" + fname);
+        } else {
+            checkfile = new File(directory + "/" + Constants.IMAGEDIR + "/" + fname);
+        }
+
         if (checkfile.exists()) {
+            long x = checkfile.length();
             if (checkfile.length() == fsize) {
                 // File exists an has right size
                 ret = true;
