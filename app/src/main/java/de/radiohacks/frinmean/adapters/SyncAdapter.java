@@ -346,7 +346,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private boolean checkfileexists(String fname, long fsize) {
 
         boolean ret = false;
-        File checkfile = null;
+        File checkfile;
 
         if (directory.endsWith("/")) {
             checkfile = new File(directory + Constants.IMAGEDIR + "/" + fname);
@@ -355,7 +355,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         if (checkfile.exists()) {
-            long x = checkfile.length();
             if (checkfile.length() == fsize) {
                 // File exists an has right size
                 ret = true;
@@ -440,9 +439,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             if (msgtype.equalsIgnoreCase(TYP_TEXT)) {
                 OutSendTextMessage outtxt = rf.sendtextmessage(username, password, c.getString(ID_MESSAGES_TextMsgValue));
-                if (outtxt.getErrortext() == null || outtxt.getErrortext().isEmpty()) {
-                    OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outtxt.getTextID(), TYP_TEXT);
-                    updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outtxt.getTextID(), TYP_TEXT, null);
+                if (outtxt != null) {
+                    if (outtxt.getErrortext() == null || outtxt.getErrortext().isEmpty()) {
+                        OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outtxt.getTextID(), TYP_TEXT);
+                        updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outtxt.getTextID(), TYP_TEXT, null);
+                    }
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_IMAGE)) {
                 String imgfile = directory;
@@ -452,10 +453,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     imgfile += "/" + Constants.IMAGEDIR + "/" + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 }
                 OutSendImageMessage outimg = rf.sendImageMessage(username, password, imgfile);
-                if (outimg.getErrortext() == null || outimg.getErrortext().isEmpty()) {
-                    OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outimg.getImageID(), TYP_IMAGE);
-                    updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outimg.getImageID(), TYP_IMAGE, outimg.getImageFileName());
-                    moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getImageFileName());
+                if (outimg != null) {
+                    if (outimg.getErrortext() == null || outimg.getErrortext().isEmpty()) {
+                        OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outimg.getImageID(), TYP_IMAGE);
+                        updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outimg.getImageID(), TYP_IMAGE, outimg.getImageFileName());
+                        moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getImageFileName());
+                    }
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
 

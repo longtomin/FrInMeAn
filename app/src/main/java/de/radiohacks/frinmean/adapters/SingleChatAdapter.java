@@ -190,25 +190,28 @@ public class SingleChatAdapter extends CursorAdapter {
 
                 File ifile = new File(imgfile);
                 if (ifile.exists()) {
-                    Bitmap bmp = BitmapFactory.decodeFile(imgfile);
-                    int imgheight = bmp.getHeight();
-                    int imgwidth = bmp.getWidth();
-                    int IMG_SIZE = 200;
+                    String fname = ifile.getAbsolutePath();
+                    Bitmap bmp = BitmapFactory.decodeFile(fname);
+                    if (bmp != null) {
+                        int imgheight = bmp.getHeight();
+                        int imgwidth = bmp.getWidth();
+                        int IMG_SIZE = 200;
 
-                    int zoom = 0;
+                        int zoom = 0;
 
-                    if (imgheight > imgwidth) {
-                        double faktor = imgheight / IMG_SIZE;
-                        zoom = (int) ((int) imgwidth / faktor);
-                        IButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, zoom, 200, false));
-                        IButton.setMaxWidth(zoom);
-                        IButton.setMaxHeight(200);
-                    } else {
-                        double faktor = imgwidth / IMG_SIZE;
-                        zoom = (int) ((int) imgheight / faktor);
-                        IButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, 200, zoom, false));
-                        IButton.setMaxWidth(200);
-                        IButton.setMaxHeight(zoom);
+                        if (imgheight > imgwidth) {
+                            double faktor = imgheight / IMG_SIZE;
+                            zoom = (int) ((int) imgwidth / faktor);
+                            IButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, zoom, 200, false));
+                            IButton.setMaxWidth(zoom);
+                            IButton.setMaxHeight(200);
+                        } else {
+                            double faktor = imgwidth / IMG_SIZE;
+                            zoom = (int) ((int) imgheight / faktor);
+                            IButton.setImageBitmap(Bitmap.createScaledBitmap(bmp, 200, zoom, false));
+                            IButton.setMaxWidth(200);
+                            IButton.setMaxHeight(zoom);
+                        }
                     }
                 }
                 if (msgOID == this.OID) {
