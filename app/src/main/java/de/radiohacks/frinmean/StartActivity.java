@@ -225,7 +225,7 @@ public class StartActivity extends Activity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Log.d(TAG, "end broadcast " + Constants.BROADCAST_GETMESSAGEFROMCHAT);
+                Log.d(TAG, "end broadcast " + Constants.BROADCAST_AUTHENTICATE);
             }
         }
     }

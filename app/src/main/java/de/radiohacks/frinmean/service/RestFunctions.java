@@ -46,8 +46,6 @@ public class RestFunctions {
     private static final String TAG = RestFunctions.class.getSimpleName();
     public ConnectivityManager conManager = null;
     private String server;
-    //    private String username;
-//    private String password;
     private boolean https;
     private String CommunicationURL;
     private int port;
@@ -115,7 +113,7 @@ public class RestFunctions {
                                             @QueryParam(Constants.QPpassword) String Password); */
 
     public OutAuthenticate authenticate(String inuser, String inpassword) {
-        Log.d(TAG, "start authenticate");
+        Log.d(TAG, "start authenticate with user=" + inuser + " password=" + inpassword);
         OutAuthenticate out = null;
         if (checkServer()) {
             RestClient rc;
@@ -135,7 +133,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start authenticate");
+        Log.d(TAG, "end authenticate =" + out.getAuthenticated());
         return out;
     }
 
@@ -147,7 +145,7 @@ public class RestFunctions {
                                 @QueryParam(Constants.QPemail) String Email); */
 
     public OutSignUp signup(String inuser, String inpassword, String inemail) {
-        Log.d(TAG, "start signup");
+        Log.d(TAG, "start signup with user=" + inuser + " password=" + inpassword + "Email=" + inemail);
         OutSignUp out = null;
         if (checkServer()) {
             RestClient rc;
@@ -168,7 +166,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start signup");
+        Log.d(TAG, "end signup");
         return out;
     }
 
@@ -180,7 +178,7 @@ public class RestFunctions {
                                     @QueryParam(Constants.QPchatname) String Chatname);*/
 
     public OutCreateChat createchat(String inuser, String inpassword, String inchatname) {
-        Log.d(TAG, "start createchat");
+        Log.d(TAG, "start createchat with user=" + inuser + " password=" + inpassword);
         OutCreateChat out = null;
         if (checkServer()) {
             RestClient rc;
@@ -201,7 +199,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start createchat");
+        Log.d(TAG, "end createchat");
         return out;
     }
 
@@ -213,7 +211,7 @@ public class RestFunctions {
                                     @QueryParam(Constants.QPchatid) int ChatID); */
 
     public OutDeleteChat deletechat(String inuser, String inpassword, int inchatid) {
-        Log.d(TAG, "start deletechat");
+        Log.d(TAG, "start deletechat with user=" + inuser + " password=" + inpassword);
         OutDeleteChat out = null;
         if (checkServer()) {
             RestClient rc;
@@ -234,7 +232,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start deletechat");
+        Log.d(TAG, "end deletechat");
         return out;
     }
 
@@ -247,7 +245,7 @@ public class RestFunctions {
                                           @QueryParam(Constants.QPchatid) int ChatID); */
 
     public OutAddUserToChat addusertochat(String inuser, String inpassword, int inuserid, int inchatid) {
-        Log.d(TAG, "start addusertochat");
+        Log.d(TAG, "start addusertochat with user=" + inuser + " password=" + inpassword);
         OutAddUserToChat out = null;
         if (checkServer()) {
             RestClient rc;
@@ -269,7 +267,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start addusertochat");
+        Log.d(TAG, "end addusertochat");
         return out;
     }
 
@@ -282,7 +280,7 @@ public class RestFunctions {
                                                     @QueryParam(Constants.QPuserid) int UserID); */
 
     public OutRemoveUserFromChat removeuserfromchat(String inuser, String inpassword, int inuserid, int inchatid) {
-        Log.d(TAG, "start removeuserfromchat");
+        Log.d(TAG, "start removeuserfromchat with user=" + inuser + " password=" + inpassword);
         OutRemoveUserFromChat out = null;
         if (checkServer()) {
             RestClient rc;
@@ -304,7 +302,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start removeuserfromchat");
+        Log.d(TAG, "end removeuserfromchat");
         return out;
     }
 
@@ -316,7 +314,7 @@ public class RestFunctions {
                                  @QueryParam(Constants.QPsearch) String search); */
 
     public OutListUser listuser(String inuser, String inpassword, String insearch) {
-        Log.d(TAG, "start listuser");
+        Log.d(TAG, "start listuser with user=" + inuser + " password=" + inpassword + " Search=" + insearch);
         OutListUser out = null;
         if (checkServer()) {
             RestClient rc;
@@ -337,7 +335,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start listuser");
+        Log.d(TAG, "end listuser");
         return out;
     }
 
@@ -346,9 +344,8 @@ public class RestFunctions {
     @Path("/listchat")
     public OutListChat ListChats(@QueryParam(Constants.QPusername) String User,
                                  @QueryParam(Constants.QPpassword) String Password); */
-
     public OutListChat listchat(String inuser, String inpassword) {
-        Log.d(TAG, "start listchat");
+        Log.d(TAG, "start listchat with user=" + inuser + " password=" + inpassword);
         OutListChat out = null;
         if (checkServer()) {
             RestClient rc;
@@ -368,7 +365,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start listchat");
+        Log.d(TAG, "end listchat Errortext" + out.getErrortext() + "Chatsize = " + String.valueOf(out.getChat().size()));
         return out;
     }
 
@@ -380,7 +377,7 @@ public class RestFunctions {
                                               @QueryParam(Constants.QPtextmessage) String TextMessage); */
 
     public OutSendTextMessage sendtextmessage(String inuser, String inpassword, String intextmsg) {
-        Log.d(TAG, "start sendtextmessage");
+        Log.d(TAG, "start sendtextmessage with user=" + inuser + " password=" + inpassword + "Message=" + intextmsg);
         OutSendTextMessage out = null;
         if (checkServer()) {
             RestClient rc;
@@ -401,7 +398,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start sendtextmessage");
+        Log.d(TAG, "end sendtextmessage");
         return out;
     }
 
@@ -413,7 +410,7 @@ public class RestFunctions {
                                               @QueryParam(Constants.QPtextmessageid) int TextMessageID); */
 
     public OutFetchTextMessage gettextmessage(String inuser, String inpassword, int intextmsgid) {
-        Log.d(TAG, "start gettextmessage");
+        Log.d(TAG, "start gettextmessage with user=" + inuser + " password=" + inpassword + "Message=" + String.valueOf(intextmsgid));
         OutFetchTextMessage out = null;
         if (checkServer()) {
             RestClient rc;
@@ -448,7 +445,7 @@ public class RestFunctions {
                                                           @QueryParam(Constants.QPmessagetype) String MessageType); */
 
     public OutInsertMessageIntoChat insertmessageintochat(String inuser, String inpassword, int inchatid, int inmsgid, String inmsgtype) {
-        Log.d(TAG, "start insertmessageintochat");
+        Log.d(TAG, "start insertmessageintochat with user=" + inuser + " password=" + inpassword + "ChatID=" + String.valueOf(inchatid) + " MessageID=" + String.valueOf(inmsgid) + "MessageType=" + inmsgtype);
         OutInsertMessageIntoChat out = null;
         if (checkServer()) {
             RestClient rc;
@@ -484,7 +481,7 @@ public class RestFunctions {
                                                           @QueryParam(Constants.QPmessageid) int MessageID); */
 
     public OutDeleteMessageFromChat deletemessagefromchat(String inuser, String inpassword, int inmsgid) {
-        Log.d(TAG, "start deletemessagefromchat");
+        Log.d(TAG, "start deletemessagefromchat with user=" + inuser + " password=" + inpassword + "MessageID=" + String.valueOf(inmsgid));
         OutDeleteMessageFromChat out = null;
         if (checkServer()) {
             RestClient rc;
@@ -518,7 +515,7 @@ public class RestFunctions {
                                                       @QueryParam(Constants.QPtimestamp) int Timestamp); */
 
     public OutFetchMessageFromChat getmessagefromchat(String inuser, String inpassword, int inchatid, long intimestamp) {
-        Log.d(TAG, "start getmessagefromchat");
+        Log.d(TAG, "start getmessagefromchat with user=" + inuser + " password=" + inpassword + "ChatID=" + String.valueOf(inchatid) + " Timestamp=" + String.valueOf(intimestamp));
         OutFetchMessageFromChat out = null;
         if (checkServer()) {
             RestClient rc;
@@ -551,7 +548,7 @@ public class RestFunctions {
                                                 @QueryParam(Constants.QPpassword) String Password); */
 
     public OutCheckNewMessages checknewmessages(String inuser, String inpassword) {
-        Log.d(TAG, "start checknewmessages");
+        Log.d(TAG, "start checknewmessages with user=" + inuser + " password=" + inpassword);
         OutCheckNewMessages out = null;
         if (checkServer()) {
             RestClient rc;
@@ -586,7 +583,7 @@ public class RestFunctions {
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
 
     public OutSendImageMessage sendImageMessage(String inuser, String inpassword, String Message) {
-        Log.d(TAG, "start sendImageMessage");
+        Log.d(TAG, "start sendImageMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
         OutSendImageMessage out = null;
         if (checkServer()) {
             RestClient rc;
@@ -625,7 +622,7 @@ public class RestFunctions {
                 @QueryParam("imageid") int imageid); */
 
     public OutGetImageMessageMetaData getImageMessageMetaData(String inuser, String inpassword, int ImgMsgID) {
-        Log.d(TAG, "start getImageMessageMetaData");
+        Log.d(TAG, "start getImageMessageMetaData with user=" + inuser + " password=" + inpassword + "ImageMessageID=" + String.valueOf(ImgMsgID));
         OutGetImageMessageMetaData out = new OutGetImageMessageMetaData();
 
         if (checkServer()) {
@@ -660,7 +657,7 @@ public class RestFunctions {
                                   @PathParam(Constants.QPimageid) int imageid); */
 
     public OutFetchImageMessage fetchImageMessage(String inuser, String inpassword, int ImgMsgID) {
-        Log.d(TAG, "start fetchImageMessage");
+        Log.d(TAG, "start fetchImageMessage with user=" + inuser + " password=" + inpassword + "ImageMessageID=" + String.valueOf(ImgMsgID));
         OutFetchImageMessage out = new OutFetchImageMessage();
 
         if (checkServer()) {
