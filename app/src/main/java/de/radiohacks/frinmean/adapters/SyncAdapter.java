@@ -177,16 +177,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         OutCheckNewMessages outcheck = rf.checknewmessages(username, password);
 
         if (outcheck != null) {
-        if (outcheck.getErrortext() == null || outcheck.getErrortext().isEmpty()) {
-            if (outcheck.getChats() != null && outcheck.getChats().size() > 0) {
-                for (int i = 0; i < outcheck.getChats().size(); i++) {
-                    Chats c = outcheck.getChats().get(i);
-                    if (c.getNumberOfMessages() > 0) {
-                        syncGetMessageFromChat(c.getChatID(), 0, c.getChatname());
+            if (outcheck.getErrortext() == null || outcheck.getErrortext().isEmpty()) {
+                if (outcheck.getChats() != null && outcheck.getChats().size() > 0) {
+                    for (int i = 0; i < outcheck.getChats().size(); i++) {
+                        Chats c = outcheck.getChats().get(i);
+                        if (c.getNumberOfMessages() > 0) {
+                            syncGetMessageFromChat(c.getChatID(), 0, c.getChatname());
+                        }
                     }
                 }
             }
-        }
         }
         Log.d(TAG, "end syncCheckNewMessages");
     }
@@ -241,31 +241,36 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (m.getMessageTyp().equalsIgnoreCase(TYP_TEXT)) {
                 valuesins.put(T_MESSAGES_TextMsgID, m.getTextMsgID());
                 OutFetchTextMessage oftm = rf.gettextmessage(username, password, m.getTextMsgID());
-                if (oftm.getErrortext() == null || oftm.getErrortext().isEmpty()) {
-                    valuesins.put(T_MESSAGES_TextMsgValue, oftm.getTextMessage());
-                    ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                    client.release();
+                if (oftm != null) {
+                    if (oftm.getErrortext() == null || oftm.getErrortext().isEmpty()) {
+                        valuesins.put(T_MESSAGES_TextMsgValue, oftm.getTextMessage());
+                        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                        client.release();
+                    }
                 }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_IMAGE)) {
                 valuesins.put(T_MESSAGES_ImageMsgID, m.getImageMsgID());
                 OutGetImageMessageMetaData outmeta = rf.getImageMessageMetaData(username, password, m.getImageMsgID());
 
-                if (outmeta.getErrortext() == null || outmeta.getErrortext().isEmpty()) {
-                    if (!checkfileexists(outmeta.getImageMessage(), outmeta.getImageSize())) {
-                        OutFetchImageMessage ofim = rf.fetchImageMessage(username, password, m.getImageMsgID());
-
-                        if (ofim.getErrortext() == null || ofim.getErrortext().isEmpty()) {
-                            valuesins.put(T_MESSAGES_ImageMsgValue, ofim.getImageMessage());
+                if (outmeta != null) {
+                    if (outmeta.getErrortext() == null || outmeta.getErrortext().isEmpty()) {
+                        if (!checkfileexists(outmeta.getImageMessage(), outmeta.getImageSize())) {
+                            OutFetchImageMessage ofim = rf.fetchImageMessage(username, password, m.getImageMsgID());
+                            if (ofim != null) {
+                                if (ofim.getErrortext() == null || ofim.getErrortext().isEmpty()) {
+                                    valuesins.put(T_MESSAGES_ImageMsgValue, ofim.getImageMessage());
+                                    ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                                    client.release();
+                                }
+                            }
+                        } else {
+                            valuesins.put(T_MESSAGES_ImageMsgValue, outmeta.getImageMessage());
                             ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
                             ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                             client.release();
                         }
-                    } else {
-                        valuesins.put(T_MESSAGES_ImageMsgValue, outmeta.getImageMessage());
-                        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                        client.release();
                     }
                 }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_CONTACT)) {

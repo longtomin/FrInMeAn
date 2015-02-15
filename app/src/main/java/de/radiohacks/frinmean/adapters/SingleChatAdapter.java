@@ -46,6 +46,29 @@ public class SingleChatAdapter extends CursorAdapter {
         Log.d(TAG, "end SingleChatAdapter");
     }
 
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
     private int findMsgType(String in) {
         Log.d(TAG, "start findMsgType");
         int ret = -1;
@@ -190,9 +213,28 @@ public class SingleChatAdapter extends CursorAdapter {
 
                 File ifile = new File(imgfile);
                 if (ifile.exists()) {
+
+
                     String fname = ifile.getAbsolutePath();
-                    Bitmap bmp = BitmapFactory.decodeFile(fname);
-                    if (bmp != null) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(fname, options);
+                    int imageHeight = options.outHeight;
+                    int imageWidth = options.outWidth;
+                    String imageType = options.outMimeType;
+
+                    options.inSampleSize = calculateInSampleSize(options, 200, 200);
+
+                    // Decode bitmap with inSampleSize set
+                    options.inJustDecodeBounds = false;
+                    Bitmap bmp = BitmapFactory.decodeFile(fname, options);
+
+                    IButton.setImageBitmap(bmp);
+                    IButton.setMaxWidth(options.outWidth);
+                    IButton.setMaxHeight(options.outHeight);
+
+                    //Bitmap bmp = BitmapFactory.decodeFile(fname);
+                    /* if (bmp != null) {
                         int imgheight = bmp.getHeight();
                         int imgwidth = bmp.getWidth();
                         int IMG_SIZE = 200;
@@ -212,7 +254,7 @@ public class SingleChatAdapter extends CursorAdapter {
                             IButton.setMaxWidth(200);
                             IButton.setMaxHeight(zoom);
                         }
-                    }
+                    } */
                 }
                 if (msgOID == this.OID) {
                     ImgOwningUserName.setGravity(Gravity.END);
@@ -226,4 +268,5 @@ public class SingleChatAdapter extends CursorAdapter {
         }
         Log.d(TAG, "end bindView ");
     }
+
 }
