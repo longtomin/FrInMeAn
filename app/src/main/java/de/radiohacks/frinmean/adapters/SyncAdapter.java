@@ -462,9 +462,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 if (outimg != null) {
                     if (outimg.getErrortext() == null || outimg.getErrortext().isEmpty()) {
                         OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outimg.getImageID(), TYP_IMAGE);
-                        updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outimg.getImageID(), TYP_IMAGE, outimg.getImageFileName());
-                        moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getImageFileName());
+                        if (outins != null) {
+                            if (outins.getErrortext() == null || outins.getErrortext().isEmpty()) {
+                                updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outimg.getImageID(), TYP_IMAGE, outimg.getImageFileName());
+                                moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getImageFileName());
+                            }
+                        }
                     }
+
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
 

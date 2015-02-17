@@ -347,6 +347,7 @@ public class RestFunctions {
     public OutListChat listchat(String inuser, String inpassword) {
         Log.d(TAG, "start listchat with user=" + inuser + " password=" + inpassword);
         OutListChat out = null;
+        int retcode = 0;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/listchat", https, port);
@@ -360,12 +361,18 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OutListChat.class, reader, false);
+                } else {
+                    retcode = rc.getResponseCode();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "end listchat Errortext" + out.getErrortext() + "Chatsize = " + String.valueOf(out.getChat().size()));
+        if (out != null) {
+            Log.d(TAG, "end listchat Errortext" + out.getErrortext() + "Chatsize = " + String.valueOf(out.getChat().size()));
+        } else {
+            Log.d(TAG, "end listchat Errortext out = null and Returncode =" + String.valueOf(retcode));
+        }
         return out;
     }
 

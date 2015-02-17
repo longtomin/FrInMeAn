@@ -163,7 +163,7 @@ public class MeBaService extends IntentService {
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final String ImageLoc = intent.getStringExtra(Constants.IMAGELOCATION);
                 insertImageMesgIntoDB(cid, ImageLoc);
-                SyncUtils.TriggerRefresh();
+                // SyncUtils.TriggerRefresh();
             } else if (Constants.ACTION_ADDUSERTOCHAT.equalsIgnoreCase(action)) {
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final int uid = intent.getIntExtra(Constants.USERID, -1);
@@ -226,7 +226,7 @@ public class MeBaService extends IntentService {
             localfname += directory + "/" + Constants.IMAGEDIR;
         }
 
-        if (!orgFile.getAbsolutePath().equalsIgnoreCase(localfname)) {
+        if (!orgFile.getAbsolutePath().equalsIgnoreCase(localfname + "/" + orgFile.getName())) {
             // Copy file
             try {
                 copy(orgFile, new File(localfname + "/" + orgFile.getName()));
