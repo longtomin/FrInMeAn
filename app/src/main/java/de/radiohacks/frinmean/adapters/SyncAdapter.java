@@ -448,7 +448,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 if (outtxt != null) {
                     if (outtxt.getErrortext() == null || outtxt.getErrortext().isEmpty()) {
                         OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outtxt.getTextID(), TYP_TEXT);
-                        updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outtxt.getTextID(), TYP_TEXT, null);
+                        if (outins != null) {
+                            if (outins.getErrortext() == null || outins.getErrortext().isEmpty()) {
+                                updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outtxt.getTextID(), TYP_TEXT, null);
+                            }
+                        }
                     }
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_IMAGE)) {
