@@ -70,7 +70,6 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        // TODO Auto-generated method stub
         super.onListItemClick(l, v, position, id);
 
         Cursor c = (Cursor) mAdapter.getItem(position);

@@ -319,7 +319,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // Now we do the Notification for the User
         // Get needed Information from ContentProvider
         ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
-        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.CHAT_CONTENT_URI, CHAT_DB_Columns, T_CHAT_BADBID + " = ?", new String[]{String.valueOf(ChatID)}, null);
+        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.CHAT_CONTENT_URI, CHAT_DB_Columns, T_CHAT_BADBID + " = ?", new String[]{String.valueOf(ChatID)}, null);
 
         if (c.moveToFirst()) {
             // Prepare intent which is triggered if the
@@ -434,10 +434,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
         Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_BADBID + " = ?", new String[]{"0"}, null);
-
-        int x = c.getCount();
-
-        //c.moveToFirst();
 
         while (c.moveToNext()) {
 

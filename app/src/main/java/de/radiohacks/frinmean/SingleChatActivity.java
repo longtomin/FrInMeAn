@@ -149,6 +149,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                     iSendTextMsgService.setAction(Constants.ACTION_SENDTEXTMESSAGE);
                     iSendTextMsgService.putExtra(Constants.CHATNAME, ChatName);
                     iSendTextMsgService.putExtra(Constants.CHATID, ChatID);
+                    iSendTextMsgService.putExtra(Constants.USERID, userid);
                     String tmpmsg = Message.getText().toString();
                     iSendTextMsgService.putExtra(Constants.TEXTMESSAGE, tmpmsg);
 
@@ -220,6 +221,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
                 picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
                 picintent.putExtra(Constants.CHATID, ChatID);
+                picintent.putExtra(Constants.USERID, userid);
                 picintent.putExtra(Constants.CHATNAME, ChatName);
 
                 if (m_imagefromcamera.exists() && m_imagefromcamera.length() > 0) {
@@ -263,6 +265,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
                 picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
                 picintent.putExtra(Constants.CHATID, ChatID);
+                picintent.putExtra(Constants.USERID, userid);
                 picintent.putExtra(Constants.CHATNAME, ChatName);
 
                 if (data != null) {

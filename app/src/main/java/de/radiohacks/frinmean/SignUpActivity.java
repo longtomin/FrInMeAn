@@ -200,36 +200,36 @@ public class SignUpActivity extends Activity {
             super.onPostExecute(result);
             dialog.dismiss();
 
-            // TODO zuerst Result prüfen ob es null ist
-
-            if (result.getErrortext() != null && !result.getErrortext().isEmpty()) {
-                if (result.getErrortext().equalsIgnoreCase(Constants.ERROR_USER_ALREADY_EXISTS)) {
-                    // TODO Sende Request wegen USER_ALREADY_EXISTS und authenthicate wegen Passwortprüfung durchführen.
+            if (result != null) {
+                if (result.getErrortext() != null && !result.getErrortext().isEmpty()) {
                     if (result.getErrortext().equalsIgnoreCase(Constants.ERROR_USER_ALREADY_EXISTS)) {
-                        SharedPreferences shP = PreferenceManager
-                                .getDefaultSharedPreferences(SignUpActivity.this);
-                        SharedPreferences.Editor ed = shP.edit();
-                        ed.putString("prefUsername", username);
-                        ed.putString("prefPassword", password);
-                        ed.putInt("prefUserID", result.getUserID());
-                        ed.commit();
-                        Toast.makeText(getApplicationContext(), R.string.signup_user_already_exists_saved, Toast.LENGTH_LONG).show();
-                    } else {
-                        ErrorHelper eh = new ErrorHelper(SignUpActivity.this);
-                        eh.CheckErrorText(result.getErrortext());
+                        // TODO Sende Request wegen USER_ALREADY_EXISTS und authenthicate wegen Passwortprüfung durchführen.
+                        if (result.getErrortext().equalsIgnoreCase(Constants.ERROR_USER_ALREADY_EXISTS)) {
+                            SharedPreferences shP = PreferenceManager
+                                    .getDefaultSharedPreferences(SignUpActivity.this);
+                            SharedPreferences.Editor ed = shP.edit();
+                            ed.putString("prefUsername", username);
+                            ed.putString("prefPassword", password);
+                            ed.putInt("prefUserID", result.getUserID());
+                            ed.commit();
+                            Toast.makeText(getApplicationContext(), R.string.signup_user_already_exists_saved, Toast.LENGTH_LONG).show();
+                        } else {
+                            ErrorHelper eh = new ErrorHelper(SignUpActivity.this);
+                            eh.CheckErrorText(result.getErrortext());
+                        }
                     }
-                }
 
-            } else {
-                if (result.getSignUp() != null && !result.getSignUp().isEmpty()) {
-                    if (result.getSignUp().equalsIgnoreCase("SUCCESSFUL")) {
-                        SharedPreferences shP = PreferenceManager
-                                .getDefaultSharedPreferences(SignUpActivity.this);
-                        SharedPreferences.Editor ed = shP.edit();
-                        ed.putString("prefUsername", username);
-                        ed.putString("prefPassword", password);
-                        ed.putInt("prefUserID", result.getUserID());
-                        ed.commit();
+                } else {
+                    if (result.getSignUp() != null && !result.getSignUp().isEmpty()) {
+                        if (result.getSignUp().equalsIgnoreCase("SUCCESSFUL")) {
+                            SharedPreferences shP = PreferenceManager
+                                    .getDefaultSharedPreferences(SignUpActivity.this);
+                            SharedPreferences.Editor ed = shP.edit();
+                            ed.putString("prefUsername", username);
+                            ed.putString("prefPassword", password);
+                            ed.putInt("prefUserID", result.getUserID());
+                            ed.commit();
+                        }
                     }
                 }
             }
