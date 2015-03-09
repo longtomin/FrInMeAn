@@ -175,6 +175,7 @@ public class Constants {
     public static final String DATABASE_NAME = "Frinme.db";
     public static final String MESSAGES_TABLE_NAME = "frinme_messages";
     public static final String CHAT_TABLE_NAME = "frinme_chats";
+    public static final String USER_TABLE_NAME = "frinme_users";
     public static final String T_MESSAGES_ID = "_id"; // int(10)
     public static final String T_MESSAGES_BADBID = "ID"; // int(10)
     public static final String T_MESSAGES_OwningUserID = "OwningUserID"; //int(10)
@@ -211,6 +212,8 @@ public class Constants {
             T_MESSAGES_TextMsgValue,
             T_MESSAGES_ImageMsgID,
             T_MESSAGES_ImageMsgValue,
+            T_MESSAGES_VideoMsgID,
+            T_MESSAGES_VideoMsgValue,
             T_MESSAGES_FileMsgID,
             T_MESSAGES_FileMsgValue,
             T_MESSAGES_LocationMsgID,
@@ -228,6 +231,18 @@ public class Constants {
             T_CHAT_OwningUserID,
             T_CHAT_OwningUserName,
             T_CHAT_ChatName};
+
+    public static final String T_USER_ID = "_id"; // int(10)
+    public static final String T_USER_BADBID = "ID"; // int(10)
+    public static final String T_USER_Username = "Username"; //varchar(45)
+    public static final String T_USER_AuthenticationTime = "AuthenticationTime"; // bigint(20)
+    public static final String T_USER_Email = "Email"; // varchar(100)
+    public static final String[] USER_DB_Columns = {
+            T_USER_ID,
+            T_USER_BADBID,
+            T_USER_AuthenticationTime,
+            T_USER_Email,
+            T_USER_Username};
 
     /*
     Integer-ID of the Database Rows
@@ -278,5 +293,3 @@ public class Constants {
     // Value below must match the account type specified in res/xml/syncadapter.xml
     public static final String ACCOUNT_TYPE = "de.radiohacks.frinmean.account";
 }
-
-

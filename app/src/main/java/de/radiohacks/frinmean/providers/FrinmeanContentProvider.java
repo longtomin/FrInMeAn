@@ -50,6 +50,12 @@ public class FrinmeanContentProvider extends ContentProvider {
     private static final int CHAT_OwningUserID = 2030;
     private static final int CHAT_OwningUserName = 2040;
     private static final int CHAT_ChatName = 2050;
+    private static final int Frinmean_users = 3000;
+    private static final int USER_ID = 3010;
+    private static final int USER_BADBID = 3020;
+    private static final int USER_Username = 3030;
+    private static final int USER_AuthenticationTime = 3040;
+    private static final int USER_Email = 3050;
     private static final UriMatcher sURIMatcher = new UriMatcher(
             UriMatcher.NO_MATCH);
 
@@ -82,6 +88,15 @@ public class FrinmeanContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, Constants.CHAT_TABLE_NAME + "/#/" + Constants.T_CHAT_OwningUserID, CHAT_OwningUserID);
         sURIMatcher.addURI(AUTHORITY, Constants.CHAT_TABLE_NAME + "/#/" + Constants.T_CHAT_OwningUserName, CHAT_OwningUserName);
         sURIMatcher.addURI(AUTHORITY, Constants.CHAT_TABLE_NAME + "/#/" + Constants.T_CHAT_ChatName, CHAT_ChatName);
+    }
+
+    static {
+        sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME, Frinmean_chats);
+        sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_ID, USER_ID);
+        sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_BADBID, USER_BADBID);
+        sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_Username, USER_Username);
+        sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_AuthenticationTime, USER_AuthenticationTime);
+        sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_Email, USER_Email);
     }
 
     // database
@@ -186,7 +201,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                 default:
                     throw new IllegalArgumentException("Unknown URI: " + uri);
             }
-        } else {
+        } else if (uriType >= 2000 && uriType <= 2050) {
             // Check if the caller has requested a column which does not exists
             checkColumns(projection, Constants.CHAT_TABLE_NAME);
 
@@ -212,6 +227,37 @@ public class FrinmeanContentProvider extends ContentProvider {
                     break;
                 case CHAT_ChatName:
                     queryBuilder.appendWhere(Constants.T_CHAT_ChatName + "="
+                            + uri.getLastPathSegment());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown URI: " + uri);
+            }
+        } else if (uriType >= 3000 && uriType <= 3050) {
+            // Check if the caller has requested a column which does not exists
+            checkColumns(projection, Constants.USER_TABLE_NAME);
+
+            queryBuilder.setTables(Constants.USER_TABLE_NAME);
+            switch (uriType) {
+                case Frinmean_users:
+                    break;
+                case USER_ID:
+                    queryBuilder.appendWhere(Constants.T_USER_ID + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case USER_BADBID:
+                    queryBuilder.appendWhere(Constants.T_USER_BADBID + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case USER_Username:
+                    queryBuilder.appendWhere(Constants.T_USER_Username + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case USER_AuthenticationTime:
+                    queryBuilder.appendWhere(Constants.T_USER_AuthenticationTime + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case USER_Email:
+                    queryBuilder.appendWhere(Constants.T_USER_Email + "="
                             + uri.getLastPathSegment());
                     break;
                 default:
@@ -249,6 +295,10 @@ public class FrinmeanContentProvider extends ContentProvider {
                 id = sqlDB.insert(Constants.CHAT_TABLE_NAME, null, values);
                 ret = Uri.parse(Constants.CHAT_TABLE_NAME + "/" + id);
                 break;
+            case Frinmean_users:
+                id = sqlDB.insert(Constants.USER_TABLE_NAME, null, values);
+                ret = Uri.parse(Constants.USER_TABLE_NAME + "/" + id);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -270,6 +320,9 @@ public class FrinmeanContentProvider extends ContentProvider {
                 rowsDeleted = sqlDB.delete(Constants.CHAT_TABLE_NAME, selection,
                         selectionArgs);
                 break;
+            case Frinmean_users:
+                rowsDeleted = sqlDB.delete(Constants.USER_TABLE_NAME, selection,
+                        selectionArgs);
             case MESSAGES_ID:
                 String msgid = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {
@@ -289,6 +342,17 @@ public class FrinmeanContentProvider extends ContentProvider {
                 } else {
                     rowsDeleted = sqlDB.delete(Constants.CHAT_TABLE_NAME,
                             Constants.CHAT_TABLE_NAME + "." + Constants.T_CHAT_ID + "=" + chatid + " and " + selection,
+                            selectionArgs);
+                }
+                break;
+            case USER_ID:
+                String userid = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsDeleted = sqlDB.delete(Constants.USER_TABLE_NAME,
+                            Constants.DATABASE_NAME + "." + Constants.T_USER_ID + "=" + userid, null);
+                } else {
+                    rowsDeleted = sqlDB.delete(Constants.USER_TABLE_NAME,
+                            Constants.USER_TABLE_NAME + "." + Constants.T_USER_ID + "=" + userid + " and " + selection,
                             selectionArgs);
                 }
                 break;
@@ -316,6 +380,10 @@ public class FrinmeanContentProvider extends ContentProvider {
                 rowsUpdated = sqlDB.update(Constants.CHAT_TABLE_NAME, values, selection,
                         selectionArgs);
                 break;
+            case Frinmean_users:
+                rowsUpdated = sqlDB.update(Constants.USER_TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
             case MESSAGES_ID:
                 String msgid = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {
@@ -335,6 +403,17 @@ public class FrinmeanContentProvider extends ContentProvider {
                 } else {
                     rowsUpdated = sqlDB.update(Constants.CHAT_TABLE_NAME, values,
                             Constants.T_CHAT_ID + "=" + chatid + " and " + selection,
+                            selectionArgs);
+                }
+                break;
+            case USER_ID:
+                String userid = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsUpdated = sqlDB.update(Constants.USER_TABLE_NAME, values,
+                            Constants.T_USER_ID + "=" + userid, null);
+                } else {
+                    rowsUpdated = sqlDB.update(Constants.USER_TABLE_NAME, values,
+                            Constants.T_USER_ID + "=" + userid + " and " + selection,
                             selectionArgs);
                 }
                 break;
@@ -392,6 +471,26 @@ public class FrinmeanContentProvider extends ContentProvider {
                 }
                 ret = Uri.parse(Constants.CHAT_TABLE_NAME + "/" + id);
                 break;
+            case Frinmean_users:
+                // First check if values has the BADBID (Backend-ID)
+                if (values.containsKey(Constants.T_USER_BADBID)) {
+                    int foundID = getID(values.getAsInteger(Constants.T_USER_BADBID), Constants.USER_TABLE_NAME);
+                    if (foundID == -1) {
+                        // Backend-ID found, make an update
+                        id = sqlDB.insert(Constants.USER_TABLE_NAME, null, values);
+                        notifyChange = true;
+                    } else {
+                        // Backend-ID not found so insert
+                        id = sqlDB.update(Constants.USER_TABLE_NAME, values,
+                                Constants.T_USER_BADBID + "=" + foundID, null);
+                    }
+                } else {
+                    // No Beckend ID given, jsut insert.
+                    id = sqlDB.insert(Constants.USER_TABLE_NAME, null, values);
+                    notifyChange = true;
+                }
+                ret = Uri.parse(Constants.USER_TABLE_NAME + "/" + id);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -413,6 +512,9 @@ public class FrinmeanContentProvider extends ContentProvider {
             } else if (tablename.equalsIgnoreCase(Constants.CHAT_TABLE_NAME)) {
                 availableColumns = new HashSet<String>(
                         Arrays.asList(Constants.CHAT_DB_Columns));
+            } else if (tablename.equalsIgnoreCase(Constants.USER_TABLE_NAME)) {
+                availableColumns = new HashSet<String>(
+                        Arrays.asList(Constants.USER_DB_Columns));
             }
             // Check if all columns which are requested are available
             if (!availableColumns.containsAll(requestedColumns)) {
@@ -435,6 +537,11 @@ public class FrinmeanContentProvider extends ContentProvider {
             Cursor c = db.query(tablename, new String[]{Constants.T_CHAT_BADBID}, Constants.T_CHAT_BADBID + " =?", new String[]{Integer.toString(inid)}, null, null, null, null);
             if (c.moveToFirst()) {
                 ret = c.getInt(c.getColumnIndex(Constants.T_CHAT_BADBID));
+            }
+        } else if (tablename.equalsIgnoreCase(Constants.USER_TABLE_NAME)) {
+            Cursor c = db.query(tablename, new String[]{Constants.T_USER_BADBID}, Constants.T_USER_BADBID + " =?", new String[]{Integer.toString(inid)}, null, null, null, null);
+            if (c.moveToFirst()) {
+                ret = c.getInt(c.getColumnIndex(Constants.T_USER_BADBID));
             }
         }
         Log.d(TAG, "end getID");

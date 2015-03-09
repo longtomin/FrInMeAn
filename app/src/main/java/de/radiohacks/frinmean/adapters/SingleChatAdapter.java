@@ -34,6 +34,7 @@ public class SingleChatAdapter extends CursorAdapter {
     private static final int FILEMSG = 2;
     private static final int CONTACTMSG = 3;
     private static final int LOCATIONMSG = 4;
+    private static final int VIDEOMSG = 5;
 
     private int OID = 0;
     private String directory;
@@ -82,6 +83,8 @@ public class SingleChatAdapter extends CursorAdapter {
             ret = CONTACTMSG;
         } else if (in.equalsIgnoreCase(Constants.TYP_LOCATION)) {
             ret = LOCATIONMSG;
+        } else if (in.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+            ret = VIDEOMSG;
         }
         Log.d(TAG, "end findMsgType");
         return ret;
@@ -90,7 +93,7 @@ public class SingleChatAdapter extends CursorAdapter {
     @Override
     public int getViewTypeCount() {
         Log.d(TAG, "start & end getViewTypeCount");
-        return 5;
+        return 6;
     }
 
     @Override
@@ -128,6 +131,18 @@ public class SingleChatAdapter extends CursorAdapter {
                 break;
             case IMAGEMSG:
                 ret = li.inflate(R.layout.imagemsg, parent, false);
+                if (mine) {
+                    ret.setBackgroundResource(R.drawable.bubble_green);
+                    ret.setPadding(10, 5, 20, 20);
+                    ((TableLayout) ret).setGravity(Gravity.END);
+                } else {
+                    ret.setBackgroundResource(R.drawable.bubble_yellow);
+                    ret.setPadding(20, 5, 10, 20);
+                    ((TableLayout) ret).setGravity(Gravity.START);
+                }
+                break;
+            case VIDEOMSG:
+                ret = li.inflate(R.layout.videomsg, parent, false);
                 if (mine) {
                     ret.setBackgroundResource(R.drawable.bubble_green);
                     ret.setPadding(10, 5, 20, 20);
@@ -263,6 +278,44 @@ public class SingleChatAdapter extends CursorAdapter {
                     ImgOwningUserName.setGravity(Gravity.START);
                     ImgReadTimeStamp.setGravity(Gravity.START);
                     ImgSendTimeStamp.setGravity(Gravity.START);
+                }
+                break;
+            case VIDEOMSG:
+                TextView VidOwningUserName = (TextView) view.findViewById(R.id.VideoOwningUserName);
+                VidOwningUserName.setText(OName);
+                TextView VidSendTimeStamp = (TextView) view.findViewById(R.id.VideoSendTimeStamp);
+                VidSendTimeStamp.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(sDate));
+                TextView VidReadTimeStamp = (TextView) view.findViewById(R.id.VideoReadTimeStamp);
+                VidReadTimeStamp.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
+                ImageButton VButton = (ImageButton) view.findViewById(R.id.VideoImageButton);
+
+                String tmpvid;
+                if (directory.endsWith("/")) {
+                    tmpvid = Constants.VIDEODIR + "/" + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                } else {
+                    tmpvid = "/" + Constants.VIDEODIR + "/" + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                }
+
+                final String vidfile = directory + tmpvid;
+                VButton.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent();
+                        intent.setAction(android.content.Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.parse(vidfile), "video/*");
+
+                        mContext.startActivity(intent);
+                    }
+                });
+
+                if (msgOID == this.OID) {
+                    VidOwningUserName.setGravity(Gravity.END);
+                    VidSendTimeStamp.setGravity(Gravity.END);
+                } else {
+                    VidOwningUserName.setGravity(Gravity.START);
+                    VidReadTimeStamp.setGravity(Gravity.START);
+                    VidSendTimeStamp.setGravity(Gravity.START);
                 }
                 break;
         }

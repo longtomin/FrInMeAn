@@ -39,7 +39,6 @@ public class MeBaService extends IntentService {
     public ConnectivityManager conManager = null;
     private String username;
     private String password;
-    //private boolean https;
     private String directory;
     private BroadcastNotifier mBroadcaster = null;
     private RestFunctions rf;
@@ -82,7 +81,11 @@ public class MeBaService extends IntentService {
     }
 
     public boolean isNetworkConnected() {
-        return conManager.getActiveNetworkInfo().isConnected();
+        if (conManager != null) {
+            return conManager.getActiveNetworkInfo().isConnected();
+        } else {
+            return false;
+        }
     }
 
     protected void getPreferenceInfo() {
@@ -134,8 +137,9 @@ public class MeBaService extends IntentService {
             } else if (Constants.ACTION_SENDVIDEOMESSAGE.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
+                final int uid = intent.getIntExtra(Constants.USERID, -1);
                 final String VideoLoc = intent.getStringExtra(Constants.VIDEOLOCATION);
-                //handleActionSendVideoMessage(ChatName, cid, VideoLoc);
+                insertVideoMesgIntoDB(cid, uid, VideoLoc);
             } else if (Constants.ACTION_RELOAD_SETTING.equalsIgnoreCase(action)) {
                 getPreferenceInfo();
                 //buildServerURL();
@@ -231,7 +235,7 @@ public class MeBaService extends IntentService {
     }
 
     private void insertImageMesgIntoDB(int ChatID, int UserID, String Message) {
-        Log.d(TAG, "start handleActionSendImageMessage");
+        Log.d(TAG, "start insertImageMesgIntoDB");
 
         // First check if File is already in the Image Folder with the right size
         // If not, copy File to the Image Directory with the given Name
@@ -255,8 +259,37 @@ public class MeBaService extends IntentService {
             }
         }
         insertMsgIntoDB(ChatID, UserID, Constants.TYP_IMAGE, orgFile.getName());
-        Log.d(TAG, "end handleActionSendImageMessage");
+        Log.d(TAG, "end insertImageMesgIntoDB");
     }
+
+    private void insertVideoMesgIntoDB(int ChatID, int UserID, String Message) {
+        Log.d(TAG, "start insertVideoMesgIntoDB");
+
+        // First check if File is already in the Image Folder with the right size
+        // If not, copy File to the Image Directory with the given Name
+        // Then insert Entry into DB for next sync
+
+        File orgFile = new File(Message);
+
+        String localfname = new String();
+        if (directory.endsWith("/")) {
+            localfname += directory + Constants.VIDEODIR;
+        } else {
+            localfname += directory + "/" + Constants.VIDEODIR;
+        }
+
+        if (!orgFile.getAbsolutePath().equalsIgnoreCase(localfname + "/" + orgFile.getName())) {
+            // Copy file
+            try {
+                copy(orgFile, new File(localfname + "/" + orgFile.getName()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        insertMsgIntoDB(ChatID, UserID, Constants.TYP_VIDEO, orgFile.getName());
+        Log.d(TAG, "end insertVideoMesgIntoDB");
+    }
+
 
     private void insertMsgIntoDB(int ChatID, int UserID, String MessageType, String Message) {
         Log.d(TAG, "start insertMsgIntoDB");

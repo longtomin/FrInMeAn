@@ -19,6 +19,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
+
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -35,11 +39,14 @@ import de.radiohacks.frinmean.model.OutCheckNewMessages;
 import de.radiohacks.frinmean.model.OutFetchImageMessage;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutFetchTextMessage;
+import de.radiohacks.frinmean.model.OutFetchVideoMessage;
 import de.radiohacks.frinmean.model.OutGetImageMessageMetaData;
+import de.radiohacks.frinmean.model.OutGetVideoMessageMetaData;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutListChat;
 import de.radiohacks.frinmean.model.OutSendImageMessage;
 import de.radiohacks.frinmean.model.OutSendTextMessage;
+import de.radiohacks.frinmean.model.OutSendVideoMessage;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.RestFunctions;
 
@@ -255,7 +262,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                 if (outmeta != null) {
                     if (outmeta.getErrortext() == null || outmeta.getErrortext().isEmpty()) {
-                        if (!checkfileexists(outmeta.getImageMessage(), outmeta.getImageSize())) {
+                        if (!checkfileexists(outmeta.getImageMessage(), TYP_IMAGE, outmeta.getImageSize(), outmeta.getImageMD5Hash())) {
                             OutFetchImageMessage ofim = rf.fetchImageMessage(username, password, m.getImageMsgID());
                             if (ofim != null) {
                                 if (ofim.getErrortext() == null || ofim.getErrortext().isEmpty()) {
@@ -305,14 +312,28 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 //                }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_VIDEO)) {
                 valuesins.put(T_MESSAGES_VideoMsgID, m.getVideoMsgID());
-                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                client.release();
-//                OutFetchVideoMessage ofvm = checkAndDownloadImageMessage(m.getImageMsgID());
-//                if (ofvm.getErrortext() == null || ofvm.getErrortext().isEmpty()) {
-//                    valuesins.put(Constants.T_ContactMsgValue, ofvm.getImageMessage());
-//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
-//                }
+                OutGetVideoMessageMetaData outmeta = rf.getVideoMessageMetaData(username, password, m.getVideoMsgID());
+
+                if (outmeta != null) {
+                    if (outmeta.getErrortext() == null || outmeta.getErrortext().isEmpty()) {
+                        if (!checkfileexists(outmeta.getVideoMessage(), TYP_VIDEO, outmeta.getVideoSize(), outmeta.getVideoMD5Hash())) {
+                            OutFetchVideoMessage ofvm = rf.fetchVideoMessage(username, password, m.getVideoMsgID());
+                            if (ofvm != null) {
+                                if (ofvm.getErrortext() == null || ofvm.getErrortext().isEmpty()) {
+                                    valuesins.put(T_MESSAGES_VideoMsgValue, ofvm.getVideoMessage());
+                                    ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                                    client.release();
+                                }
+                            }
+                        } else {
+                            valuesins.put(T_MESSAGES_VideoMsgValue, outmeta.getVideoMessage());
+                            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                            client.release();
+                        }
+                    }
+                }
             }
         }
 
@@ -349,21 +370,46 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, "end saveMessageToLDB");
     }
 
-    private boolean checkfileexists(String fname, long fsize) {
+    private boolean checkfileexists(String fname, String msgType, long fsize, String inmd5sumd) {
 
         boolean ret = false;
         File checkfile;
+        String checkfilepath = null;
 
         if (directory.endsWith("/")) {
-            checkfile = new File(directory + Constants.IMAGEDIR + "/" + fname);
+            if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+                checkfilepath = directory + Constants.IMAGEDIR + "/" + fname;
+            } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+                checkfilepath = directory + Constants.VIDEODIR + "/" + fname;
+            } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
+                checkfilepath = directory + Constants.FILESDIR + "/" + fname;
+            }
         } else {
-            checkfile = new File(directory + "/" + Constants.IMAGEDIR + "/" + fname);
+            if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+                checkfilepath = directory + "/" + Constants.IMAGEDIR + "/" + fname;
+            } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+                checkfilepath = directory + "/" + Constants.VIDEODIR + "/" + fname;
+            } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
+                checkfilepath = directory + "/" + Constants.FILESDIR + "/" + fname;
+            }
         }
+        checkfile = new File(checkfilepath);
 
         if (checkfile.exists()) {
             if (checkfile.length() == fsize) {
                 // File exists an has right size
-                ret = true;
+                HashCode md5 = null;
+                try {
+                    md5 = Files.hash(new File(checkfilepath),
+                            Hashing.md5());
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                if (md5.toString().equals(inmd5sumd)) {
+                    // MD5Sum is equal File already exists
+                    ret = true;
+                }
             }
         }
         return ret;
@@ -474,7 +520,25 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
 
             } else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
+                String vidfile = directory;
+                if (vidfile.endsWith("/")) {
+                    vidfile += Constants.VIDEODIR + "/" + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                } else {
+                    vidfile += "/" + Constants.VIDEODIR + "/" + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                }
+                OutSendVideoMessage outvid = rf.sendVideoMessage(username, password, vidfile);
+                if (outvid != null) {
+                    if (outvid.getErrortext() == null || outvid.getErrortext().isEmpty()) {
+                        OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outvid.getVideoID(), TYP_VIDEO);
+                        if (outins != null) {
+                            if (outins.getErrortext() == null || outins.getErrortext().isEmpty()) {
+                                updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outvid.getVideoID(), TYP_VIDEO, outvid.getVideoFileName());
+                                moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVideoFileName());
+                            }
+                        }
+                    }
 
+                }
             } else if (msgtype.equalsIgnoreCase(TYP_FILE)) {
 
             } else if (msgtype.equalsIgnoreCase(TYP_CONTACT)) {

@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -71,6 +72,27 @@ public class SingleChatActivity extends ActionBarActivity implements
     private String ChatName;
     private int OwningUserID;
     private EditText Message;
+
+    public static String getDataColumn(Context context, Uri uri, String selection,
+                                       String[] selectionArgs) {
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {
+                column
+        };
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                    null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int column_index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(column_index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -243,6 +265,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
                 vidintent.setAction(Constants.ACTION_SENDVIDEOMESSAGE);
                 vidintent.putExtra(Constants.CHATID, ChatID);
+                vidintent.putExtra(Constants.USERID, userid);
                 vidintent.putExtra(Constants.CHATNAME, ChatName);
 
                 if (m_videofromcamera.exists() && m_videofromcamera.length() > 0) {
@@ -263,24 +286,29 @@ public class SingleChatActivity extends ActionBarActivity implements
                 //Start MeBaService
                 Intent picintent = new Intent(this, MeBaService.class);
 
-                picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
                 picintent.putExtra(Constants.CHATID, ChatID);
                 picintent.putExtra(Constants.USERID, userid);
                 picintent.putExtra(Constants.CHATNAME, ChatName);
 
                 if (data != null) {
-
                     Uri selectedimage = data.getData();
 
-                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
-                    Cursor cursor = this.getContentResolver().query(selectedimage, filePathColumn, null, null, null);
-                    cursor.moveToFirst();
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    String filePath = cursor.getString(columnIndex);
-                    cursor.close();
+                    String mediaType = null;
+                    String filePath = null;
+                    if ("content".equalsIgnoreCase(selectedimage.getScheme())) {
+                        filePath = getDataColumn(this, selectedimage, null, null);
+                        String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
+                        mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                    }
 
-                    picintent.putExtra(Constants.IMAGELOCATION, filePath);
+                    if (mediaType.startsWith("image")) {
+                        picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
+                        picintent.putExtra(Constants.IMAGELOCATION, filePath);
 
+                    } else if (mediaType.startsWith("video")) {
+                        picintent.setAction(Constants.ACTION_SENDVIDEOMESSAGE);
+                        picintent.putExtra(Constants.VIDEOLOCATION, filePath);
+                    }
                     startService(picintent);
                 }
             } else if (resultCode == RESULT_CANCELED) {
@@ -317,7 +345,7 @@ public class SingleChatActivity extends ActionBarActivity implements
         Log.d(TAG, "start SendGalleryPicture");
 
         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-        photoPickerIntent.setType("image/*");
+        photoPickerIntent.setType("video/*, images/*");
         startActivityForResult(photoPickerIntent, SELECT_IMAGE_ACTIVITY_REQUEST_CODE);
 
         Log.d(TAG, "end SendGalleryPicture");
@@ -329,7 +357,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         // Name ist der Unix Timestamp um eindeutigkeit zu erzielen.
         // Name wird nach dem Upload in den Servernamen umbenannt.
-        File imagesFolder = new File(directory + "/" + Constants.IMAGEDIR);
+        File imagesFolder = new File(directory + "/" + Constants.VIDEODIR);
         imagesFolder.mkdirs();
         long imagetime = System.currentTimeMillis() / 1000L;
         m_videofromcamera = new File(imagesFolder, String.valueOf(imagetime) + ".mp4");

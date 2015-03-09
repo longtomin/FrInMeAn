@@ -260,25 +260,27 @@ public class RestClient {
             HttpPost httppost = httpposts[0];
 
             File f = new File(getFilename());
+            if (f.exists()) {
 
-            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-            builder.addBinaryBody("file", f, ContentType.MULTIPART_FORM_DATA, f.getName());
-            HttpEntity multipart = builder.build();
+                MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+                builder.addBinaryBody("file", f, ContentType.MULTIPART_FORM_DATA, f.getName());
+                HttpEntity multipart = builder.build();
 
-            httppost.setEntity(multipart);
+                httppost.setEntity(multipart);
 
-            response = client.execute(httppost);
-            responseCode = response.getStatusLine().getStatusCode();
-            HttpEntity entity = response.getEntity();
+                response = client.execute(httppost);
+                responseCode = response.getStatusLine().getStatusCode();
+                HttpEntity entity = response.getEntity();
 
-            if (entity != null) {
+                if (entity != null) {
 
-                InputStream instream = entity.getContent();
-                responseXML = convertStreamToString(instream);
+                    InputStream instream = entity.getContent();
+                    responseXML = convertStreamToString(instream);
 
-                // Closing the input stream will trigger connection release
-                instream.close();
+                    // Closing the input stream will trigger connection release
+                    instream.close();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

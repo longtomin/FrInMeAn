@@ -8,7 +8,7 @@
     <string name="chatname">Chatnamen angeben</string>
     <string name="action_searchuser">Benutzer suchen</string>
     <string name="action_sendcamera">Kamerabild senden</string>
-    <string name="action_sendpicture">Galleriebild senden</string>
+    <string name="action_sendpicture">Gallerieelment senden</string>
     <string name="action_sendvideo">Video senden</string>
     <string name="action_sendlocation">Standort senden</string>
     <string name="action_sendfile">Datei senden</string>

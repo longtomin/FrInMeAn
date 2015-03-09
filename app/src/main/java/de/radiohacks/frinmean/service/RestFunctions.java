@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 
@@ -29,13 +28,16 @@ import de.radiohacks.frinmean.model.OutDeleteMessageFromChat;
 import de.radiohacks.frinmean.model.OutFetchImageMessage;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutFetchTextMessage;
+import de.radiohacks.frinmean.model.OutFetchVideoMessage;
 import de.radiohacks.frinmean.model.OutGetImageMessageMetaData;
+import de.radiohacks.frinmean.model.OutGetVideoMessageMetaData;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutListChat;
 import de.radiohacks.frinmean.model.OutListUser;
 import de.radiohacks.frinmean.model.OutRemoveUserFromChat;
 import de.radiohacks.frinmean.model.OutSendImageMessage;
 import de.radiohacks.frinmean.model.OutSendTextMessage;
+import de.radiohacks.frinmean.model.OutSendVideoMessage;
 import de.radiohacks.frinmean.model.OutSignUp;
 
 /**
@@ -58,7 +60,11 @@ public class RestFunctions {
     }
 
     protected boolean isNetworkConnected() {
-        return conManager.getActiveNetworkInfo().isConnected();
+        if (conManager != null) {
+            return conManager.getActiveNetworkInfo().isConnected();
+        } else {
+            return false;
+        }
     }
 
     protected void getPreferenceInfo() {
@@ -681,7 +687,7 @@ public class RestFunctions {
                 if (savedFilename != null && !savedFilename.isEmpty()) {
                     out.setImageMessage(savedFilename);
                     File file = new File(directory + "/" + "images/" + savedFilename);
-                    MediaStore.Images.Media.insertImage(FrinmeanApplication.getAppContext().getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
+                    //MediaStore.Images.Media.insertImage(FrinmeanApplication.getAppContext().getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
 
                 } else {
                     out.setErrortext("ERROR_DOWNLOAD_IMAGE");
@@ -695,30 +701,118 @@ public class RestFunctions {
     }
 
     /* @POST
-    @Path("/senderrorreport")
+    @Path("/upload")
+    @Produces(MediaType.APPLICATION_XML)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public void sendErrorReport(
+    public OutSendVideoMessage uploadVideo(
+            @QueryParam(Constants.QPusername) String User,
+            @QueryParam(Constants.QPpassword) String Password,
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
 
-    public int sendErrorReport(String Message) {
-        Log.d(TAG, "start sendErrorReport");
-        int out = 0;
+    public OutSendVideoMessage sendVideoMessage(String inuser, String inpassword, String Message) {
+        Log.d(TAG, "start sendImageMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
+        OutSendVideoMessage out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/senderrorreport", https, port);
+            rc = new RestClient(CommunicationURL + "video/upload", https, port);
             try {
                 rc.AddHeader("enctype", "multipart/form-data");
+                rc.AddParam(Constants.USERNAME, convertB64(inuser));
+                rc.AddParam(Constants.PASSWORD, convertB64(inpassword));
                 rc.setFilename(Message);
 
                 String ret = rc.ExecuteRequestUploadXML(rc.BevorExecutePost());
 
-                out = rc.getResponseCode();
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OutSendVideoMessage.class, reader, false);
+                } else {
+                    ErrorHelper eh = new ErrorHelper(FrinmeanApplication.getAppContext());
+                    eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "end sendImageMessage");
+        Log.d(TAG, "end sendVideoMessage");
+        return out;
+    }
+
+    /* @GET
+        @Path("/getvideometadata")
+        @Produces(MediaType.APPLICATION_XML)
+        public OutGetVideoMessageMetaData getvideometadata(
+                @QueryParam(Constants.QPusername) String User,
+                @QueryParam(Constants.QPpassword) String Password,
+                @QueryParam("videoid") int videoid); */
+
+    public OutGetVideoMessageMetaData getVideoMessageMetaData(String inuser, String inpassword, int VidMsgID) {
+        Log.d(TAG, "start getVideoMessageMetaData with user=" + inuser + " password=" + inpassword + " VideoMessageID=" + String.valueOf(VidMsgID));
+        OutGetVideoMessageMetaData out = new OutGetVideoMessageMetaData();
+
+        if (checkServer()) {
+            try {
+                RestClient rc;
+                rc = new RestClient(CommunicationURL + "video/getvideometadata", https, port);
+                Integer vidid = VidMsgID;
+                rc.AddParam("username", convertB64(inuser));
+                rc.AddParam("password", convertB64(inpassword));
+                rc.AddParam("videoid", URLEncoder.encode(vidid.toString(), "UTF-8"));
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
+
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OutGetVideoMessageMetaData.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "end getVideoMessageMetaData");
+        return out;
+    }
+
+    /* @GET
+    @Path("/download/{username}/{password}/{videoeid}")
+    @Produces("image/*")
+    public Response downloadImage(@PathParam(Constants.QPusername) String User,
+                                  @PathParam(Constants.QPpassword) String Password,
+                                  @PathParam(Constants.QPvideoid) int videoid); */
+
+    public OutFetchVideoMessage fetchVideoMessage(String inuser, String inpassword, int VidMsgID) {
+        Log.d(TAG, "start fetchVideoMessage with user=" + inuser + " password=" + inpassword + " VideoMessageID=" + String.valueOf(VidMsgID));
+        OutFetchVideoMessage out = new OutFetchVideoMessage();
+
+        if (checkServer()) {
+
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "video/download", https, port);
+
+            rc.AddHeader("Accept", "video/mp4");
+            rc.setSaveDirectory(directory + "/" + Constants.VIDEODIR + "/");
+
+            try {
+                String savedFilename = rc.ExecuteRequestImage(rc.BevorExecuteGetPath(inuser, inpassword, VidMsgID));
+
+                if (savedFilename != null && !savedFilename.isEmpty()) {
+                    out.setVideoMessage(savedFilename);
+                    // TODO Video muss im MediaStore noch registriert werden
+                    //File file = new File(directory + "/" + Constants.VIDEODIR + "/" + savedFilename);
+                    //MediaStore.Video.Media.(FrinmeanApplication.getAppContext().getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
+
+                } else {
+                    out.setErrortext("ERROR_DOWNLOAD_VIDEO");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "end fetchVideoMessage");
         return out;
     }
 }
