@@ -235,109 +235,53 @@ public class SingleChatActivity extends ActionBarActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "start onActivityResult");
-        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
 
-                //Start MeBaService
-                Intent picintent = new Intent(this, MeBaService.class);
+        if (resultCode == RESULT_OK) {
 
-                picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
-                picintent.putExtra(Constants.CHATID, ChatID);
-                picintent.putExtra(Constants.USERID, userid);
-                picintent.putExtra(Constants.CHATNAME, ChatName);
+            //Start MeBaService
+            Intent picintent = new Intent(this, MeBaService.class);
 
-                if (m_imagefromcamera.exists() && m_imagefromcamera.length() > 0) {
-                    picintent.putExtra(Constants.IMAGELOCATION, m_imagefromcamera.getAbsolutePath());
+            picintent.putExtra(Constants.CHATID, ChatID);
+            picintent.putExtra(Constants.USERID, userid);
+            picintent.putExtra(Constants.CHATNAME, ChatName);
 
+            if (data != null) {
+                Uri selectedimage = data.getData();
+
+                String mediaType = null;
+                String filePath = null;
+                if ("content".equalsIgnoreCase(selectedimage.getScheme())) {
+                    filePath = getDataColumn(this, selectedimage, null, null);
+                    String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
+                    mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                }
+
+                if (mediaType.startsWith("image")) {
+                    picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
+                    picintent.putExtra(Constants.IMAGELOCATION, filePath);
+                    startService(picintent);
+
+                } else if (mediaType.startsWith("video")) {
+                    picintent.setAction(Constants.ACTION_SENDVIDEOMESSAGE);
+                    picintent.putExtra(Constants.VIDEOLOCATION, filePath);
                     startService(picintent);
                 }
-            } else if (resultCode == RESULT_CANCELED) {
-                // User cancelled the image capture
-            } else {
-                // Image capture failed, advise user
             }
-        }
-
-        if (requestCode == CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                //Start MeBaService
-                Intent vidintent = new Intent(this, MeBaService.class);
-
-                vidintent.setAction(Constants.ACTION_SENDVIDEOMESSAGE);
-                vidintent.putExtra(Constants.CHATID, ChatID);
-                vidintent.putExtra(Constants.USERID, userid);
-                vidintent.putExtra(Constants.CHATNAME, ChatName);
-
-                if (m_videofromcamera.exists() && m_videofromcamera.length() > 0) {
-                    vidintent.putExtra(Constants.VIDEOLOCATION, m_videofromcamera.getAbsolutePath());
-
-                    startService(vidintent);
-                }
-            } else if (resultCode == RESULT_CANCELED) {
-                // User cancelled the video capture
-            } else {
-                // Video capture failed, advise user
-            }
-        }
-
-        if (requestCode == SELECT_IMAGE_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-
-                //Start MeBaService
-                Intent picintent = new Intent(this, MeBaService.class);
-
-                picintent.putExtra(Constants.CHATID, ChatID);
-                picintent.putExtra(Constants.USERID, userid);
-                picintent.putExtra(Constants.CHATNAME, ChatName);
-
-                if (data != null) {
-                    Uri selectedimage = data.getData();
-
-                    String mediaType = null;
-                    String filePath = null;
-                    if ("content".equalsIgnoreCase(selectedimage.getScheme())) {
-                        filePath = getDataColumn(this, selectedimage, null, null);
-                        String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
-                        mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    }
-
-                    if (mediaType.startsWith("image")) {
-                        picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
-                        picintent.putExtra(Constants.IMAGELOCATION, filePath);
-
-                    } else if (mediaType.startsWith("video")) {
-                        picintent.setAction(Constants.ACTION_SENDVIDEOMESSAGE);
-                        picintent.putExtra(Constants.VIDEOLOCATION, filePath);
-                    }
-                    startService(picintent);
-                }
-            } else if (resultCode == RESULT_CANCELED) {
-                // User cancelled the image capture
-            } else {
-                // Image capture failed, advise user
-            }
+        } else if (resultCode == RESULT_CANCELED) {
+            // User cancelled the image capture
+        } else {
+            // Image capture failed, advise user
         }
         Log.d(TAG, "end onActivityResult");
     }
 
     private void SendCameraPicture() {
         Log.d(TAG, "start SendCameraPicture");
-        // create Intent to take a picture and return control to the calling application
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        // Name wird nach dem Upload in den Servernamen umbenannt.
-        File imagesFolder = new File(directory + "/" + Constants.IMAGEDIR);
-        imagesFolder.mkdirs();
-
-        long imagetime = System.currentTimeMillis() / 1000L;
-        String fname = username.replaceAll("\\s", "");
-        fname += String.valueOf(imagetime) + ".jpg";
-
-        m_imagefromcamera = new File(imagesFolder, fname);
-        Uri uriSavedImage = Uri.fromFile(m_imagefromcamera);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
-        // start the image capture Intent
-        startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+        }
         Log.d(TAG, "end SendCameraPicture");
     }
 
@@ -351,21 +295,14 @@ public class SingleChatActivity extends ActionBarActivity implements
         Log.d(TAG, "end SendGalleryPicture");
     }
 
-    private void SendVideo() {
-        Log.d(TAG, "start SendVideo");
-        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+    private void SendCameraVideo() {
+        Log.d(TAG, "start SendCameraVideo");
 
-        // Name ist der Unix Timestamp um eindeutigkeit zu erzielen.
-        // Name wird nach dem Upload in den Servernamen umbenannt.
-        File imagesFolder = new File(directory + "/" + Constants.VIDEODIR);
-        imagesFolder.mkdirs();
-        long imagetime = System.currentTimeMillis() / 1000L;
-        m_videofromcamera = new File(imagesFolder, String.valueOf(imagetime) + ".mp4");
-        Uri uriSavedImage = Uri.fromFile(m_videofromcamera);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
-        // start the image capture Intent
-        startActivityForResult(intent, CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE);
-        Log.d(TAG, "start SendVideo");
+        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takeVideoIntent, CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE);
+        }
+        Log.d(TAG, "start SendCameraVideo");
     }
 
     @Override
@@ -501,7 +438,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                         SendGalleryPicture();
                         return true;
                     case R.id.action_sendvideo:
-                        SendVideo();
+                        SendCameraVideo();
                         return true;
                     case R.id.action_sendcamera:
                         SendCameraPicture();
