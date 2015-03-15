@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -100,6 +101,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private String password;
     private String directory;
     private int userid;
+    private String ringtone;
+    private boolean vibrate;
     private RestFunctions rf;
 
     /**
@@ -132,6 +135,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
+        this.ringtone = sharedPrefs.getString(Constants.prefRingtone, "DEFAULT_SOUND");
+        this.vibrate = sharedPrefs.getBoolean(Constants.prefVibrate, true);
 //        this.userid = Integer.parseInt(sharedPrefs.getString(Constants.PrefUserID, "-1"));
         Log.d(TAG, "end getPferefenceInfo");
     }
@@ -355,12 +360,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             PendingIntent pIntent = PendingIntent.getActivity(this.getContext(), 0, resultIntent, 0);
 
+            long[] vibpattern = {500, 100, 500};
             // Build notification
             // Actions are just fake
-            Notification noti = new Notification.Builder(this.getContext())
-                    .setContentTitle("FrInMeAn")
-                    .setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat " + ChatName).setSmallIcon(R.drawable.ic_stat_chat)
-                    .setContentIntent(pIntent).build();
+            Notification.Builder nb = new Notification.Builder(this.getContext());
+            nb.setContentTitle("FrInMeAn");
+            nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat " + ChatName).setSmallIcon(R.drawable.ic_stat_chat);
+            nb.setSound(Uri.parse(ringtone));
+            nb.setContentIntent(pIntent);
+
+            if (vibrate) {
+                nb.setVibrate(vibpattern);
+            }
+
+            Notification noti = nb.build();
+
             NotificationManager notificationManager = (NotificationManager) this.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
             // hide the notification after its selected
             noti.flags |= Notification.FLAG_AUTO_CANCEL;

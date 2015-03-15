@@ -1,10 +1,13 @@
 package de.radiohacks.frinmean;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -14,7 +17,7 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
-import net.rdrei.android.dirchooser.DirectoryChooserActivity;
+import com.nononsenseapps.filepicker.FilePickerActivity;
 
 import java.io.File;
 
@@ -42,6 +45,27 @@ public class SettingsActivity extends PreferenceActivity {
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
     private static final int REQUEST_DIRECTORY = 0;
     private static final int REQUEST_USER_THUMBNAIL = 1;
+
+    public static String getDataColumn(Context context, Uri uri, String selection,
+                                       String[] selectionArgs) {
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {
+                column
+        };
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                    null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int column_index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(column_index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -185,13 +209,28 @@ public class SettingsActivity extends PreferenceActivity {
         filePicker.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                final Intent chooserIntent = new Intent(
+
+                /*final Intent chooserIntent = new Intent(
                         SettingsActivity.this,
                         DirectoryChooserActivity.class);
                 chooserIntent.putExtra(
                         DirectoryChooserActivity.EXTRA_NEW_DIR_NAME,
                         "Frinmean");
                 startActivityForResult(chooserIntent, REQUEST_DIRECTORY);
+                return true;*/
+
+
+                // This always works
+                Intent i = new Intent(SettingsActivity.this, FilePickerActivity.class);
+// This works if you defined the intent filter
+// Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+
+// Set these depending on your use case. These are the defaults.
+                i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+                i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, true);
+                i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR);
+
+                startActivityForResult(i, REQUEST_DIRECTORY);
                 return true;
             }
         });
@@ -256,40 +295,41 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_DIRECTORY) {
-            if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
-                // Zuerst speichern wir den Wert in der Präferenz
-                String s = data
-                        .getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR);
+        if (requestCode == REQUEST_DIRECTORY && resultCode == Activity.RESULT_OK) {
+
+            Uri file_uri = data.getData();
+            String real_path = file_uri.getPath();
+
+            if (real_path != null && !real_path.isEmpty()) {
                 SharedPreferences sharedPrefs = PreferenceManager
                         .getDefaultSharedPreferences(this);
                 SharedPreferences.Editor editor = sharedPrefs.edit();
-                editor.putString("prefDirectory", s);
+                editor.putString("prefDirectory", real_path);
                 editor.commit();
 
                 // Jetzt erstellen wir die Unterverzeichnisse
 
 
                 //File basedir = new File(Environment.getExternalStorageDirectory() + s);
-                File basedir = new File(s);
+                File basedir = new File(real_path);
                 if (basedir.exists() && basedir.isDirectory()) {
-                    File imagedir = new File(s + "/" + Constants.IMAGEDIR);
+                    File imagedir = new File(real_path + "/" + Constants.IMAGEDIR);
                     if (!imagedir.exists() || !imagedir.isDirectory()) {
                         imagedir.mkdir();
                     }
-                    File imagepreviewdir = new File(s + "/" + Constants.IMAGEPREVIEWDIR);
+                    File imagepreviewdir = new File(real_path + "/" + Constants.IMAGEPREVIEWDIR);
                     if (!imagepreviewdir.exists() || !imagepreviewdir.isDirectory()) {
                         imagepreviewdir.mkdir();
                     }
-                    File imagechatdir = new File(s + "/" + Constants.CHATIAMGEDIR);
+                    File imagechatdir = new File(real_path + "/" + Constants.CHATIAMGEDIR);
                     if (!imagechatdir.exists() || !imagechatdir.isDirectory()) {
                         imagechatdir.mkdir();
                     }
-                    File videodir = new File(s + "/" + Constants.VIDEODIR);
+                    File videodir = new File(real_path + "/" + Constants.VIDEODIR);
                     if (!videodir.exists() || !videodir.isDirectory()) {
                         videodir.mkdir();
                     }
-                    File filesdir = new File(s + "/" + Constants.FILESDIR);
+                    File filesdir = new File(real_path + "/" + Constants.FILESDIR);
                     if (!filesdir.exists() || !filesdir.isDirectory()) {
                         filesdir.mkdir();
                     }

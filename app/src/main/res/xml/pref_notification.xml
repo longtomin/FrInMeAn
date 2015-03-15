@@ -13,7 +13,7 @@
     <RingtonePreference
         android:defaultValue="content://settings/system/notification_sound"
         android:dependency="notifications_new_message"
-        android:key="notifications_new_message_ringtone"
+        android:key="prefRingtone"
         android:ringtoneType="notification"
         android:title="@string/pref_title_ringtone" />
 
@@ -21,7 +21,7 @@
     <CheckBoxPreference
         android:defaultValue="true"
         android:dependency="notifications_new_message"
-        android:key="notifications_new_message_vibrate"
+        android:key="prefVibrate"
         android:title="@string/pref_title_vibrate" />
 
 </PreferenceScreen>
