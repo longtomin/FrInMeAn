@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.TableLayout;
 import android.widget.TextView;
 
 import java.io.File;
@@ -152,27 +151,29 @@ public class SingleChatAdapter extends CursorAdapter {
                 }
                 break;
             case IMAGEMSG:
-                ret = li.inflate(R.layout.imagemsg, parent, false);
                 if (mine) {
-                    ret.setBackgroundResource(R.drawable.bubble_green);
+                    ret = li.inflate(R.layout.rellay_imageownmsg, parent, false);
+ /*                   ret.setBackgroundResource(R.drawable.bubble_green);
                     ret.setPadding(10, 5, 20, 20);
-                    ((TableLayout) ret).setGravity(Gravity.END);
+                    ((TableLayout) ret).setGravity(Gravity.END);*/
                 } else {
-                    ret.setBackgroundResource(R.drawable.bubble_yellow);
+                    ret = li.inflate(R.layout.rellay_imageforeignmsg, parent, false);
+                    /* ret.setBackgroundResource(R.drawable.bubble_yellow);
                     ret.setPadding(20, 5, 10, 20);
-                    ((TableLayout) ret).setGravity(Gravity.START);
+                    ((TableLayout) ret).setGravity(Gravity.START); */
                 }
                 break;
             case VIDEOMSG:
-                ret = li.inflate(R.layout.videomsg, parent, false);
                 if (mine) {
-                    ret.setBackgroundResource(R.drawable.bubble_green);
+                    ret = li.inflate(R.layout.rellay_videoownmsg, parent, false);
+                    /* ret.setBackgroundResource(R.drawable.bubble_green);
                     ret.setPadding(10, 5, 20, 20);
-                    ((TableLayout) ret).setGravity(Gravity.END);
+                    ((TableLayout) ret).setGravity(Gravity.END); */
                 } else {
-                    ret.setBackgroundResource(R.drawable.bubble_yellow);
+                    ret = li.inflate(R.layout.rellay_videoforeignmsg, parent, false);
+                    /*ret.setBackgroundResource(R.drawable.bubble_yellow);
                     ret.setPadding(20, 5, 10, 20);
-                    ((TableLayout) ret).setGravity(Gravity.START);
+                    ((TableLayout) ret).setGravity(Gravity.START);*/
                 }
                 break;
         }
