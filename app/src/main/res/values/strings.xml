@@ -36,6 +36,7 @@
     <string name="not_connected_to_network">Keine Internet Verbindung</string>
     <string name="DirecotryChooser">Ablageort auswählen</string>
     <string name="SelectOwnImage">Eigenes Bild auswählen</string>
+    <string name="message_option">Nachrichten Optionen</string>
 
     <!-- String for ErrorText FROM SERVER -->
     <string name="ERROR_NO_CONNECTION_TO_SERVER">Keine Verbindung zum Server!</string>

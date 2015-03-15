@@ -61,7 +61,11 @@ public class RestFunctions {
 
     protected boolean isNetworkConnected() {
         if (conManager != null) {
-            return conManager.getActiveNetworkInfo().isConnected();
+            if (conManager.getActiveNetworkInfo() != null) {
+                return conManager.getActiveNetworkInfo().isConnected();
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -312,6 +316,41 @@ public class RestFunctions {
         return out;
     }
 
+    /* @DELETE
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("/deletemessagefromchat")
+    public OutDeleteMessageFromChat deleteMessageFromChat(
+            @QueryParam(Constants.QPusername) String User,
+            @QueryParam(Constants.QPpassword) String Password,
+            @QueryParam(Constants.QPmessageid) int MessageID);*/
+
+    public OutDeleteMessageFromChat deleteMessageFromChat(String inuser, String inpassword, int inmessageid) {
+        Log.d(TAG, "start removeuserfromchat with user=" + inuser + " password=" + inpassword);
+        OutDeleteMessageFromChat out = null;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "user/deletemessagefromchat", https, port);
+            try {
+                rc.AddParam(Constants.QPusername, convertB64(inuser));
+                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+                rc.AddParam(Constants.QPmessageid, Integer.toString(inmessageid));
+
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteDeleteQuery());
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OutDeleteMessageFromChat.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "end removeuserfromchat");
+        return out;
+    }
+
+
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/listuser")
@@ -484,7 +523,6 @@ public class RestFunctions {
         Log.d(TAG, "start insertmessageintochat");
         return out;
     }
-
 
     /* @DELETE
     @Produces(MediaType.APPLICATION_XML)

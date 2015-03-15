@@ -215,6 +215,7 @@ public class StartActivity extends Activity {
                                     Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
                                     startchat.putExtra(Constants.USERID, res.getUserID());
                                     startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
+                                    startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FULL);
                                     startActivity(startchat);
                                     StartActivity.this.finish();
                                 }

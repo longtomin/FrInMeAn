@@ -28,6 +28,8 @@ import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.model.OutAddUserToChat;
 import de.radiohacks.frinmean.model.OutAuthenticate;
 import de.radiohacks.frinmean.model.OutCreateChat;
+import de.radiohacks.frinmean.model.OutDeleteMessageFromChat;
+import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutListUser;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 
@@ -120,7 +122,7 @@ public class MeBaService extends IntentService {
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final int uid = intent.getIntExtra(Constants.USERID, -1);
                 final String TextMessage = intent.getStringExtra(Constants.TEXTMESSAGE);
-                insertMsgIntoDB(cid, uid, Constants.TYP_TEXT, TextMessage);
+                insertNewMsgIntoDB(cid, uid, Constants.TYP_TEXT, TextMessage);
             } else if (Constants.ACTION_CREATECHAT.equalsIgnoreCase(action)) {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 handleActionCreateChat(ChatName);
@@ -149,9 +151,46 @@ public class MeBaService extends IntentService {
                 sSyncAdapter.syncGetMessageFromChat(cid, 0, ChatName);
             } else if (Constants.ACTION_AUTHENTICATE.equalsIgnoreCase(action)) {
                 handleActionAuthenticateUser();
+            } else if (Constants.ACTION_INSERTMESSAGEINTOCHAT.equalsIgnoreCase(action)) {
+                final String mtype = intent.getStringExtra(Constants.MESSAGETYPE);
+                final int cid = intent.getIntExtra(Constants.CHATID, -1);
+                final int cntmid = intent.getIntExtra(Constants.FWDCONTENTMESSAGEID, -1);
+                final int uid = intent.getIntExtra(Constants.USERID, -1);
+                final String ContentMsg = intent.getStringExtra(Constants.FWDCONTENTMESSAGE);
+                handleActionInsertFwdMsgIntoChat(cid, uid, cntmid, mtype, ContentMsg);
+            } else if (Constants.ACTION_DELETEMESSAGEFROMCHAT.equalsIgnoreCase(action)) {
+                final int mid = intent.getIntExtra(Constants.MESSAGEID, -1);
+                handleActionDeleteMsgFromChat(mid);
             }
         }
         Log.d(TAG, "start onHandleIntent");
+    }
+
+    private void handleActionInsertFwdMsgIntoChat(int ChatID, int UserID, int ContetntMsgID, String ContentMsgType, String ContentMessage) {
+        Log.d(TAG, "start handleActionInsertMsgIntoChat");
+
+        try {
+            OutInsertMessageIntoChat out = rf.insertmessageintochat(username, password, ChatID, ContetntMsgID, ContentMsgType);
+            insertFwdMsgIntoDB(ChatID, UserID, out.getMessageID(), out.getSendTimestamp(), ContentMsgType, ContentMessage, ContetntMsgID);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "end handleActionInsertMsgIntoChat");
+    }
+
+    private void handleActionDeleteMsgFromChat(int inmid) {
+        Log.d(TAG, "start handleActionInsertMsgIntoChat");
+
+        try {
+            OutDeleteMessageFromChat out = rf.deleteMessageFromChat(username, password, inmid);
+            Serializer serializer = new Persister();
+            StringWriter OutString = new StringWriter();
+
+            serializer.write(out, OutString);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "end handleActionInsertMsgIntoChat");
     }
 
     private void handleActionAddUserToChat(int ChatID, int UserID) {
@@ -258,7 +297,7 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
-        insertMsgIntoDB(ChatID, UserID, Constants.TYP_IMAGE, orgFile.getName());
+        insertNewMsgIntoDB(ChatID, UserID, Constants.TYP_IMAGE, orgFile.getName());
         Log.d(TAG, "end insertImageMesgIntoDB");
     }
 
@@ -286,12 +325,12 @@ public class MeBaService extends IntentService {
                 e.printStackTrace();
             }
         }
-        insertMsgIntoDB(ChatID, UserID, Constants.TYP_VIDEO, orgFile.getName());
+        insertNewMsgIntoDB(ChatID, UserID, Constants.TYP_VIDEO, orgFile.getName());
         Log.d(TAG, "end insertVideoMesgIntoDB");
     }
 
 
-    private void insertMsgIntoDB(int ChatID, int UserID, String MessageType, String Message) {
+    private void insertNewMsgIntoDB(int ChatID, int UserID, String MessageType, String Message) {
         Log.d(TAG, "start insertMsgIntoDB");
 
         // Insert new Message into local DB and trigger Sync to upload the Information.
@@ -326,6 +365,48 @@ public class MeBaService extends IntentService {
         } else if (MessageType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
             valuesins.put(Constants.T_MESSAGES_VideoMsgID, 0);
             valuesins.put(Constants.T_MESSAGES_VideoMsgValue, Message);
+        }
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+        client.getLocalContentProvider().insert(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+
+        Log.d(TAG, "end insertMsgIntoDB");
+    }
+
+    private void insertFwdMsgIntoDB(int ChatID, int UserID, int MsgID, long timeStamp, String MessageType, String ContentMessage, int ContentMsgID) {
+        Log.d(TAG, "start insertMsgIntoDB");
+
+        // Insert new Message into local DB and trigger Sync to upload the Information.
+        // To find the not send messages the Backend ID musst be 0 and the
+        // Sendtimestamp musst be 0
+        // The Readtimestamp and the MessageIDs are supplied by the Server
+        // The ChatID is needed to insert the Message into the right Chat afterwards
+
+        ContentValues valuesins = new ContentValues();
+        valuesins.put(Constants.T_MESSAGES_BADBID, MsgID);
+        valuesins.put(Constants.T_MESSAGES_OwningUserID, UserID);
+        valuesins.put(Constants.T_MESSAGES_OwningUserName, username);
+        valuesins.put(Constants.T_MESSAGES_ChatID, ChatID);
+        valuesins.put(Constants.T_MESSAGES_MessageTyp, MessageType);
+        valuesins.put(Constants.T_MESSAGES_SendTimestamp, timeStamp);
+        valuesins.put(Constants.T_MESSAGES_ReadTimestamp, timeStamp);
+        if (MessageType.equalsIgnoreCase(Constants.TYP_TEXT)) {
+            valuesins.put(Constants.T_MESSAGES_TextMsgID, ContentMsgID);
+            valuesins.put(Constants.T_MESSAGES_TextMsgValue, ContentMessage);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+            valuesins.put(Constants.T_MESSAGES_ImageMsgID, ContentMsgID);
+            valuesins.put(Constants.T_MESSAGES_ImageMsgValue, ContentMessage);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_LOCATION)) {
+            valuesins.put(Constants.T_MESSAGES_LocationMsgID, ContentMsgID);
+            valuesins.put(Constants.T_MESSAGES_LocationMsgValue, ContentMessage);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_CONTACT)) {
+            valuesins.put(Constants.T_MESSAGES_ContactMsgID, ContentMsgID);
+            valuesins.put(Constants.T_MESSAGES_ContactMsgValue, ContentMessage);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_FILE)) {
+            valuesins.put(Constants.T_MESSAGES_FileMsgID, ContentMsgID);
+            valuesins.put(Constants.T_MESSAGES_FileMsgValue, ContentMessage);
+        } else if (MessageType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+            valuesins.put(Constants.T_MESSAGES_VideoMsgID, ContentMsgID);
+            valuesins.put(Constants.T_MESSAGES_VideoMsgValue, ContentMessage);
         }
         ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
         client.getLocalContentProvider().insert(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);

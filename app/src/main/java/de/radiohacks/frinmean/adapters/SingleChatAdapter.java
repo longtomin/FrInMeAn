@@ -1,6 +1,8 @@
 package de.radiohacks.frinmean.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -20,8 +22,10 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import de.radiohacks.frinmean.ChatActivity;
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.R;
+import de.radiohacks.frinmean.service.MeBaService;
 
 /**
  * Created by thomas on 25.10.14.
@@ -111,12 +115,30 @@ public class SingleChatAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(Context context, Cursor cur, ViewGroup parent) {
+    public View newView(final Context context, Cursor cur, ViewGroup parent) {
         Log.d(TAG, "start newView");
         View ret = null;
 
-        String msgType = cur.getString(Constants.ID_MESSAGES_MessageType);
+        final String msgType = cur.getString(Constants.ID_MESSAGES_MessageType);
+        final int chatID = cur.getInt(Constants.ID_MESSAGES_ChatID);
+        final int msgID = cur.getInt(Constants.ID_MESSAGES_BADBID);
         String msgOID = cur.getString(Constants.ID_MESSAGES_OwningUserID);
+
+        // Needed for the innerclass in the dilaog.
+        final int imageid = cur.getInt(Constants.ID_MESSAGES_ImageMsgID);
+        final int textid = cur.getInt(Constants.ID_MESSAGES_TextMsgID);
+        final int locationid = cur.getInt(Constants.ID_MESSAGES_LocationMsgID);
+        final int fileid = cur.getInt(Constants.ID_MESSAGES_FileMsgID);
+        final int contactid = cur.getInt(Constants.ID_MESSAGES_ContactMsgID);
+        final int videoid = cur.getInt(Constants.ID_MESSAGES_VideoMsgID);
+        final String imageval = cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
+        final String textval = cur.getString(Constants.ID_MESSAGES_TextMsgValue);
+        final String locationoval = cur.getString(Constants.ID_MESSAGES_LocationMsgValue);
+        final String fileval = cur.getString(Constants.ID_MESSAGES_FileMsgValue);
+        final String contactval = cur.getString(Constants.ID_MESSAGES_ContactMsgValue);
+        final String videoval = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
+
+
         boolean mine = msgOID.equalsIgnoreCase(String.valueOf(OID));
         LayoutInflater li = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -154,6 +176,67 @@ public class SingleChatAdapter extends CursorAdapter {
                 }
                 break;
         }
+        if (ret != null) ret.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle(R.string.message_option);
+                builder.setItems(R.array.message_options, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // The 'which' argument contains the index position
+                        // of the selected item
+                        switch (which) {
+                            case 0:
+                                // Löschen
+                                //TODO Dialog mit Löschen vom Mobiltelefon einblenden (VIDEO/IMAGE/FILES)
+                                Intent delintent = new Intent(context, MeBaService.class);
+
+                                break;
+                            case 1:
+                                // Weiterleiten
+                                Intent startchat = new Intent(context, ChatActivity.class);
+                                startchat.putExtra(Constants.USERID, OID);
+                                startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FORWARD);
+                                startchat.putExtra(Constants.SENDCHATID, chatID);
+
+                                startchat.putExtra(Constants.MESSAGETYPE, msgType);
+                                switch (findMsgType(msgType)) {
+                                    case TEXTMSG:
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, textid);
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, textval);
+                                        break;
+                                    case IMAGEMSG:
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, imageid);
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, imageval);
+                                        break;
+                                    case FILEMSG:
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, fileid);
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, fileval);
+                                        break;
+                                    case CONTACTMSG:
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, contactid);
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, contactval);
+                                        break;
+                                    case LOCATIONMSG:
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, locationid);
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, locationoval);
+                                        break;
+                                    case VIDEOMSG:
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, videoid);
+                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, videoval);
+                                        break;
+                                }
+
+                                context.startActivity(startchat);
+                                break;
+                        }
+                    }
+                });
+                AlertDialog dlg = builder.create();
+                dlg.show();
+                return false;
+            }
+        });
         Log.d(TAG, "end newView");
         return ret;
     }

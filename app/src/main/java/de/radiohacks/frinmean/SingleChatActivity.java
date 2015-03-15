@@ -25,7 +25,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -35,7 +34,6 @@ import android.widget.Toast;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
-import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -66,8 +64,6 @@ public class SingleChatActivity extends ActionBarActivity implements
     private String username;
     private String directory;
     private int userid;
-    private File m_imagefromcamera;
-    private File m_videofromcamera;
     private int ChatID;
     private String ChatName;
     private int OwningUserID;
@@ -130,15 +126,6 @@ public class SingleChatActivity extends ActionBarActivity implements
 
 
         ListView lv = (ListView) findViewById(R.id.singlechatlist);
-
-        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-                // ToDo Dialog mit Loeschen oder weiterleiten
-                return false;
-            }
-        });
 
         lv.setAdapter(mAdapter);
 

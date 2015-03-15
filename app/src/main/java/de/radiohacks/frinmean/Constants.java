@@ -13,6 +13,7 @@ public class Constants {
     public static final String ACTION_AUTHENTICATE = "authenticate";
     public static final String ACTION_CREATECHAT = "createchat";
     public static final String ACTION_DELETECHAT = "deletechat";
+    public static final String ACTION_DELETEMESSAGEFROMCHAT = "deletemessagefromchat";
     public static final String ACTION_ADDUSERTOCHAT = "addusertochat";
     public static final String ACTION_REMOVEUSERFROMCHAT = "removeuserfromchat";
     public static final String ACTION_LISTUSER = "listuser";
@@ -30,6 +31,9 @@ public class Constants {
      */
     public static final String ACTION_RELOAD_SETTING = "reloadsettings";
     public static final String ACTION_FULLSYNC = "fullsync";
+    public static final String CHAT_ACTIVITY_MODE = "chat_activity_mode";
+    public static final String CHAT_ACTIVITY_FULL = "chat_activity_full";
+    public static final String CHAT_ACTIVITY_FORWARD = "chat_activity_forward";
 
     /*
     Contants for ErrorText
@@ -126,6 +130,9 @@ public class Constants {
     public final static String FILESDIR = "files";
     public final static String VIDEODIR = "videos";
 
+    /*
+    Constants for query parameters
+     */
     public final static String USERNAME = "username";
     public final static String PASSWORD = "password";
     public final static String CHATNAME = "chatname";
@@ -141,6 +148,10 @@ public class Constants {
     public final static String IMAGELOCATION = "imagelocation";
     public final static String VIDEOLOCATION = "videolocation";
     public final static String SEARCH = "search";
+
+    public final static String SENDCHATID = "sendchatid";
+    public final static String FWDCONTENTMESSAGEID = "fwdcontentmessageid";
+    public final static String FWDCONTENTMESSAGE = "fwdcontentmessage";
 
     /*
     Constants for Broadcasts

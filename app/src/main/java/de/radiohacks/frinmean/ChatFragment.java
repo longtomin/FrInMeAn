@@ -28,11 +28,17 @@ import de.radiohacks.frinmean.service.MeBaService;
 
 public class ChatFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final int CHAT_LOADER_ID = 2000;
+    private static final int CHAT_LOADER_FULL_ID = 2000;
+    private static final int CHAT_LOADER_FORWARD_ID = 3000;
     private ChatAdapter mAdapter;
     private int syncFreq;
     private int userid;
     private String chatname;
+    private String mode;
+    private int sendChatID;
+    private int MessageID;
+    private String MessageType;
+    private String MessageContent;
 
     /**
      * Options menu used to populate ActionBar.
@@ -41,19 +47,31 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
         Intent i = getActivity().getIntent();
+        mode = i.getStringExtra(Constants.CHAT_ACTIVITY_MODE);
         userid = i.getIntExtra(Constants.USERID, -1);
-        syncFreq = i.getIntExtra(Constants.PrefSyncfrequency, -1);
-        if (syncFreq != -1) {
-            SyncUtils.ChangeSyncFreq(syncFreq);
-        }
 
-        SharedPreferences sharedPrefs = PreferenceManager
-                .getDefaultSharedPreferences(getActivity());
-
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String directory = sharedPrefs.getString("prefDirectory", "NULL");
+
+        if (mode.equalsIgnoreCase(Constants.CHAT_ACTIVITY_FULL)) {
+            setHasOptionsMenu(true);
+
+            syncFreq = i.getIntExtra(Constants.PrefSyncfrequency, -1);
+            if (syncFreq != -1) {
+                SyncUtils.ChangeSyncFreq(syncFreq);
+            }
+
+
+        } else {
+            // Needed to show not the Chat where the Message is send from
+            sendChatID = i.getIntExtra(Constants.SENDCHATID, -1);
+            // MessageID und Message Type kommen vom original chat, chat ID kommt vom gewählten Chat
+            MessageID = i.getIntExtra(Constants.FWDCONTENTMESSAGEID, -1);
+            MessageType = i.getStringExtra(Constants.MESSAGETYPE);
+            MessageContent = i.getStringExtra(Constants.FWDCONTENTMESSAGE);
+        }
 
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
             Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
@@ -74,13 +92,25 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
         Cursor c = (Cursor) mAdapter.getItem(position);
 
-        Intent i = new Intent(getActivity(), SingleChatActivity.class);
-        i.putExtra(Constants.CHATID, c.getInt(Constants.ID_CHAT_BADBID));
-        i.putExtra(Constants.CHATNAME, c.getString(Constants.ID_CHAT_ChatName));
-        i.putExtra(Constants.OWNINGUSERID, c.getInt(Constants.ID_CHAT_OwningUserID));
-        i.putExtra(Constants.USERID, userid);
-        startActivity(i);
+        if (mode.equalsIgnoreCase(Constants.CHAT_ACTIVITY_FULL)) {
 
+            Intent startSingleChat = new Intent(getActivity(), SingleChatActivity.class);
+            startSingleChat.putExtra(Constants.CHATID, c.getInt(Constants.ID_CHAT_BADBID));
+            startSingleChat.putExtra(Constants.CHATNAME, c.getString(Constants.ID_CHAT_ChatName));
+            startSingleChat.putExtra(Constants.OWNINGUSERID, c.getInt(Constants.ID_CHAT_OwningUserID));
+            startSingleChat.putExtra(Constants.USERID, userid);
+            startActivity(startSingleChat);
+        } else {
+            Intent insertMsg = new Intent(getActivity(), MeBaService.class);
+            insertMsg.setAction(Constants.ACTION_INSERTMESSAGEINTOCHAT);
+            insertMsg.putExtra(Constants.CHATID, c.getInt(Constants.ID_CHAT_BADBID));
+            insertMsg.putExtra(Constants.FWDCONTENTMESSAGEID, MessageID);
+            insertMsg.putExtra(Constants.MESSAGETYPE, MessageType);
+            insertMsg.putExtra(Constants.USERID, userid);
+            insertMsg.putExtra(Constants.FWDCONTENTMESSAGE, MessageContent);
+            getActivity().startService(insertMsg);
+            getActivity().finish();
+        }
     }
 
     @Override
@@ -91,7 +121,11 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
         setListAdapter(mAdapter);
         setEmptyText(getText(R.string.no_chats));
-        getLoaderManager().initLoader(CHAT_LOADER_ID, null, this);
+        if (mode.equalsIgnoreCase(Constants.CHAT_ACTIVITY_FULL)) {
+            getLoaderManager().initLoader(CHAT_LOADER_FULL_ID, null, this);
+        } else {
+            getLoaderManager().initLoader(CHAT_LOADER_FORWARD_ID, null, this);
+        }
     }
 
     /* @Override
@@ -116,17 +150,30 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), FrinmeanContentProvider.CHAT_CONTENT_URI,
-                Constants.CHAT_DB_Columns, null, null, null);
+        CursorLoader cl = null;
+
+        switch (id) {
+            case CHAT_LOADER_FULL_ID:
+                cl = new CursorLoader(getActivity(), FrinmeanContentProvider.CHAT_CONTENT_URI,
+                        Constants.CHAT_DB_Columns, null, null, null);
+                break;
+            case CHAT_LOADER_FORWARD_ID:
+                cl = new CursorLoader(getActivity(), FrinmeanContentProvider.CHAT_CONTENT_URI, Constants.CHAT_DB_Columns, Constants.T_CHAT_BADBID + " != ?", new String[]{String.valueOf(sendChatID)}, null);
+                break;
+        }
+        return cl;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         switch (loader.getId()) {
-            case CHAT_LOADER_ID:
+            case CHAT_LOADER_FULL_ID:
                 // The asynchronous load is complete and the data
                 // is now available for use. Only now can we associate
                 // the queried Cursor with the SimpleCursorAdapter.
+                mAdapter.swapCursor(data);
+                break;
+            case CHAT_LOADER_FORWARD_ID:
                 mAdapter.swapCursor(data);
                 break;
         }
@@ -140,8 +187,11 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        mOptionsMenu = menu;
-        inflater.inflate(R.menu.chat, menu);
+
+        if (mode.equalsIgnoreCase(Constants.CHAT_ACTIVITY_FULL)) {
+            mOptionsMenu = menu;
+            inflater.inflate(R.menu.chat, menu);
+        }
     }
 
     @Override
@@ -195,40 +245,4 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
         // show alert
         alertDialog.show();
     }
-
-    /**
-     * Crfate a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
-     * onResume(), and removed in onPause(). If status changes, it sets the state of the Refresh
-     * button. If a sync is active or pending, the Refresh button is replaced by an indeterminate
-     * ProgressBar; otherwise, the button itself is displayed.
-     */
-/*    private SyncStatusObserver mSyncStatusObserver = new SyncStatusObserver() {
-        @Override
-        public void onStatusChanged(int which) {
-            getActivity().runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    // Create a handle to the account that was created by
-                    // SyncService.CreateSyncAccount(). This will be used to query the system to
-                    // see how the sync status has changed.
-                    Account account = GenericAccountService.GetAccount(SyncUtils.ACCOUNT_TYPE);
-                    if (account == null) {
-                        // GetAccount() returned an invalid value. This shouldn't happen, but
-                        // we'll set the status to "not refreshing".
-                        setRefreshActionButtonState(false);
-                        return;
-                    }
-
-                    // Test the ContentResolver to see if the sync adapter is active or pending.
-                    // Set the state of the refresh button accordingly.
-                    boolean syncActive = ContentResolver.isSyncActive(
-                            account, FeedContract.CONTENT_AUTHORITY);
-                    boolean syncPending = ContentResolver.isSyncPending(
-                            account, FeedContract.CONTENT_AUTHORITY);
-                    setRefreshActionButtonState(syncActive || syncPending);
-                }
-            });
-        }
-    }; */
 }
