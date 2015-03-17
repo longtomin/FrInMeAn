@@ -23,6 +23,8 @@ public class FrinmeanContentProvider extends ContentProvider {
             + "/" + Constants.MESSAGES_TABLE_NAME);
     public static final Uri CHAT_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + Constants.CHAT_TABLE_NAME);
+    public static final Uri USER_CONTENT_URI = Uri.parse("content://" + AUTHORITY
+            + "/" + Constants.USER_TABLE_NAME);
     private static final String TAG = FrinmeanContentProvider.class.getSimpleName();
     // Used for the UriMacher
     private static final int Frinmean_messages = 1000;
@@ -91,7 +93,7 @@ public class FrinmeanContentProvider extends ContentProvider {
     }
 
     static {
-        sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME, Frinmean_chats);
+        sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME, Frinmean_users);
         sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_ID, USER_ID);
         sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_BADBID, USER_BADBID);
         sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_Username, USER_Username);
@@ -302,7 +304,7 @@ public class FrinmeanContentProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+        getContext().getContentResolver().notifyChange(ret, null);
         return ret;
     }
 
@@ -425,7 +427,7 @@ public class FrinmeanContentProvider extends ContentProvider {
     }
 
     public Uri insertorupdate(Uri uri, ContentValues values) {
-        boolean notifyChange = false;
+        // boolean notifyChange = false;
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
         Uri ret;
@@ -438,7 +440,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                     if (foundID == -1) {
                         // Backend-ID found, make an update
                         id = sqlDB.insert(Constants.MESSAGES_TABLE_NAME, null, values);
-                        notifyChange = true;
+                        // notifyChange = true;
                     } else {
                         // Backend-ID not found so insert
                         id = sqlDB.update(Constants.MESSAGES_TABLE_NAME, values,
@@ -447,7 +449,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                 } else {
                     // No Beckend ID given, jsut insert.
                     id = sqlDB.insert(Constants.MESSAGES_TABLE_NAME, null, values);
-                    notifyChange = true;
+                    // notifyChange = true;
                 }
                 ret = Uri.parse(Constants.MESSAGES_TABLE_NAME + "/" + id);
                 break;
@@ -458,7 +460,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                     if (foundID == -1) {
                         // Backend-ID found, make an update
                         id = sqlDB.insert(Constants.CHAT_TABLE_NAME, null, values);
-                        notifyChange = true;
+                        // notifyChange = true;
                     } else {
                         // Backend-ID not found so insert
                         id = sqlDB.update(Constants.CHAT_TABLE_NAME, values,
@@ -467,7 +469,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                 } else {
                     // No Beckend ID given, jsut insert.
                     id = sqlDB.insert(Constants.CHAT_TABLE_NAME, null, values);
-                    notifyChange = true;
+                    // notifyChange = true;
                 }
                 ret = Uri.parse(Constants.CHAT_TABLE_NAME + "/" + id);
                 break;
@@ -478,7 +480,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                     if (foundID == -1) {
                         // Backend-ID found, make an update
                         id = sqlDB.insert(Constants.USER_TABLE_NAME, null, values);
-                        notifyChange = true;
+                        // notifyChange = true;
                     } else {
                         // Backend-ID not found so insert
                         id = sqlDB.update(Constants.USER_TABLE_NAME, values,
@@ -487,16 +489,16 @@ public class FrinmeanContentProvider extends ContentProvider {
                 } else {
                     // No Beckend ID given, jsut insert.
                     id = sqlDB.insert(Constants.USER_TABLE_NAME, null, values);
-                    notifyChange = true;
+                    // notifyChange = true;
                 }
                 ret = Uri.parse(Constants.USER_TABLE_NAME + "/" + id);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-        if (notifyChange) {
-            getContext().getContentResolver().notifyChange(uri, null);
-        }
+        //if (notifyChange) {
+        getContext().getContentResolver().notifyChange(ret, null);
+        //}
         return ret;
     }
 

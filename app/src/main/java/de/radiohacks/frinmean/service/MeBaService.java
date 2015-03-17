@@ -339,14 +339,16 @@ public class MeBaService extends IntentService {
         // The Readtimestamp and the MessageIDs are supplied by the Server
         // The ChatID is needed to insert the Message into the right Chat afterwards
 
+        long time = System.currentTimeMillis() / 1000L;
+
         ContentValues valuesins = new ContentValues();
         valuesins.put(Constants.T_MESSAGES_BADBID, 0);
         valuesins.put(Constants.T_MESSAGES_OwningUserID, UserID);
         valuesins.put(Constants.T_MESSAGES_OwningUserName, username);
         valuesins.put(Constants.T_MESSAGES_ChatID, ChatID);
         valuesins.put(Constants.T_MESSAGES_MessageTyp, MessageType);
-        valuesins.put(Constants.T_MESSAGES_SendTimestamp, 0);
-        valuesins.put(Constants.T_MESSAGES_ReadTimestamp, 0);
+        valuesins.put(Constants.T_MESSAGES_SendTimestamp, time);
+        valuesins.put(Constants.T_MESSAGES_ReadTimestamp, time);
         if (MessageType.equalsIgnoreCase(Constants.TYP_TEXT)) {
             valuesins.put(Constants.T_MESSAGES_TextMsgID, 0);
             valuesins.put(Constants.T_MESSAGES_TextMsgValue, Message);

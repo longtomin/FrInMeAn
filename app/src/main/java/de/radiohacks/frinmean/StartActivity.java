@@ -38,7 +38,7 @@ public class StartActivity extends Activity {
     private String server = "NULL";
     private int port = 80;
     private boolean https = true;
-    private String CommunicationURL;
+    // private String CommunicationURL;
     private StartReceiver mStartReceiver = new StartReceiver();
 
     @Override
@@ -107,7 +107,7 @@ public class StartActivity extends Activity {
         Log.d(TAG, "end getPferefenceInfo");
     }
 
-    protected void buildServerURL() {
+    /* protected void buildServerURL() {
         this.CommunicationURL = "";
         if (this.https) {
             this.CommunicationURL += "https://";
@@ -115,7 +115,7 @@ public class StartActivity extends Activity {
             this.CommunicationURL += "http://";
         }
         this.CommunicationURL += server + ":" + port + "/frinmeba/";
-    }
+    }*/
 
     @Override
     protected void onResume() {
@@ -216,6 +216,7 @@ public class StartActivity extends Activity {
                                     startchat.putExtra(Constants.USERID, res.getUserID());
                                     startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
                                     startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FULL);
+                                    startchat.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                                     startActivity(startchat);
                                     StartActivity.this.finish();
                                 }
