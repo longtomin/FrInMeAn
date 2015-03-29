@@ -49,7 +49,10 @@ public class LocalDBHandler extends SQLiteOpenHelper {
             + Constants.T_MESSAGES_LocationMsgID + " INTEGER, "
             + Constants.T_MESSAGES_LocationMsgValue + " VARCHAR(50), "
             + Constants.T_MESSAGES_ContactMsgID + " INTEGER, "
-            + Constants.T_MESSAGES_ContactMsgValue + " VARCHAR(250));";
+            + Constants.T_MESSAGES_ContactMsgValue + " VARCHAR(250), "
+            + Constants.T_MESSAGES_NumberAll + " INTEGER, "
+            + Constants.T_MESSAGES_NumberRead + " INTEGER, "
+            + Constants.T_MESSAGES_NumberShow + " INTEGER);";
 
     private static final String TABLE_CHAT_CREATE
             = "CREATE TABLE " + Constants.CHAT_TABLE_NAME

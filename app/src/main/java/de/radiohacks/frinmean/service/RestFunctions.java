@@ -19,6 +19,7 @@ import java.net.URLEncoder;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.FrinmeanApplication;
+import de.radiohacks.frinmean.model.OutAcknowledgeMessageDownload;
 import de.radiohacks.frinmean.model.OutAddUserToChat;
 import de.radiohacks.frinmean.model.OutAuthenticate;
 import de.radiohacks.frinmean.model.OutCheckNewMessages;
@@ -30,6 +31,7 @@ import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutFetchTextMessage;
 import de.radiohacks.frinmean.model.OutFetchVideoMessage;
 import de.radiohacks.frinmean.model.OutGetImageMessageMetaData;
+import de.radiohacks.frinmean.model.OutGetMessageInformation;
 import de.radiohacks.frinmean.model.OutGetVideoMessageMetaData;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutListChat;
@@ -38,6 +40,7 @@ import de.radiohacks.frinmean.model.OutRemoveUserFromChat;
 import de.radiohacks.frinmean.model.OutSendImageMessage;
 import de.radiohacks.frinmean.model.OutSendTextMessage;
 import de.radiohacks.frinmean.model.OutSendVideoMessage;
+import de.radiohacks.frinmean.model.OutSetShowTimeStamp;
 import de.radiohacks.frinmean.model.OutSignUp;
 
 /**
@@ -851,6 +854,111 @@ public class RestFunctions {
             }
         }
         Log.d(TAG, "end fetchVideoMessage");
+        return out;
+    }
+
+
+    /* @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("/setshowtimestamp")
+    public OutSetShowTimeStamp setShowTimeStamp(
+            @QueryParam(Constants.QPusername) String User,
+            @QueryParam(Constants.QPpassword) String Password,
+            @QueryParam(Constants.QPmessageid) int MessageID); */
+
+    public OutSetShowTimeStamp setshowtimestamp(String inuser, String inpassword, int msgid) {
+        Log.d(TAG, "start setshowtimestamp with user=" + inuser + " password=" + inpassword + "MessageID=" + String.valueOf(msgid));
+        OutSetShowTimeStamp out = null;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "user/setshowtimestamp", https, port);
+            try {
+                rc.AddParam(Constants.QPusername, convertB64(inuser));
+                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+                rc.AddParam(Constants.QPmessageid, Integer.toString(msgid));
+
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OutSetShowTimeStamp.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "start setshowtimestamp");
+        return out;
+    }
+
+    /* @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("/getmessageinformation")
+    public OutGetMessageInformation getMessageInformation(
+            @QueryParam(Constants.QPusername) String User,
+            @QueryParam(Constants.QPpassword) String Password,
+            @QueryParam(Constants.QPmessageid) int MessageID); */
+
+    public OutGetMessageInformation getmessageinformation(String inuser, String inpassword, int msgid) {
+        Log.d(TAG, "start getmessageinformation with user=" + inuser + " password=" + inpassword + "MessageID=" + String.valueOf(msgid));
+        OutGetMessageInformation out = null;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "user/getmessageinformation", https, port);
+            try {
+                rc.AddParam(Constants.QPusername, convertB64(inuser));
+                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+                rc.AddParam(Constants.QPmessageid, Integer.toString(msgid));
+
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OutGetMessageInformation.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "start getmessageinformation");
+        return out;
+    }
+
+    /* @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("/acknowledgemessagedownload")
+    public OutAcknowledgeMessageDownload acknowledgeMessageDownload(
+            @QueryParam(Constants.QPusername) String User,
+            @QueryParam(Constants.QPpassword) String Password,
+            @QueryParam(Constants.QPmessageid) int MessageID,
+            @QueryParam(Constants.QPacknowledge) String Acknowledge); */
+
+    public OutAcknowledgeMessageDownload acknowledgemessagedownload(String inuser, String inpassword, int msgid, String inacknowledge) {
+        Log.d(TAG, "start acknowledgemessagedownload with user=" + inuser + " password=" + inpassword + " MessageID=" + String.valueOf(msgid) + " Acknowledge=" + inacknowledge);
+        OutAcknowledgeMessageDownload out = null;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "user/acknowledgemessagedownload", https, port);
+            try {
+                rc.AddParam(Constants.QPusername, convertB64(inuser));
+                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+                rc.AddParam(Constants.QPmessageid, Integer.toString(msgid));
+                rc.AddParam(Constants.QPacknowledge, convertB64(inacknowledge));
+
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OutAcknowledgeMessageDownload.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "start acknowledgemessagedownload");
         return out;
     }
 }

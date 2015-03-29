@@ -46,6 +46,9 @@ public class FrinmeanContentProvider extends ContentProvider {
     private static final int MESSAGES_LocationMsgValue = 1160;
     private static final int MESSAGES_ContactMsgID = 1170;
     private static final int MESSAGES_ContactMsgValue = 1180;
+    private static final int MESSAGES_NumberAll = 1190;
+    private static final int MESSAGES_NumberRead = 1200;
+    private static final int MESSAGES_NumberShow = 1210;
     private static final int Frinmean_chats = 2000;
     private static final int CHAT_ID = 2010;
     private static final int CHAT_BADBID = 2020;
@@ -81,6 +84,9 @@ public class FrinmeanContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_LocationMsgValue, MESSAGES_LocationMsgValue);
         sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_ContactMsgID, MESSAGES_ContactMsgID);
         sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_ContactMsgValue, MESSAGES_ContactMsgValue);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_NumberAll, MESSAGES_NumberAll);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_NumberRead, MESSAGES_NumberRead);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_NumberShow, MESSAGES_NumberShow);
     }
 
     static {
@@ -198,6 +204,18 @@ public class FrinmeanContentProvider extends ContentProvider {
                     break;
                 case MESSAGES_ContactMsgValue:
                     queryBuilder.appendWhere(Constants.T_MESSAGES_ContactMsgValue + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case MESSAGES_NumberAll:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_NumberAll + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case MESSAGES_NumberRead:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_NumberRead + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case MESSAGES_NumberShow:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_NumberShow + "="
                             + uri.getLastPathSegment());
                     break;
                 default:

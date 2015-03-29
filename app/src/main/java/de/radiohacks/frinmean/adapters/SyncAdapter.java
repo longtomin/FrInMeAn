@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.common.hash.HashCode;
+import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
@@ -36,12 +37,14 @@ import de.radiohacks.frinmean.SingleChatActivity;
 import de.radiohacks.frinmean.model.Chat;
 import de.radiohacks.frinmean.model.Chats;
 import de.radiohacks.frinmean.model.Message;
+import de.radiohacks.frinmean.model.OutAcknowledgeMessageDownload;
 import de.radiohacks.frinmean.model.OutCheckNewMessages;
 import de.radiohacks.frinmean.model.OutFetchImageMessage;
 import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
 import de.radiohacks.frinmean.model.OutFetchTextMessage;
 import de.radiohacks.frinmean.model.OutFetchVideoMessage;
 import de.radiohacks.frinmean.model.OutGetImageMessageMetaData;
+import de.radiohacks.frinmean.model.OutGetMessageInformation;
 import de.radiohacks.frinmean.model.OutGetVideoMessageMetaData;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutListChat;
@@ -52,6 +55,7 @@ import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.RestFunctions;
 
 import static de.radiohacks.frinmean.Constants.CHAT_DB_Columns;
+import static de.radiohacks.frinmean.Constants.ID_MESSAGES_BADBID;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_ChatID;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_MessageType;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_TextMsgValue;
@@ -79,6 +83,9 @@ import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_LocationMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_LocationMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_MessageTyp;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_NumberAll;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_NumberRead;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_NumberShow;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserName;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ReadTimestamp;
@@ -165,6 +172,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         syncListChats();
         syncCheckNewMessages();
         uploadUnsavedMessages();
+        syncGetMessageInformation();
         Log.i(TAG, "Network synchronization complete");
     }
 
@@ -255,10 +263,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 OutFetchTextMessage oftm = rf.gettextmessage(username, password, m.getTextMsgID());
                 if (oftm != null) {
                     if (oftm.getErrortext() == null || oftm.getErrortext().isEmpty()) {
-                        valuesins.put(T_MESSAGES_TextMsgValue, oftm.getTextMessage());
-                        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                        client.release();
+                        if (acknowledgeMessage(Constants.TYP_TEXT, oftm.getTextMessage(), m.getMessageID())) {
+                            valuesins.put(T_MESSAGES_TextMsgValue, oftm.getTextMessage());
+                            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                            client.release();
+                        }
                     }
                 }
             } else if (m.getMessageTyp().equalsIgnoreCase(TYP_IMAGE)) {
@@ -271,10 +281,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             OutFetchImageMessage ofim = rf.fetchImageMessage(username, password, m.getImageMsgID());
                             if (ofim != null) {
                                 if (ofim.getErrortext() == null || ofim.getErrortext().isEmpty()) {
-                                    valuesins.put(T_MESSAGES_ImageMsgValue, ofim.getImageMessage());
-                                    ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                                    client.release();
+                                    String checkfilepath;
+
+                                    if (directory.endsWith("/")) {
+                                        checkfilepath = directory + Constants.IMAGEDIR + "/" + ofim.getImageMessage();
+                                    } else {
+                                        checkfilepath = directory + "/" + Constants.IMAGEDIR + "/" + ofim.getImageMessage();
+                                    }
+                                    if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMessageID())) {
+                                        valuesins.put(T_MESSAGES_ImageMsgValue, ofim.getImageMessage());
+                                        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                                        client.release();
+                                    }
                                 }
                             }
                         } else {
@@ -325,10 +344,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             OutFetchVideoMessage ofvm = rf.fetchVideoMessage(username, password, m.getVideoMsgID());
                             if (ofvm != null) {
                                 if (ofvm.getErrortext() == null || ofvm.getErrortext().isEmpty()) {
-                                    valuesins.put(T_MESSAGES_VideoMsgValue, ofvm.getVideoMessage());
-                                    ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                                    client.release();
+                                    String checkfilepath;
+
+                                    if (directory.endsWith("/")) {
+                                        checkfilepath = directory + Constants.VIDEODIR + "/" + ofvm.getVideoMessage();
+                                    } else {
+                                        checkfilepath = directory + "/" + Constants.VIDEODIR + "/" + ofvm.getVideoMessage();
+                                    }
+                                    if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMessageID())) {
+                                        valuesins.put(T_MESSAGES_VideoMsgValue, ofvm.getVideoMessage());
+                                        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                                        client.release();
+                                    }
                                 }
                             }
                         } else {
@@ -384,7 +412,66 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, "end saveMessageToLDB");
     }
 
+    private boolean acknowledgeMessage(String msgType, String message, int msgid) {
+        Log.d(TAG, "start acknowledgeMessage");
+
+        boolean ret = false;
+
+        if (msgType.equalsIgnoreCase(Constants.TYP_TEXT)) {
+            Hasher hasher = Hashing.md5().newHasher();
+            hasher.putBytes(message.getBytes());
+            byte[] md5 = hasher.hash().asBytes();
+
+            OutAcknowledgeMessageDownload oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+            if (oack != null) {
+                if (oack.getErrortext() == null || oack.getErrortext().isEmpty()) {
+                    if (oack.getAcknowledge().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
+                        ret = true;
+                    }
+                }
+            }
+        } else if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+            HashCode md5 = null;
+            try {
+                md5 = Files.hash(new File(message),
+                        Hashing.md5());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            OutAcknowledgeMessageDownload oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+            if (oack != null) {
+                if (oack.getErrortext() == null || oack.getErrortext().isEmpty()) {
+                    if (oack.getAcknowledge().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
+                        ret = true;
+                    }
+                }
+            }
+        } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+            HashCode md5 = null;
+            try {
+                md5 = Files.hash(new File(message),
+                        Hashing.md5());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            OutAcknowledgeMessageDownload oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+            if (oack != null) {
+                if (oack.getErrortext() == null || oack.getErrortext().isEmpty()) {
+                    if (oack.getAcknowledge().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
+                        ret = true;
+                    }
+                }
+            }
+        }
+
+        Log.d(TAG, "end acknowledgeMessage");
+        return ret;
+    }
+
     private boolean checkfileexists(String fname, String msgType, long fsize, String inmd5sumd) {
+        Log.d(TAG, "start checkfileexists");
 
         boolean ret = false;
         File checkfile;
@@ -426,6 +513,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             }
         }
+        Log.d(TAG, "end checkfileexists");
         return ret;
     }
 
@@ -458,9 +546,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     /*
-    Update local Database with values returned from the server
+    Update local Database with values returned from the server after the upload
      */
-    public void updateDatabase(int id, int backendid, long send, long read, int msgid, String MessageType, String Message) {
+    public void updateUploadedNessagesDatabase(int id, int backendid, long send, long read, int msgid, String MessageType, String Message) {
         ContentValues valuesins = new ContentValues();
         valuesins.put(T_MESSAGES_BADBID, backendid);
         valuesins.put(T_MESSAGES_SendTimestamp, send);
@@ -506,7 +594,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outtxt.getTextID(), TYP_TEXT);
                         if (outins != null) {
                             if (outins.getErrortext() == null || outins.getErrortext().isEmpty()) {
-                                updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outtxt.getTextID(), TYP_TEXT, null);
+                                updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outtxt.getTextID(), TYP_TEXT, null);
                             }
                         }
                     }
@@ -524,7 +612,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outimg.getImageID(), TYP_IMAGE);
                         if (outins != null) {
                             if (outins.getErrortext() == null || outins.getErrortext().isEmpty()) {
-                                updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outimg.getImageID(), TYP_IMAGE, outimg.getImageFileName());
+                                updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outimg.getImageID(), TYP_IMAGE, outimg.getImageFileName());
                                 moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getImageFileName());
                             }
                         }
@@ -546,7 +634,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         OutInsertMessageIntoChat outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outvid.getVideoID(), TYP_VIDEO);
                         if (outins != null) {
                             if (outins.getErrortext() == null || outins.getErrortext().isEmpty()) {
-                                updateDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outvid.getVideoID(), TYP_VIDEO, outvid.getVideoFileName());
+                                updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMessageID(), outins.getSendTimestamp(), outins.getSendTimestamp(), outvid.getVideoID(), TYP_VIDEO, outvid.getVideoFileName());
                                 moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVideoFileName());
                             }
                         }
@@ -557,6 +645,41 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             } else if (msgtype.equalsIgnoreCase(TYP_CONTACT)) {
 
+            }
+        }
+    }
+
+    /*
+Update local Database with values returned from the server after the upload
+ */
+    public void updateGetInformationMessagesDatabase(int id, int innumall, int innumread, int innumshow) {
+        ContentValues valuesins = new ContentValues();
+        valuesins.put(T_MESSAGES_NumberAll, innumall);
+        valuesins.put(T_MESSAGES_NumberRead, innumread);
+        valuesins.put(T_MESSAGES_NumberShow, innumshow);
+
+        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+        ((FrinmeanContentProvider) client.getLocalContentProvider()).update(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(id)});
+    }
+
+
+    /*
+    Get the Message Information for the Messages
+     */
+    private void syncGetMessageInformation() {
+
+        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI,
+                MESSAGES_DB_Columns,
+                T_MESSAGES_NumberRead + " != " + T_MESSAGES_NumberAll + " AND " + T_MESSAGES_NumberShow + " != " + T_MESSAGES_NumberAll,
+                null, null);
+
+        while (c.moveToNext()) {
+            OutGetMessageInformation ogmi = rf.getmessageinformation(username, password, c.getInt(ID_MESSAGES_BADBID));
+            if (ogmi != null) {
+                if (ogmi.getErrortext() == null || ogmi.getErrortext().isEmpty()) {
+                    updateGetInformationMessagesDatabase(c.getInt(ID_MESSAGES__id), ogmi.getNumberTotal(), ogmi.getNumberRead(), ogmi.getNumberShow());
+                }
             }
         }
     }

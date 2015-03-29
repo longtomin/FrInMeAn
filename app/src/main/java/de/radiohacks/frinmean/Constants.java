@@ -60,6 +60,9 @@ public class Constants {
     public final static String ERROR_USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
     public final static String ERROR_NO_ACTIVE_CHATS = "NO_ACTIVE_CHATS";
     public final static String ERROR_USER_ALREADY_IN_CHAT = "USER_ALREADY_IN_CHAT";
+    public final static String ERROR_ENCODING_ERROR = "ENCODING_ERROR";
+    public final static String ERROR_NO_CONTENT_GIVEN = "NO_CONTENT_GIVEN";
+    public final static String ERROR_MESSAGE_NOT_READ = "MESSAGE_NOT_READ";
 
         /*
     Contants for ResultText
@@ -74,6 +77,13 @@ public class Constants {
 
     public final static String AUTHENTICATE_TRUE = "TRUE";
     public final static String AUTHENTICATE_FALSE = "FALSE";
+
+        /*
+    Contants for AcknowledgeText
+     */
+
+    public final static String ACKNOWLEDGE_TRUE = "TRUE";
+    public final static String ACKNOWLEDGE_FALSE = "FALSE";
 
         /*
     Constants for Media Types
@@ -104,7 +114,7 @@ public class Constants {
     public static final String QPtimestamp = "timestamp";
     public static final String QPimageid = "imageid";
     public static final String QPvideoid = "videoid";
-
+    public static final String QPacknowledge = "acknowledge";
 
     /*
     Constants for Result Types
@@ -207,6 +217,11 @@ public class Constants {
     public static final String T_MESSAGES_LocationMsgValue = "LocationMsgValue"; // varchar(50)
     public static final String T_MESSAGES_ContactMsgID = "ContactMsgID"; // int(10) unsgned DEFAULT NULL,
     public static final String T_MESSAGES_ContactMsgValue = "ContactMsgValue"; // varchar(250)
+    public static final String T_MESSAGES_NumberAll = "NumberAll"; // int(10) unsigned DEFAULT NULL
+    public static final String T_MESSAGES_NumberRead = "NumberRead"; // int(10) unsigned DEFAULT NULL
+    public static final String T_MESSAGES_NumberShow = "NumberShow"; // int(10) unsigned DEFAULT NULL
+
+
     /*
     String Arrays for the Content Provider
      */
@@ -230,7 +245,10 @@ public class Constants {
             T_MESSAGES_LocationMsgID,
             T_MESSAGES_LocationMsgValue,
             T_MESSAGES_ContactMsgID,
-            T_MESSAGES_ContactMsgValue};
+            T_MESSAGES_ContactMsgValue,
+            T_MESSAGES_NumberAll,
+            T_MESSAGES_NumberRead,
+            T_MESSAGES_NumberShow};
     public static final String T_CHAT_ID = "_id"; // int(10)
     public static final String T_CHAT_BADBID = "ID"; // int(10)
     public static final String T_CHAT_OwningUserID = "OwningUserID"; //int(10)
@@ -279,6 +297,9 @@ public class Constants {
     public static final int ID_MESSAGES_LocationMsgValue = 17;
     public static final int ID_MESSAGES_ContactMsgID = 18;
     public static final int ID_MESSAGES_ContactMsgValue = 19;
+    public static final int ID_MESSAGES_NumberAll = 20;
+    public static final int ID_MESSAGES_NumberRead = 20;
+    public static final int ID_MESSAGES_NumberShow = 20;
 
     public static final int ID_CHAT__id = 0;
     public static final int ID_CHAT_BADBID = 1;
