@@ -5,6 +5,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.os.IBinder;
@@ -31,7 +32,10 @@ import de.radiohacks.frinmean.model.OutCreateChat;
 import de.radiohacks.frinmean.model.OutDeleteMessageFromChat;
 import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
 import de.radiohacks.frinmean.model.OutListUser;
+import de.radiohacks.frinmean.model.OutSetShowTimeStamp;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
+
+import static de.radiohacks.frinmean.Constants.MESSAGES_DB_Columns;
 
 public class MeBaService extends IntentService {
 
@@ -161,9 +165,32 @@ public class MeBaService extends IntentService {
             } else if (Constants.ACTION_DELETEMESSAGEFROMCHAT.equalsIgnoreCase(action)) {
                 final int mid = intent.getIntExtra(Constants.MESSAGEID, -1);
                 handleActionDeleteMsgFromChat(mid);
+            } else if (Constants.ACTION_SETSHOWTIMESTAMP.equalsIgnoreCase(action)) {
+                final int cid = intent.getIntExtra(Constants.CHATID, -1);
+                handleActionSetShowTimestamp(cid);
             }
         }
         Log.d(TAG, "start onHandleIntent");
+    }
+
+    private void handleActionSetShowTimestamp(int ChatID) {
+        String select = "((" + Constants.T_MESSAGES_ChatID + " = ?) AND (" + Constants.T_MESSAGES_ShowTimestamp + " = 0))";
+        String sort = Constants.T_MESSAGES_SendTimestamp + " ASC";
+
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, select, new String[]{String.valueOf(ChatID)}, sort);
+
+        while (c.moveToNext()) {
+            OutSetShowTimeStamp outsst = rf.setshowtimestamp(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
+            if (outsst != null) {
+                if (outsst.getErrortext() == null || outsst.getErrortext().isEmpty()) {
+                    ContentValues valuesins = new ContentValues();
+                    valuesins.put(Constants.T_MESSAGES_BADBID, outsst.getMessageID());
+                    valuesins.put(Constants.T_MESSAGES_ReadTimestamp, outsst.getShowTimestamp());
+                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                }
+            }
+        }
     }
 
     private void handleActionInsertFwdMsgIntoChat(int ChatID, int UserID, int ContetntMsgID, String ContentMsgType, String ContentMessage) {

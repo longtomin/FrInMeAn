@@ -21,7 +21,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.common.hash.HashCode;
-import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
@@ -55,7 +54,6 @@ import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.RestFunctions;
 
 import static de.radiohacks.frinmean.Constants.CHAT_DB_Columns;
-import static de.radiohacks.frinmean.Constants.ID_MESSAGES_BADBID;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_ChatID;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_MessageType;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_TextMsgValue;
@@ -418,11 +416,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         boolean ret = false;
 
         if (msgType.equalsIgnoreCase(Constants.TYP_TEXT)) {
-            Hasher hasher = Hashing.md5().newHasher();
+            /* Hasher hasher = Hashing.md5().newHasher();
             hasher.putBytes(message.getBytes());
-            byte[] md5 = hasher.hash().asBytes();
+            byte[] md5 = hasher.hash().asBytes(); */
+            int hashCode = message.hashCode();
 
-            OutAcknowledgeMessageDownload oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+            OutAcknowledgeMessageDownload oack = rf.acknowledgemessagedownload(username, password, msgid, String.valueOf(hashCode));
             if (oack != null) {
                 if (oack.getErrortext() == null || oack.getErrortext().isEmpty()) {
                     if (oack.getAcknowledge().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
@@ -668,17 +667,22 @@ Update local Database with values returned from the server after the upload
      */
     private void syncGetMessageInformation() {
 
+        String select = "((" + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberRead + ") OR  ("
+                + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberRead + "))";
+
         ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI,
-                MESSAGES_DB_Columns,
-                T_MESSAGES_NumberRead + " != " + T_MESSAGES_NumberAll + " AND " + T_MESSAGES_NumberShow + " != " + T_MESSAGES_NumberAll,
-                null, null);
+        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, select, null, null);
 
         while (c.moveToNext()) {
-            OutGetMessageInformation ogmi = rf.getmessageinformation(username, password, c.getInt(ID_MESSAGES_BADBID));
-            if (ogmi != null) {
-                if (ogmi.getErrortext() == null || ogmi.getErrortext().isEmpty()) {
-                    updateGetInformationMessagesDatabase(c.getInt(ID_MESSAGES__id), ogmi.getNumberTotal(), ogmi.getNumberRead(), ogmi.getNumberShow());
+            OutGetMessageInformation outgmi = rf.getmessageinformation(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
+            if (outgmi != null) {
+                if (outgmi.getErrortext() == null || outgmi.getErrortext().isEmpty()) {
+                    ContentValues valuesins = new ContentValues();
+                    valuesins.put(Constants.T_MESSAGES_BADBID, outgmi.getMessageID());
+                    valuesins.put(Constants.T_MESSAGES_NumberAll, outgmi.getNumberTotal());
+                    valuesins.put(Constants.T_MESSAGES_NumberRead, outgmi.getNumberRead());
+                    valuesins.put(Constants.T_MESSAGES_NumberShow, outgmi.getNumberShow());
+                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 }
             }
         }

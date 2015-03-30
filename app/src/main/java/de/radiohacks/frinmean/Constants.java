@@ -25,6 +25,8 @@ public class Constants {
     public static final String ACTION_INSERTMESSAGEINTOCHAT = "insertmessageintochat";
     public static final String ACTION_GETMESSAGEFROMCHAT = "getmessagefromchat";
     public static final String ACTION_CHECKNEWMESSAGES = "checknewmessages";
+    public static final String ACTION_SETSHOWTIMESTAMP = "setshowtimestamp";
+    public static final String ACTION_GETMESSAGEINFORMATION = "getmessageinformation";
 
     /*
     App own action without correspondance in the backend
@@ -205,6 +207,7 @@ public class Constants {
     public static final String T_MESSAGES_MessageTyp = "MessageTyp";// varchar(10)
     public static final String T_MESSAGES_SendTimestamp = "SendTimeStamp"; // datetime NOT NULL,
     public static final String T_MESSAGES_ReadTimestamp = "ReadTimeStamp"; // datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+    public static final String T_MESSAGES_ShowTimestamp = "ShowTimeStamp"; // datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
     public static final String T_MESSAGES_TextMsgID = "TextMsgID"; // int(10) unsigned DEFAULT NULL,
     public static final String T_MESSAGES_TextMsgValue = "TextMsgValue";  // varchar(10000)
     public static final String T_MESSAGES_ImageMsgID = "ImageMsgID"; // int(10) unsigned DEFAULT NULL
@@ -234,6 +237,7 @@ public class Constants {
             T_MESSAGES_MessageTyp,
             T_MESSAGES_SendTimestamp,
             T_MESSAGES_ReadTimestamp,
+            T_MESSAGES_ShowTimestamp,
             T_MESSAGES_TextMsgID,
             T_MESSAGES_TextMsgValue,
             T_MESSAGES_ImageMsgID,
@@ -285,21 +289,22 @@ public class Constants {
     public static final int ID_MESSAGES_MessageType = 5;
     public static final int ID_MESSAGES_SendTimeStamp = 6;
     public static final int ID_MESSAGES_ReadTimeStamp = 7;
-    public static final int ID_MESSAGES_TextMsgID = 8;
-    public static final int ID_MESSAGES_TextMsgValue = 9;
-    public static final int ID_MESSAGES_ImageMsgID = 10;
-    public static final int ID_MESSAGES_ImageMsgValue = 11;
-    public static final int ID_MESSAGES_VideoMsgID = 12;
-    public static final int ID_MESSAGES_VideoMsgValue = 13;
-    public static final int ID_MESSAGES_FileMsgID = 14;
-    public static final int ID_MESSAGES_FileMsgValue = 15;
-    public static final int ID_MESSAGES_LocationMsgID = 16;
-    public static final int ID_MESSAGES_LocationMsgValue = 17;
-    public static final int ID_MESSAGES_ContactMsgID = 18;
-    public static final int ID_MESSAGES_ContactMsgValue = 19;
-    public static final int ID_MESSAGES_NumberAll = 20;
-    public static final int ID_MESSAGES_NumberRead = 20;
-    public static final int ID_MESSAGES_NumberShow = 20;
+    public static final int ID_MESSAGES_ShowTimeStamp = 8;
+    public static final int ID_MESSAGES_TextMsgID = 9;
+    public static final int ID_MESSAGES_TextMsgValue = 10;
+    public static final int ID_MESSAGES_ImageMsgID = 11;
+    public static final int ID_MESSAGES_ImageMsgValue = 12;
+    public static final int ID_MESSAGES_VideoMsgID = 13;
+    public static final int ID_MESSAGES_VideoMsgValue = 14;
+    public static final int ID_MESSAGES_FileMsgID = 15;
+    public static final int ID_MESSAGES_FileMsgValue = 16;
+    public static final int ID_MESSAGES_LocationMsgID = 17;
+    public static final int ID_MESSAGES_LocationMsgValue = 18;
+    public static final int ID_MESSAGES_ContactMsgID = 19;
+    public static final int ID_MESSAGES_ContactMsgValue = 20;
+    public static final int ID_MESSAGES_NumberAll = 21;
+    public static final int ID_MESSAGES_NumberRead = 22;
+    public static final int ID_MESSAGES_NumberShow = 23;
 
     public static final int ID_CHAT__id = 0;
     public static final int ID_CHAT_BADBID = 1;

@@ -38,6 +38,7 @@ public class LocalDBHandler extends SQLiteOpenHelper {
             + Constants.T_MESSAGES_MessageTyp + " VARCHAR(10), "
             + Constants.T_MESSAGES_SendTimestamp + " LONG, "
             + Constants.T_MESSAGES_ReadTimestamp + " LONG, "
+            + Constants.T_MESSAGES_ShowTimestamp + " LONG, "
             + Constants.T_MESSAGES_TextMsgID + " INTEGER, "
             + Constants.T_MESSAGES_TextMsgValue + " VARCHAR(10000), "
             + Constants.T_MESSAGES_ImageMsgID + " INTEGER, "

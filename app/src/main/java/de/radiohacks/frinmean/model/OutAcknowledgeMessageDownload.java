@@ -66,11 +66,11 @@ import org.simpleframework.xml.Root;
 @Root(name = "OutAcknowledgeMessageDownload", strict = false)
 public class OutAcknowledgeMessageDownload {
 
-    @Element(name = "MessageID")
+    @Element(name = "MessageID", required = false)
     protected Integer messageID;
-    @Element(name = "Acknowledge")
+    @Element(name = "Acknowledge", required = false)
     protected String acknowledge;
-    @Element(name = "Errortext")
+    @Element(name = "Errortext", required = false)
     protected String errortext;
 
     /**
