@@ -66,6 +66,7 @@ import java.util.List;
  *                     &lt;element name="MessageTyp" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *                     &lt;element name="SendTimestamp" type="{http://www.w3.org/2001/XMLSchema}long"/>
  *                     &lt;element name="ReadTimestamp" type="{http://www.w3.org/2001/XMLSchema}long"/>
+ *                     &lt;element name="ShowTimestamp" type="{http://www.w3.org/2001/XMLSchema}long"/>
  *                     &lt;element name="OwningUser">
  *                       &lt;complexType>
  *                         &lt;complexContent>
@@ -84,6 +85,10 @@ import java.util.List;
  *                     &lt;element name="LocationMsgID" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *                     &lt;element name="FileMsgID" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *                     &lt;element name="VideoMsgID" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *                     &lt;element name="OriginMsgID" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *                     &lt;element name="NumberTotal" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *                     &lt;element name="NumberRead" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *                     &lt;element name="NumberShow" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *                   &lt;/sequence>
  *                 &lt;/restriction>
  *               &lt;/complexContent>

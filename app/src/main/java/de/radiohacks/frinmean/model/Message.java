@@ -55,28 +55,38 @@ import org.simpleframework.xml.Root;
 @Root(name = "Message", strict = false)
 public class Message {
 
-    @Element(name = "MessageID", required = true)
+    @Element(name = "MessageID", required = false)
     protected int messageID;
-    @Element(name = "MessageTyp", required = true)
+    @Element(name = "MessageTyp", required = false)
     protected String messageTyp;
-    @Element(name = "SendTimestamp", required = true)
+    @Element(required = false, name = "SendTimestamp")
     protected long sendTimestamp;
-    @Element(name = "ReadTimestamp", required = true)
+    @Element(required = false, name = "ReadTimestamp")
     protected long readTimestamp;
-    @Element(name = "OwningUser", required = true)
+    @Element(required = false, name = "ShowTimestamp")
+    protected long showTimestamp;
+    @Element(name = "OwningUser", required = false)
     protected OwningUser owningUser;
-    @Element(name = "TextMsgID", required = false)
+    @Element(required = false, name = "TextMsgID")
     protected int textMsgID;
-    @Element(name = "ImageMsgID", required = false)
+    @Element(required = false, name = "ImageMsgID")
     protected int imageMsgID;
-    @Element(name = "ContactMsgID", required = false)
+    @Element(required = false, name = "ContactMsgID")
     protected int contactMsgID;
-    @Element(name = "LocationMsgID", required = false)
+    @Element(required = false, name = "LocationMsgID")
     protected int locationMsgID;
-    @Element(name = "FileMsgID", required = false)
+    @Element(required = false, name = "FileMsgID")
     protected int fileMsgID;
-    @Element(name = "VideoMsgID", required = false)
+    @Element(required = false, name = "VideoMsgID")
     protected int videoMsgID;
+    @Element(required = false, name = "OriginMsgID")
+    protected int originMsgID;
+    @Element(required = false, name = "NumberTotal")
+    protected int numberTotal;
+    @Element(required = false, name = "NumberRead")
+    protected int numberRead;
+    @Element(required = false, name = "NumberShow")
+    protected int numberShow;
 
     public int getMessageID() {
         return messageID;
@@ -108,6 +118,14 @@ public class Message {
 
     public void setReadTimestamp(long value) {
         this.readTimestamp = value;
+    }
+
+    public long getShowTimestamp() {
+        return showTimestamp;
+    }
+
+    public void setShowTimestamp(long value) {
+        this.showTimestamp = value;
     }
 
     public OwningUser getOwningUser() {
@@ -164,5 +182,37 @@ public class Message {
 
     public void setVideoMsgID(int value) {
         this.videoMsgID = value;
+    }
+
+    public int getOriginMsgID() {
+        return originMsgID;
+    }
+
+    public void setOriginMsgID(int value) {
+        this.originMsgID = value;
+    }
+
+    public int getNumberTotal() {
+        return numberTotal;
+    }
+
+    public void setNumberTotal(int value) {
+        this.numberTotal = value;
+    }
+
+    public int getNumberRead() {
+        return numberRead;
+    }
+
+    public void setNumberRead(int value) {
+        this.numberRead = value;
+    }
+
+    public int getNumberShow() {
+        return numberShow;
+    }
+
+    public void setNumberShow(int value) {
+        this.numberShow = value;
     }
 }

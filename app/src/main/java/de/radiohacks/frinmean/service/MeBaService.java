@@ -36,6 +36,8 @@ import de.radiohacks.frinmean.model.OutSetShowTimeStamp;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 
 import static de.radiohacks.frinmean.Constants.MESSAGES_DB_Columns;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_ChatID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_ShowTimestamp;
 
 public class MeBaService extends IntentService {
 
@@ -86,9 +88,13 @@ public class MeBaService extends IntentService {
         return sSyncAdapter.getSyncAdapterBinder();
     }
 
-    public boolean isNetworkConnected() {
+    protected boolean isNetworkConnected() {
         if (conManager != null) {
-            return conManager.getActiveNetworkInfo().isConnected();
+            if (conManager.getActiveNetworkInfo() != null) {
+                return conManager.getActiveNetworkInfo().isConnected();
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -99,14 +105,6 @@ public class MeBaService extends IntentService {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        //this.server = sharedPrefs.getString(Constants.PrefServername, "NULL");
-        //this.https = sharedPrefs.getBoolean(Constants.PrefHTTPSCommunication, true);
-        //if (this.https) {
-        //    this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "443"));
-        //} else {
-        //    this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "80"));
-        //}
-        // this.userid = Integer.parseInt(sharedPrefs.getString(Constants.PrefUserID, "0"));
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
@@ -174,11 +172,15 @@ public class MeBaService extends IntentService {
     }
 
     private void handleActionSetShowTimestamp(int ChatID) {
-        String select = "((" + Constants.T_MESSAGES_ChatID + " = ?) AND (" + Constants.T_MESSAGES_ShowTimestamp + " = 0))";
-        String sort = Constants.T_MESSAGES_SendTimestamp + " ASC";
 
         ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, select, new String[]{String.valueOf(ChatID)}, sort);
+        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ShowTimestamp + " = ? AND " + T_MESSAGES_ChatID + " = ?", new String[]{"0", String.valueOf(ChatID)}, null);
+
+//        String select = "((" + Constants.T_MESSAGES_ChatID + " = ?) AND (" + Constants.T_MESSAGES_ShowTimestamp + " = 0))";
+//        String sort = Constants.T_MESSAGES_SendTimestamp + " ASC";
+
+//        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+//        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, select, new String[]{String.valueOf(ChatID)}, sort);
 
         while (c.moveToNext()) {
             OutSetShowTimeStamp outsst = rf.setshowtimestamp(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
@@ -186,7 +188,7 @@ public class MeBaService extends IntentService {
                 if (outsst.getErrortext() == null || outsst.getErrortext().isEmpty()) {
                     ContentValues valuesins = new ContentValues();
                     valuesins.put(Constants.T_MESSAGES_BADBID, outsst.getMessageID());
-                    valuesins.put(Constants.T_MESSAGES_ReadTimestamp, outsst.getShowTimestamp());
+                    valuesins.put(Constants.T_MESSAGES_ShowTimestamp, outsst.getShowTimestamp());
                     ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 }
             }
@@ -370,6 +372,9 @@ public class MeBaService extends IntentService {
 
         ContentValues valuesins = new ContentValues();
         valuesins.put(Constants.T_MESSAGES_BADBID, 0);
+        valuesins.put(Constants.T_MESSAGES_NumberAll, 0);
+        valuesins.put(Constants.T_MESSAGES_NumberRead, 0);
+        valuesins.put(Constants.T_MESSAGES_NumberShow, 0);
         valuesins.put(Constants.T_MESSAGES_OwningUserID, UserID);
         valuesins.put(Constants.T_MESSAGES_OwningUserName, username);
         valuesins.put(Constants.T_MESSAGES_ChatID, ChatID);

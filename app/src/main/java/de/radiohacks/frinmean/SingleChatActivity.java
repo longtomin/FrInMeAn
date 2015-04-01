@@ -170,6 +170,14 @@ public class SingleChatActivity extends ActionBarActivity implements
             }
         });
 
+        /* Now we have to set the ShowTimestamp for the messages in this chat */
+        Intent iSetShowTime = new Intent(SingleChatActivity.this, MeBaService.class);
+
+        iSetShowTime.setAction(Constants.ACTION_SETSHOWTIMESTAMP);
+        iSetShowTime.putExtra(Constants.CHATID, ChatID);
+
+        startService(iSetShowTime);
+
         /* Fuer Testzwecke um den Chat komplett neu zu laden */
         /* Intent picintent = new Intent(this, MeBaService.class);
         picintent.putExtra(Constants.CHATNAME, ChatName);

@@ -88,6 +88,7 @@ import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserName;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ReadTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_SendTimestamp;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_ShowTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgID;
@@ -256,6 +257,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             valuesins.put(T_MESSAGES_MessageTyp, m.getMessageTyp());
             valuesins.put(T_MESSAGES_SendTimestamp, m.getSendTimestamp());
             valuesins.put(T_MESSAGES_ReadTimestamp, m.getReadTimestamp());
+            valuesins.put(T_MESSAGES_ShowTimestamp, m.getShowTimestamp());
+            valuesins.put(T_MESSAGES_NumberAll, m.getNumberTotal());
+            valuesins.put(T_MESSAGES_NumberShow, m.getNumberShow());
+            valuesins.put(T_MESSAGES_NumberRead, m.getNumberRead());
+
             if (m.getMessageTyp().equalsIgnoreCase(TYP_TEXT)) {
                 valuesins.put(T_MESSAGES_TextMsgID, m.getTextMsgID());
                 OutFetchTextMessage oftm = rf.gettextmessage(username, password, m.getTextMsgID());
@@ -295,10 +301,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 }
                             }
                         } else {
-                            valuesins.put(T_MESSAGES_ImageMsgValue, outmeta.getImageMessage());
-                            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                            client.release();
+                            String checkfilepath;
+                            if (directory.endsWith("/")) {
+                                checkfilepath = directory + Constants.IMAGEDIR + "/" + outmeta.getImageMessage();
+                            } else {
+                                checkfilepath = directory + "/" + Constants.IMAGEDIR + "/" + outmeta.getImageMessage();
+                            }
+                            if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMessageID())) {
+                                valuesins.put(T_MESSAGES_ImageMsgValue, outmeta.getImageMessage());
+                                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                                client.release();
+                            }
                         }
                     }
                 }
@@ -358,10 +372,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 }
                             }
                         } else {
-                            valuesins.put(T_MESSAGES_VideoMsgValue, outmeta.getVideoMessage());
-                            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                            client.release();
+                            String checkfilepath;
+
+                            if (directory.endsWith("/")) {
+                                checkfilepath = directory + Constants.VIDEODIR + "/" + outmeta.getVideoMessage();
+                            } else {
+                                checkfilepath = directory + "/" + Constants.VIDEODIR + "/" + outmeta.getVideoMessage();
+                            }
+                            if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMessageID())) {
+                                valuesins.put(T_MESSAGES_VideoMsgValue, outmeta.getVideoMessage());
+                                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                                client.release();
+                            }
                         }
                     }
                 }
@@ -667,14 +690,11 @@ Update local Database with values returned from the server after the upload
      */
     private void syncGetMessageInformation() {
 
-        String select = "((" + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberRead + ") OR  ("
-                + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberRead + "))";
+        ContentProviderClient clienttotalnull = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+        Cursor ctn = ((FrinmeanContentProvider) clienttotalnull.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_NumberAll + " = ?", new String[]{"0"}, null);
 
-        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, select, null, null);
-
-        while (c.moveToNext()) {
-            OutGetMessageInformation outgmi = rf.getmessageinformation(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
+        while (ctn.moveToNext()) {
+            OutGetMessageInformation outgmi = rf.getmessageinformation(username, password, ctn.getInt(Constants.ID_MESSAGES_BADBID));
             if (outgmi != null) {
                 if (outgmi.getErrortext() == null || outgmi.getErrortext().isEmpty()) {
                     ContentValues valuesins = new ContentValues();
@@ -682,7 +702,27 @@ Update local Database with values returned from the server after the upload
                     valuesins.put(Constants.T_MESSAGES_NumberAll, outgmi.getNumberTotal());
                     valuesins.put(Constants.T_MESSAGES_NumberRead, outgmi.getNumberRead());
                     valuesins.put(Constants.T_MESSAGES_NumberShow, outgmi.getNumberShow());
-                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                    ((FrinmeanContentProvider) clienttotalnull.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                }
+            }
+        }
+
+        String selectdifferent = "((" + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberRead + ") OR  ("
+                + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberShow + "))";
+
+        ContentProviderClient clientdifferent = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+        Cursor cd = ((FrinmeanContentProvider) clientdifferent.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, selectdifferent, null, null);
+
+        while (cd.moveToNext()) {
+            OutGetMessageInformation outgmi = rf.getmessageinformation(username, password, cd.getInt(Constants.ID_MESSAGES_BADBID));
+            if (outgmi != null) {
+                if (outgmi.getErrortext() == null || outgmi.getErrortext().isEmpty()) {
+                    ContentValues valuesins = new ContentValues();
+                    valuesins.put(Constants.T_MESSAGES_BADBID, outgmi.getMessageID());
+                    valuesins.put(Constants.T_MESSAGES_NumberAll, outgmi.getNumberTotal());
+                    valuesins.put(Constants.T_MESSAGES_NumberRead, outgmi.getNumberRead());
+                    valuesins.put(Constants.T_MESSAGES_NumberShow, outgmi.getNumberShow());
+                    ((FrinmeanContentProvider) clientdifferent.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 }
             }
         }

@@ -66,11 +66,11 @@ import org.simpleframework.xml.Root;
 @Root(name = "OutSetShowTimeStamp", strict = false)
 public class OutSetShowTimeStamp {
 
-    @Element(name = "MessageID")
+    @Element(name = "MessageID", required = false)
     protected Integer messageID;
-    @Element(name = "ShowTimestamp")
+    @Element(name = "ShowTimestamp", required = false)
     protected Long showTimestamp;
-    @Element(name = "Errortext")
+    @Element(name = "Errortext", required = false)
     protected String errortext;
 
     /**

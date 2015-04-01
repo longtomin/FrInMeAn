@@ -69,15 +69,15 @@ import org.simpleframework.xml.Root;
 @Root(name = "OutGetMessageInformation", strict = false)
 public class OutGetMessageInformation {
 
-    @Element(name = "MessageID")
+    @Element(name = "MessageID", required = false)
     protected Integer messageID;
-    @Element(name = "NumberTotal")
+    @Element(name = "NumberTotal", required = false)
     protected Integer numberTotal;
-    @Element(name = "NumberRead")
+    @Element(name = "NumberRead", required = false)
     protected Integer numberRead;
-    @Element(name = "NumberShow")
+    @Element(name = "NumberShow", required = false)
     protected Integer numberShow;
-    @Element(name = "Errortext")
+    @Element(name = "Errortext", required = false)
     protected String errortext;
 
     /**
