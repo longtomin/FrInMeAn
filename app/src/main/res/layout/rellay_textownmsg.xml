@@ -6,16 +6,40 @@
     android:layout_gravity="right"
     android:padding="5dp">
 
-    <ImageView
-        android:id="@+id/user_img"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxHeight="50dp"
-        android:maxWidth="50dp"
-        android:minHeight="50dp"
-        android:minWidth="50dp"
-        android:nestedScrollingEnabled="false"
-        android:src="@drawable/iconuser" />
+        android:layout_toEndOf="@+id/ImageMessageContainer">
+
+        <ImageView
+            android:id="@+id/user_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:maxWidth="50dp"
+            android:minHeight="50dp"
+            android:minWidth="50dp"
+            android:nestedScrollingEnabled="false"
+            android:src="@drawable/iconuser" />
+
+        <TextView
+            android:id="@+id/TextStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="false"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentRight="false"
+            android:layout_alignParentTop="false"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_below="@+id/user_img"
+            android:layout_centerHorizontal="true"
+            android:layout_span="2"
+            android:inputType="none"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="10dp"
+            android:textStyle="italic" />
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/TextMessageContainer"

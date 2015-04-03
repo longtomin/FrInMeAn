@@ -252,6 +252,9 @@ public class SingleChatAdapter extends CursorAdapter {
         long rstamp = cur.getLong(Constants.ID_MESSAGES_ReadTimeStamp);
         Date rDate = new java.util.Date(rstamp * 1000);
         String OName = cur.getString(Constants.ID_MESSAGES_OwningUserName);
+        int NumTotal = cur.getInt(Constants.ID_MESSAGES_NumberAll);
+        int NumRead = cur.getInt(Constants.ID_MESSAGES_NumberRead);
+        int NumShow = cur.getInt(Constants.ID_MESSAGES_NumberShow);
 
         switch (findMsgType(msgType)) {
             case TEXTMSG:
@@ -263,6 +266,8 @@ public class SingleChatAdapter extends CursorAdapter {
                 TxtReadTimeStamp.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
                 TextView TextMessage = (TextView) view.findViewById(R.id.TextTextMessage);
                 TextMessage.setText(cur.getString(Constants.ID_MESSAGES_TextMsgValue));
+                TextView TextStatus = (TextView) view.findViewById(R.id.TextStatus);
+                TextStatus.setText(NumTotal + "/" + NumRead + "/" + NumShow);
 
                 TxtOwningUserName.setGravity(Gravity.START);
                 TextMessage.setGravity(Gravity.START);
@@ -287,6 +292,8 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImgSendTimeStamp.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(sDate));
                 TextView ImgReadTimeStamp = (TextView) view.findViewById(R.id.ImageReadTimeStamp);
                 ImgReadTimeStamp.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
+                TextView ImageStatus = (TextView) view.findViewById(R.id.ImageStatus);
+                ImageStatus.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton IButton = (ImageButton) view.findViewById(R.id.ImageImageButton);
 
                 String tmpimg;
@@ -371,6 +378,8 @@ public class SingleChatAdapter extends CursorAdapter {
                 VidSendTimeStamp.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(sDate));
                 TextView VidReadTimeStamp = (TextView) view.findViewById(R.id.VideoReadTimeStamp);
                 VidReadTimeStamp.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
+                TextView VideoStatus = (TextView) view.findViewById(R.id.VideoStatus);
+                VideoStatus.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton VButton = (ImageButton) view.findViewById(R.id.VideoImageButton);
 
                 String tmpvid;
