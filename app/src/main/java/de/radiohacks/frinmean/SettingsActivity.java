@@ -137,6 +137,10 @@ public class SettingsActivity extends PreferenceActivity {
      * "simplified" settings UI should be shown.
      */
     private static boolean isSimplePreferences(Context context) {
+        boolean ret1 = ALWAYS_SIMPLE_PREFS;
+        boolean ret2 = Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB;
+        boolean ret3 = !isXLargeTablet(context);
+
         return ALWAYS_SIMPLE_PREFS
                 || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
                 || !isXLargeTablet(context);
@@ -196,9 +200,9 @@ public class SettingsActivity extends PreferenceActivity {
      * shown.
      */
     private void setupSimplePreferencesScreen() {
-        if (!isSimplePreferences(this)) {
-            return;
-        }
+//        if (!isSimplePreferences(this)) {
+//            return;
+//        }
 
         // In the simplified UI, fragments are not used at all and we instead
         // use the older PreferenceActivity APIs.

@@ -17,6 +17,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -51,6 +52,7 @@ import de.radiohacks.frinmean.model.OutSendImageMessage;
 import de.radiohacks.frinmean.model.OutSendTextMessage;
 import de.radiohacks.frinmean.model.OutSendVideoMessage;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
+import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.RestFunctions;
 
 import static de.radiohacks.frinmean.Constants.CHAT_DB_Columns;
@@ -119,6 +121,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver = context.getContentResolver();
         getPreferenceInfo();
         rf = new RestFunctions();
+        if (directory.equalsIgnoreCase("NULL")) {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+            }
+        } else {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+            }
+        }
     }
 
     /**
@@ -130,6 +141,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver = context.getContentResolver();
         getPreferenceInfo();
         rf = new RestFunctions();
+        if (directory.equalsIgnoreCase("NULL")) {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+            }
+        } else {
+            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+            }
+        }
     }
 
     protected void getPreferenceInfo() {
@@ -414,7 +434,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             // Actions are just fake
             Notification.Builder nb = new Notification.Builder(this.getContext());
             nb.setContentTitle("FrInMeAn");
-            nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat " + ChatName).setSmallIcon(R.drawable.ic_stat_chat);
+            nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat " + ChatName).setSmallIcon(R.drawable.ic_stat_frinmean);
             nb.setSound(Uri.parse(ringtone));
             nb.setContentIntent(pIntent);
 
@@ -690,7 +710,8 @@ Update local Database with values returned from the server after the upload
      */
     private void syncGetMessageInformation() {
 
-        ContentProviderClient clienttotalnull = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+        /* This if for new uploaded Messages to get teh first Status*/
+        /* ContentProviderClient clienttotalnull = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
         Cursor ctn = ((FrinmeanContentProvider) clienttotalnull.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_NumberAll + " = ?", new String[]{"0"}, null);
 
         while (ctn.moveToNext()) {
@@ -705,24 +726,29 @@ Update local Database with values returned from the server after the upload
                     ((FrinmeanContentProvider) clienttotalnull.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 }
             }
-        }
+        }*/
 
-        String selectdifferent = "((" + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberRead + ") OR  ("
+        /* This is to identify changes in the status, if a message is totally downloaded and shown nothing can change anymore */
+        String selectdifferent = "((" + Constants.T_MESSAGES_NumberAll + " = ?) OR (" + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberRead + ") OR  ("
                 + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberShow + "))";
 
         ContentProviderClient clientdifferent = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor cd = ((FrinmeanContentProvider) clientdifferent.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, selectdifferent, null, null);
+        Cursor cd = ((FrinmeanContentProvider) clientdifferent.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, selectdifferent, new String[]{"0"}, null);
 
         while (cd.moveToNext()) {
             OutGetMessageInformation outgmi = rf.getmessageinformation(username, password, cd.getInt(Constants.ID_MESSAGES_BADBID));
             if (outgmi != null) {
                 if (outgmi.getErrortext() == null || outgmi.getErrortext().isEmpty()) {
-                    ContentValues valuesins = new ContentValues();
-                    valuesins.put(Constants.T_MESSAGES_BADBID, outgmi.getMessageID());
-                    valuesins.put(Constants.T_MESSAGES_NumberAll, outgmi.getNumberTotal());
-                    valuesins.put(Constants.T_MESSAGES_NumberRead, outgmi.getNumberRead());
-                    valuesins.put(Constants.T_MESSAGES_NumberShow, outgmi.getNumberShow());
-                    ((FrinmeanContentProvider) clientdifferent.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                    if (outgmi.getNumberTotal() != cd.getInt(Constants.ID_MESSAGES_NumberAll) ||
+                            (outgmi.getNumberRead() != cd.getInt(Constants.ID_MESSAGES_NumberRead)) ||
+                            (outgmi.getNumberShow() != cd.getInt(Constants.ID_MESSAGES_NumberShow))) {
+                        ContentValues valuesins = new ContentValues();
+                        valuesins.put(Constants.T_MESSAGES_BADBID, outgmi.getMessageID());
+                        valuesins.put(Constants.T_MESSAGES_NumberAll, outgmi.getNumberTotal());
+                        valuesins.put(Constants.T_MESSAGES_NumberRead, outgmi.getNumberRead());
+                        valuesins.put(Constants.T_MESSAGES_NumberShow, outgmi.getNumberShow());
+                        ((FrinmeanContentProvider) clientdifferent.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                    }
                 }
             }
         }
