@@ -7,9 +7,6 @@ import android.util.Log;
 
 import de.radiohacks.frinmean.Constants;
 
-/**
- * Created by thomas on 06.09.14.
- */
 public class LocalDBHandler extends SQLiteOpenHelper {
 
     private static final String TAG = LocalDBHandler.class.getSimpleName();

@@ -153,7 +153,7 @@ public class SettingsActivity extends PreferenceActivity {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        String directory = sharedPrefs.getString("prefDirectory", "NULL");
+        String directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         if (directory.equalsIgnoreCase("NULL")) {
             if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
                 Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
@@ -209,7 +209,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         // Add 'general' preferences.
         addPreferencesFromResource(R.xml.pref_general);
-        Preference filePicker = (Preference) findPreference("prefDirectory");
+        Preference filePicker = findPreference(Constants.PrefDirectory);
         filePicker.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -285,16 +285,6 @@ public class SettingsActivity extends PreferenceActivity {
         return isXLargeTablet(this) && !isSimplePreferences(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    /*@Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public void onBuildHeaders(List<Header> target) {
-        if (!isSimplePreferences(this)) {
-            loadHeadersFromResource(R.xml.pref_headers, target);
-        }
-    }*/
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -308,7 +298,7 @@ public class SettingsActivity extends PreferenceActivity {
                 SharedPreferences sharedPrefs = PreferenceManager
                         .getDefaultSharedPreferences(this);
                 SharedPreferences.Editor editor = sharedPrefs.edit();
-                editor.putString("prefDirectory", real_path);
+                editor.putString(Constants.PrefDirectory, real_path);
                 editor.commit();
 
                 // Jetzt erstellen wir die Unterverzeichnisse

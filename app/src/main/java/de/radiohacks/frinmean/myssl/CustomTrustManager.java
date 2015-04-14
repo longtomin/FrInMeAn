@@ -113,6 +113,7 @@ public class CustomTrustManager implements X509TrustManager {
             throw new IllegalArgumentException("Untrusted Certificate!");
         } finally {
             try {
+                assert inStream != null;
                 inStream.close();
             } catch (IOException e) {
                 e.printStackTrace();

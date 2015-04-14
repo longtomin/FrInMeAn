@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import de.radiohacks.frinmean.ChatActivity;
@@ -25,9 +26,6 @@ import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.R;
 import de.radiohacks.frinmean.service.MeBaService;
 
-/**
- * Created by thomas on 25.10.14.
- */
 public class SingleChatAdapter extends CursorAdapter {
 
     private static final String TAG = SingleChatAdapter.class.getSimpleName();
@@ -163,22 +161,22 @@ public class SingleChatAdapter extends CursorAdapter {
 
         switch (findMsgType(msgType, mine)) {
             case TEXTMSG_OWN:
-                    ret = li.inflate(R.layout.rellay_textownmsg, parent, false);
+                ret = li.inflate(R.layout.rellay_textownmsg, parent, false);
                 break;
             case TEXTMSG_FOREIGN:
-                    ret = li.inflate(R.layout.rellay_textforeignmsg, parent, false);
+                ret = li.inflate(R.layout.rellay_textforeignmsg, parent, false);
                 break;
             case IMAGEMSG_OWN:
-                    ret = li.inflate(R.layout.rellay_imageownmsg, parent, false);
+                ret = li.inflate(R.layout.rellay_imageownmsg, parent, false);
                 break;
             case IMAGEMSG_FOREIGN:
-                    ret = li.inflate(R.layout.rellay_imageforeignmsg, parent, false);
+                ret = li.inflate(R.layout.rellay_imageforeignmsg, parent, false);
                 break;
             case VIDEOMSG_OWN:
-                    ret = li.inflate(R.layout.rellay_videoownmsg, parent, false);
+                ret = li.inflate(R.layout.rellay_videoownmsg, parent, false);
                 break;
             case VIDEOMSG_FOREIGN:
-                    ret = li.inflate(R.layout.rellay_videoforeignmsg, parent, false);
+                ret = li.inflate(R.layout.rellay_videoforeignmsg, parent, false);
                 break;
         }
         if (ret != null) ret.setOnLongClickListener(new View.OnLongClickListener() {
@@ -193,9 +191,60 @@ public class SingleChatAdapter extends CursorAdapter {
                         switch (which) {
                             case 0:
                                 // Löschen
-                                //TODO Dialog mit Löschen vom Mobiltelefon einblenden (VIDEO/IMAGE/FILES)
-                                Intent delintent = new Intent(context, MeBaService.class);
+                                final CharSequence[] items = {mContext.getText(R.string.delete_on_server), mContext.getText(R.string.delete_local_content)};
+                                // arraylist to keep the selected items
+                                final ArrayList seletedItems = new ArrayList();
 
+                                AlertDialog.Builder delbuilder = new AlertDialog.Builder(context);
+                                delbuilder.setTitle(context.getText(R.string.delete_options));
+                                delbuilder.setMultiChoiceItems(items, null,
+                                        new DialogInterface.OnMultiChoiceClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int indexSelected,
+                                                                boolean isChecked) {
+                                                if (isChecked) {
+                                                    // If the user checked the item, add it to the selected items
+                                                    seletedItems.add(indexSelected);
+                                                } else if (seletedItems.contains(indexSelected)) {
+                                                    // Else, if the item is already in the array, remove it
+                                                    seletedItems.remove(Integer.valueOf(indexSelected));
+                                                }
+                                            }
+                                        })
+                                        // Set the action buttons
+                                        .setPositiveButton(context.getText(R.string.delete), new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                Intent delintent = new Intent(context, MeBaService.class);
+
+                                                boolean delserver = false;
+                                                boolean delcontent = false;
+                                                for (int j = 0; j < seletedItems.size(); j++) {
+                                                    CharSequence option = items[j];
+                                                    String stmpoption = option.toString();
+                                                    if (stmpoption.equalsIgnoreCase(context.getText(R.string.delete_on_server).toString())) {
+                                                        delserver = true;
+                                                    }
+                                                    if (stmpoption.equalsIgnoreCase(context.getText(R.string.delete_local_content).toString())) {
+                                                        delcontent = true;
+                                                    }
+                                                }
+                                                delintent.setAction(Constants.ACTION_DELETEMESSAGEFROMCHAT);
+                                                delintent.putExtra(Constants.DELETEONSERVER, delserver);
+                                                delintent.putExtra(Constants.DELETELOCALCONTENT, delcontent);
+                                                delintent.putExtra(Constants.MESSAGEID, msgID);
+                                                context.startService(delintent);
+                                            }
+                                        })
+                                        .setNegativeButton(context.getText(R.string.cancel), new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                //  Your code when user clicked on Cancel
+
+                                            }
+                                        });
+                                AlertDialog deldlg = delbuilder.create();
+                                deldlg.show();
                                 break;
                             case 1:
                                 // Weiterleiten
@@ -290,9 +339,9 @@ public class SingleChatAdapter extends CursorAdapter {
                 TextView TxtOwningUserNameOwn = (TextView) view.findViewById(R.id.TextOwningUserName);
                 TxtOwningUserNameOwn.setText(OName);
                 TextView TxtSendTimeStampOwn = (TextView) view.findViewById(R.id.TextSendTimeStamp);
-                TxtSendTimeStampOwn.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(sDate));
+                TxtSendTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
                 TextView TxtReadTimeStampOwn = (TextView) view.findViewById(R.id.TextReadTimeStamp);
-                TxtReadTimeStampOwn.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
+                TxtReadTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView TextMessageOwn = (TextView) view.findViewById(R.id.TextTextMessage);
                 TextMessageOwn.setText(cur.getString(Constants.ID_MESSAGES_TextMsgValue));
                 TextView TextStatusOwn = (TextView) view.findViewById(R.id.TextStatus);
@@ -302,37 +351,21 @@ public class SingleChatAdapter extends CursorAdapter {
                 TextView TxtOwningUserNameForeign = (TextView) view.findViewById(R.id.TextOwningUserName);
                 TxtOwningUserNameForeign.setText(OName);
                 TextView TxtSendTimeStampForeign = (TextView) view.findViewById(R.id.TextSendTimeStamp);
-                TxtSendTimeStampForeign.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(sDate));
+                TxtSendTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
                 TextView TxtReadTimeStampForeign = (TextView) view.findViewById(R.id.TextReadTimeStamp);
-                TxtReadTimeStampForeign.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
+                TxtReadTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView TextMessageForeign = (TextView) view.findViewById(R.id.TextTextMessage);
                 TextMessageForeign.setText(cur.getString(Constants.ID_MESSAGES_TextMsgValue));
                 TextView TextStatusForeign = (TextView) view.findViewById(R.id.TextStatus);
                 TextStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
-
-/*                 TxtOwningUserName.setGravity(Gravity.START);
-                TextMessage.setGravity(Gravity.START);
-
-                // RelativeLayout bg = (RelativeLayout) view.findViewById(R.id.TextMsgLayout);
-                if (msgOID == this.OID) {
-                    TxtOwningUserName.setGravity(Gravity.END);
-                    TxtReadTimeStamp.setGravity(Gravity.END);
-                    TxtSendTimeStamp.setGravity(Gravity.END);
-                    TextMessage.setGravity(Gravity.END);
-                } else {
-                    TxtOwningUserName.setGravity(Gravity.START);
-                    TxtReadTimeStamp.setGravity(Gravity.START);
-                    TxtSendTimeStamp.setGravity(Gravity.START);
-                    TextMessage.setGravity(Gravity.START);
-                } */
                 break;
             case IMAGEMSG_OWN:
                 TextView ImgOwningUserNameOwn = (TextView) view.findViewById(R.id.ImageOwningUserName);
                 ImgOwningUserNameOwn.setText(OName);
                 TextView ImgSendTimeStampOwn = (TextView) view.findViewById(R.id.ImageSendTimeStamp);
-                ImgSendTimeStampOwn.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(sDate));
+                ImgSendTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
                 TextView ImgReadTimeStampOwn = (TextView) view.findViewById(R.id.ImageReadTimeStamp);
-                ImgReadTimeStampOwn.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
+                ImgReadTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView ImageStatusOwn = (TextView) view.findViewById(R.id.ImageStatus);
                 ImageStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton IButtonOwn = (ImageButton) view.findViewById(R.id.ImageImageButton);
@@ -364,9 +397,6 @@ public class SingleChatAdapter extends CursorAdapter {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(fname, options);
-                    int imageHeight = options.outHeight;
-                    int imageWidth = options.outWidth;
-                    String imageType = options.outMimeType;
 
                     options.inSampleSize = calculateInSampleSize(options, 200, 200);
 
@@ -379,22 +409,14 @@ public class SingleChatAdapter extends CursorAdapter {
                     IButtonOwn.setMaxHeight(options.outHeight);
 
                 }
-/*                if (msgOID == this.OID) {
-                    ImgOwningUserName.setGravity(Gravity.END);
-                    ImgSendTimeStamp.setGravity(Gravity.END);
-                } else {
-                    ImgOwningUserName.setGravity(Gravity.START);
-                    ImgReadTimeStamp.setGravity(Gravity.START);
-                    ImgSendTimeStamp.setGravity(Gravity.START);
-                }*/
                 break;
             case IMAGEMSG_FOREIGN:
                 TextView ImgOwningUserNameForeign = (TextView) view.findViewById(R.id.ImageOwningUserName);
                 ImgOwningUserNameForeign.setText(OName);
                 TextView ImgSendTimeStampForeign = (TextView) view.findViewById(R.id.ImageSendTimeStamp);
-                ImgSendTimeStampForeign.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(sDate));
+                ImgSendTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
                 TextView ImgReadTimeStampForeign = (TextView) view.findViewById(R.id.ImageReadTimeStamp);
-                ImgReadTimeStampForeign.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
+                ImgReadTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView ImageStatusForeign = (TextView) view.findViewById(R.id.ImageStatus);
                 ImageStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton IButtonForeign = (ImageButton) view.findViewById(R.id.ImageImageButton);
@@ -426,9 +448,6 @@ public class SingleChatAdapter extends CursorAdapter {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(fname, options);
-                    int imageHeight = options.outHeight;
-                    int imageWidth = options.outWidth;
-                    String imageType = options.outMimeType;
 
                     options.inSampleSize = calculateInSampleSize(options, 200, 200);
 
@@ -446,9 +465,9 @@ public class SingleChatAdapter extends CursorAdapter {
                 TextView VidOwningUserNameOwn = (TextView) view.findViewById(R.id.VideoOwningUserName);
                 VidOwningUserNameOwn.setText(OName);
                 TextView VidSendTimeStampOwn = (TextView) view.findViewById(R.id.VideoSendTimeStamp);
-                VidSendTimeStampOwn.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(sDate));
+                VidSendTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
                 TextView VidReadTimeStampOwn = (TextView) view.findViewById(R.id.VideoReadTimeStamp);
-                VidReadTimeStampOwn.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
+                VidReadTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView VideoStatusOwn = (TextView) view.findViewById(R.id.VideoStatus);
                 VideoStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.VideoImageButton);
@@ -472,23 +491,14 @@ public class SingleChatAdapter extends CursorAdapter {
                         mContext.startActivity(intent);
                     }
                 });
-
-/*                if (msgOID == this.OID) {
-                    VidOwningUserName.setGravity(Gravity.END);
-                    VidSendTimeStamp.setGravity(Gravity.END);
-                } else {
-                    VidOwningUserName.setGravity(Gravity.START);
-                    VidReadTimeStamp.setGravity(Gravity.START);
-                    VidSendTimeStamp.setGravity(Gravity.START);
-                }*/
                 break;
             case VIDEOMSG_FOREIGN:
                 TextView VidOwningUserNameForeign = (TextView) view.findViewById(R.id.VideoOwningUserName);
                 VidOwningUserNameForeign.setText(OName);
                 TextView VidSendTimeStampForeign = (TextView) view.findViewById(R.id.VideoSendTimeStamp);
-                VidSendTimeStampForeign.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(sDate));
+                VidSendTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
                 TextView VidReadTimeStampForeign = (TextView) view.findViewById(R.id.VideoReadTimeStamp);
-                VidReadTimeStampForeign.setText(new SimpleDateFormat("dd.MM.yyy HH:mm:ss").format(rDate));
+                VidReadTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView VideoStatusForeign = (TextView) view.findViewById(R.id.VideoStatus);
                 VideoStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.VideoImageButton);

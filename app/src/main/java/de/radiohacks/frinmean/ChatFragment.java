@@ -53,7 +53,7 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
         userid = i.getIntExtra(Constants.USERID, -1);
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String directory = sharedPrefs.getString("prefDirectory", "NULL");
+        String directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
 
         if (mode.equalsIgnoreCase(Constants.CHAT_ACTIVITY_FULL)) {
             setHasOptionsMenu(true);

@@ -96,9 +96,6 @@ import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgValue;
 
-/**
- * Created by thomas on 19.01.15.
- */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final String TAG = "SyncAdapter";
     /**
@@ -450,6 +447,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             notificationManager.notify(0, noti);
         }
+        c.close();
+        client.release();
         Log.d(TAG, "end saveMessageToLDB");
     }
 
@@ -481,6 +480,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+            assert md5 != null;
             OutAcknowledgeMessageDownload oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
             if (oack != null) {
                 if (oack.getErrortext() == null || oack.getErrortext().isEmpty()) {
@@ -498,6 +498,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+            assert md5 != null;
             OutAcknowledgeMessageDownload oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
             if (oack != null) {
                 if (oack.getErrortext() == null || oack.getErrortext().isEmpty()) {
@@ -536,6 +537,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 checkfilepath = directory + "/" + Constants.FILESDIR + "/" + fname;
             }
         }
+        assert checkfilepath != null;
         checkfile = new File(checkfilepath);
 
         if (checkfile.exists()) {
@@ -549,6 +551,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
+                assert md5 != null;
                 if (md5.toString().equals(inmd5sumd)) {
                     // MD5Sum is equal File already exists
                     ret = true;
@@ -614,7 +617,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             valuesins.put(T_MESSAGES_VideoMsgValue, Message);
         }
         ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        ((FrinmeanContentProvider) client.getLocalContentProvider()).update(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(id)});
+        client.getLocalContentProvider().update(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(id)});
+        client.release();
     }
 
     /*
@@ -623,7 +627,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void uploadUnsavedMessages() {
 
         ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor c = ((FrinmeanContentProvider) client.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_BADBID + " = ?", new String[]{"0"}, null);
+        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_BADBID + " = ?", new String[]{"0"}, null);
 
         while (c.moveToNext()) {
 
@@ -661,9 +665,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     }
 
                 }
-            } else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
+            } /*else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
 
-            } else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
+            } */ else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
                 String vidfile = directory;
                 if (vidfile.endsWith("/")) {
                     vidfile += Constants.VIDEODIR + "/" + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
@@ -683,25 +687,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     }
 
                 }
-            } else if (msgtype.equalsIgnoreCase(TYP_FILE)) {
+            } /* else if (msgtype.equalsIgnoreCase(TYP_FILE)) {
 
             } else if (msgtype.equalsIgnoreCase(TYP_CONTACT)) {
 
-            }
+            } */
         }
-    }
-
-    /*
-Update local Database with values returned from the server after the upload
- */
-    public void updateGetInformationMessagesDatabase(int id, int innumall, int innumread, int innumshow) {
-        ContentValues valuesins = new ContentValues();
-        valuesins.put(T_MESSAGES_NumberAll, innumall);
-        valuesins.put(T_MESSAGES_NumberRead, innumread);
-        valuesins.put(T_MESSAGES_NumberShow, innumshow);
-
-        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        ((FrinmeanContentProvider) client.getLocalContentProvider()).update(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(id)});
+        c.close();
+        client.release();
     }
 
 
@@ -710,30 +703,12 @@ Update local Database with values returned from the server after the upload
      */
     private void syncGetMessageInformation() {
 
-        /* This if for new uploaded Messages to get teh first Status*/
-        /* ContentProviderClient clienttotalnull = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor ctn = ((FrinmeanContentProvider) clienttotalnull.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_NumberAll + " = ?", new String[]{"0"}, null);
-
-        while (ctn.moveToNext()) {
-            OutGetMessageInformation outgmi = rf.getmessageinformation(username, password, ctn.getInt(Constants.ID_MESSAGES_BADBID));
-            if (outgmi != null) {
-                if (outgmi.getErrortext() == null || outgmi.getErrortext().isEmpty()) {
-                    ContentValues valuesins = new ContentValues();
-                    valuesins.put(Constants.T_MESSAGES_BADBID, outgmi.getMessageID());
-                    valuesins.put(Constants.T_MESSAGES_NumberAll, outgmi.getNumberTotal());
-                    valuesins.put(Constants.T_MESSAGES_NumberRead, outgmi.getNumberRead());
-                    valuesins.put(Constants.T_MESSAGES_NumberShow, outgmi.getNumberShow());
-                    ((FrinmeanContentProvider) clienttotalnull.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
-                }
-            }
-        }*/
-
         /* This is to identify changes in the status, if a message is totally downloaded and shown nothing can change anymore */
         String selectdifferent = "((" + Constants.T_MESSAGES_NumberAll + " = ?) OR (" + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberRead + ") OR  ("
                 + Constants.T_MESSAGES_NumberAll + " != " + Constants.T_MESSAGES_NumberShow + "))";
 
         ContentProviderClient clientdifferent = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor cd = ((FrinmeanContentProvider) clientdifferent.getLocalContentProvider()).query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, selectdifferent, new String[]{"0"}, null);
+        Cursor cd = clientdifferent.getLocalContentProvider().query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, selectdifferent, new String[]{"0"}, null);
 
         while (cd.moveToNext()) {
             OutGetMessageInformation outgmi = rf.getmessageinformation(username, password, cd.getInt(Constants.ID_MESSAGES_BADBID));
@@ -752,6 +727,8 @@ Update local Database with values returned from the server after the upload
                 }
             }
         }
+        cd.close();
+        clientdifferent.release();
     }
 }
 

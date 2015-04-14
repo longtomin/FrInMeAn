@@ -68,13 +68,12 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/ImageMessageContainer">
+        android:layout_toEndOf="@+id/VideoMessageContainer">
 
         <ImageView
             android:id="@+id/user_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/VideoMessageContainer"
             android:maxHeight="50dp"
             android:maxWidth="50dp"
             android:minHeight="50dp"

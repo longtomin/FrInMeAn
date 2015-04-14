@@ -107,16 +107,6 @@ public class StartActivity extends Activity {
         Log.d(TAG, "end getPferefenceInfo");
     }
 
-    /* protected void buildServerURL() {
-        this.CommunicationURL = "";
-        if (this.https) {
-            this.CommunicationURL += "https://";
-        } else {
-            this.CommunicationURL += "http://";
-        }
-        this.CommunicationURL += server + ":" + port + "/frinmeba/";
-    }*/
-
     @Override
     protected void onResume() {
         super.onResume();

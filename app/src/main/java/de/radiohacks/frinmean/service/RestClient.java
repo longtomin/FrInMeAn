@@ -51,8 +51,6 @@ import de.radiohacks.frinmean.FrinmeanApplication;
 import de.radiohacks.frinmean.myssl.CustomSSLSocketFactory;
 import de.radiohacks.frinmean.myssl.CustomTrustManager;
 
-//import java.net.URL;
-
 /**
  * Created by thomas on 24.08.14.
  */
@@ -231,13 +229,6 @@ public class RestClient {
             request.addHeader(h.getName(), h.getValue());
         }
 
-        /* if (!params.isEmpty()) {
-            request.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-        }
-
-        if (reqEntity != null) {
-            request.setEntity(reqEntity);
-        } */
         Log.d(TAG, "start BevorExecutePost");
         return request;
     }

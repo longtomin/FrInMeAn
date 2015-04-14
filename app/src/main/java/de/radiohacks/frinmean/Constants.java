@@ -164,6 +164,8 @@ public class Constants {
     public final static String SENDCHATID = "sendchatid";
     public final static String FWDCONTENTMESSAGEID = "fwdcontentmessageid";
     public final static String FWDCONTENTMESSAGE = "fwdcontentmessage";
+    public final static String DELETEONSERVER = "deleteonserver";
+    public final static String DELETELOCALCONTENT = "deletelocalcontent";
 
     /*
     Constants for Broadcasts
@@ -331,4 +333,6 @@ public class Constants {
     public static final String PREF_SETUP_COMPLETE = "setup_complete";
     // Value below must match the account type specified in res/xml/syncadapter.xml
     public static final String ACCOUNT_TYPE = "de.radiohacks.frinmean.account";
+
+    public static final String DATETIMEFORMAT = "dd.MM.yyy HH:mm:ss";
 }

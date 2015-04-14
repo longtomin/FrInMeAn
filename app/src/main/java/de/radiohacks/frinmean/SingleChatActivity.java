@@ -156,7 +156,6 @@ public class SingleChatActivity extends ActionBarActivity implements
                     Intent iSendTextMsgService = new Intent(SingleChatActivity.this, MeBaService.class);
 
                     iSendTextMsgService.setAction(Constants.ACTION_SENDTEXTMESSAGE);
-                    iSendTextMsgService.putExtra(Constants.CHATNAME, ChatName);
                     iSendTextMsgService.putExtra(Constants.CHATID, ChatID);
                     iSendTextMsgService.putExtra(Constants.USERID, userid);
                     String tmpmsg = Message.getText().toString();
@@ -220,10 +219,10 @@ public class SingleChatActivity extends ActionBarActivity implements
                 .getDefaultSharedPreferences(this);
 
         //server = sharedPrefs.getString("prefServername", "NULL");
-        username = sharedPrefs.getString("prefUsername", "NULL");
+        username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         //password = sharedPrefs.getString("prefPassword", "NULL");
         // userid = sharedPrefs.getInt("prefUserID", 0);
-        directory = sharedPrefs.getString("prefDirectory", "NULL");
+        directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         Log.d(TAG, "end getPreferenceInfo");
     }
 
@@ -238,7 +237,6 @@ public class SingleChatActivity extends ActionBarActivity implements
 
             picintent.putExtra(Constants.CHATID, ChatID);
             picintent.putExtra(Constants.USERID, userid);
-            picintent.putExtra(Constants.CHATNAME, ChatName);
 
             if (data != null) {
                 Uri selectedimage = data.getData();
@@ -251,6 +249,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                     mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                 }
 
+                assert mediaType != null;
                 if (mediaType.startsWith("image")) {
                     picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
                     picintent.putExtra(Constants.IMAGELOCATION, filePath);

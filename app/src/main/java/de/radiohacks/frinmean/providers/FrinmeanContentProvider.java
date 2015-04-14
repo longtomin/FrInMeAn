@@ -343,6 +343,7 @@ public class FrinmeanContentProvider extends ContentProvider {
             case Frinmean_users:
                 rowsDeleted = sqlDB.delete(Constants.USER_TABLE_NAME, selection,
                         selectionArgs);
+                break;
             case MESSAGES_ID:
                 String msgid = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {
@@ -523,20 +524,21 @@ public class FrinmeanContentProvider extends ContentProvider {
     private void checkColumns(String[] projection, String tablename) {
 
         if (projection != null) {
-            HashSet<String> requestedColumns = new HashSet<String>(
+            HashSet<String> requestedColumns = new HashSet<>(
                     Arrays.asList(projection));
             HashSet<String> availableColumns = null;
             if (tablename.equalsIgnoreCase(Constants.MESSAGES_TABLE_NAME)) {
-                availableColumns = new HashSet<String>(
+                availableColumns = new HashSet<>(
                         Arrays.asList(Constants.MESSAGES_DB_Columns));
             } else if (tablename.equalsIgnoreCase(Constants.CHAT_TABLE_NAME)) {
-                availableColumns = new HashSet<String>(
+                availableColumns = new HashSet<>(
                         Arrays.asList(Constants.CHAT_DB_Columns));
             } else if (tablename.equalsIgnoreCase(Constants.USER_TABLE_NAME)) {
-                availableColumns = new HashSet<String>(
+                availableColumns = new HashSet<>(
                         Arrays.asList(Constants.USER_DB_Columns));
             }
             // Check if all columns which are requested are available
+            assert availableColumns != null;
             if (!availableColumns.containsAll(requestedColumns)) {
                 throw new IllegalArgumentException(
                         "Unknown columns in projection");
@@ -553,16 +555,19 @@ public class FrinmeanContentProvider extends ContentProvider {
             if (c.moveToFirst()) {
                 ret = c.getInt(c.getColumnIndex(Constants.T_MESSAGES_BADBID));
             }
+            c.close();
         } else if (tablename.equalsIgnoreCase(Constants.CHAT_TABLE_NAME)) {
             Cursor c = db.query(tablename, new String[]{Constants.T_CHAT_BADBID}, Constants.T_CHAT_BADBID + " =?", new String[]{Integer.toString(inid)}, null, null, null, null);
             if (c.moveToFirst()) {
                 ret = c.getInt(c.getColumnIndex(Constants.T_CHAT_BADBID));
             }
+            c.close();
         } else if (tablename.equalsIgnoreCase(Constants.USER_TABLE_NAME)) {
             Cursor c = db.query(tablename, new String[]{Constants.T_USER_BADBID}, Constants.T_USER_BADBID + " =?", new String[]{Integer.toString(inid)}, null, null, null, null);
             if (c.moveToFirst()) {
                 ret = c.getInt(c.getColumnIndex(Constants.T_USER_BADBID));
             }
+            c.close();
         }
         Log.d(TAG, "end getID");
         return ret;

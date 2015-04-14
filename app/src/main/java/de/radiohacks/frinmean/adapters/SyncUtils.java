@@ -33,7 +33,6 @@ import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
  * Static helper methods for working with the sync framework.
  */
 public class SyncUtils {
-    private static final long SYNC_FREQUENCY = 60;  // 60 seconds)
     private static Account mAccount;
 
     /**

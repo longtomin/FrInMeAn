@@ -86,8 +86,6 @@ public class RestFunctions {
         } else {
             this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "80"));
         }
-//        this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
-//        this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
@@ -146,7 +144,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "end authenticate =" + out.getAuthenticated());
+        Log.d(TAG, "end authenticate");
         return out;
     }
 

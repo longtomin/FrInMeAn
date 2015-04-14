@@ -37,6 +37,10 @@
     <string name="DirecotryChooser">Ablageort auswählen</string>
     <string name="SelectOwnImage">Eigenes Bild auswählen</string>
     <string name="message_option">Nachrichten Optionen</string>
+    <string name="delete">Löschen</string>
+    <string name="delete_options">Lösch-Optionen</string>
+    <string name="delete_on_server">Auf dem Server löschen</string>
+    <string name="delete_local_content">Lokalen Inhalt löschen</string>
 
     <!-- String for ErrorText FROM SERVER -->
     <string name="ERROR_NO_CONNECTION_TO_SERVER">Keine Verbindung zum Server!</string>
