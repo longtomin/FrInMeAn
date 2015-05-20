@@ -1,0 +1,4 @@
+TODO:
+Kopieren von Nachrichten einbauen.
+Löschen mit Multi-Select aufbauen.
+SSL Kommunikation aufbauen
