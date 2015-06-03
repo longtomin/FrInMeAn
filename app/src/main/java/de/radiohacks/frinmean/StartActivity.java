@@ -40,6 +40,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
 
 
@@ -99,10 +100,12 @@ public class StartActivity extends Activity {
                 authIntent.setAction(Constants.ACTION_AUTHENTICATE);
                 startService(authIntent); */
 
+                SyncUtils.CreateSyncAccount(this);
                 /* Alernative 3 keine Authentifizierung, einfach eiter zu den Chats, offline Modus möglich */
                 Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
                 startchat.putExtra(Constants.USERID, this.userid);
                 startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FULL);
+                startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
                 startchat.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(startchat);
                 StartActivity.this.finish();
@@ -195,7 +198,7 @@ public class StartActivity extends Activity {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    OutAuthenticate res = serializer.read(OutAuthenticate.class, reader, false);
+                    OAuth res = serializer.read(OAuth.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(StartActivity.this);
                         eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
@@ -237,12 +240,12 @@ public class StartActivity extends Activity {
     } */
 
 
-    /* private class AuthenticateLoader extends AsyncTask<String, Void, OutAuthenticate> {
+    /* private class AuthenticateLoader extends AsyncTask<String, Void, OAuth> {
         private final ProgressDialog dialog = new ProgressDialog(StartActivity.this);
         private final String TAG = AuthenticateLoader.class.getSimpleName();
 
         @Override
-        protected void onPostExecute(OutAuthenticate result) {
+        protected void onPostExecute(OAuth result) {
             Log.d(TAG, "start onPostExecute");
             super.onPostExecute(result);
             dialog.dismiss();
@@ -281,13 +284,13 @@ public class StartActivity extends Activity {
         protected void onPreExecute() {
             Log.d(TAG, "start onPreExecute");
             super.onPreExecute();
-            dialog.setMessage("Authenticate User...");
+            dialog.setMessage("Authenticate Benutzer...");
             dialog.show();
             Log.d(TAG, "end onPreExecute");
         }
 
         @Override
-        protected OutAuthenticate doInBackground(String... params) {
+        protected OAuth doInBackground(String... params) {
             Log.d(TAG, "start doInBackground");
 
             RestFunctions rf = new RestFunctions();

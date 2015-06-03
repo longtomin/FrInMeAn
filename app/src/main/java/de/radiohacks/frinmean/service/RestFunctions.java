@@ -19,29 +19,30 @@ import java.net.URLEncoder;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.FrinmeanApplication;
-import de.radiohacks.frinmean.model.OutAcknowledgeMessageDownload;
-import de.radiohacks.frinmean.model.OutAddUserToChat;
-import de.radiohacks.frinmean.model.OutAuthenticate;
-import de.radiohacks.frinmean.model.OutCheckNewMessages;
-import de.radiohacks.frinmean.model.OutCreateChat;
-import de.radiohacks.frinmean.model.OutDeleteChat;
-import de.radiohacks.frinmean.model.OutDeleteMessageFromChat;
-import de.radiohacks.frinmean.model.OutFetchImageMessage;
-import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
-import de.radiohacks.frinmean.model.OutFetchTextMessage;
-import de.radiohacks.frinmean.model.OutFetchVideoMessage;
-import de.radiohacks.frinmean.model.OutGetImageMessageMetaData;
-import de.radiohacks.frinmean.model.OutGetMessageInformation;
-import de.radiohacks.frinmean.model.OutGetVideoMessageMetaData;
-import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
-import de.radiohacks.frinmean.model.OutListChat;
-import de.radiohacks.frinmean.model.OutListUser;
-import de.radiohacks.frinmean.model.OutRemoveUserFromChat;
-import de.radiohacks.frinmean.model.OutSendImageMessage;
-import de.radiohacks.frinmean.model.OutSendTextMessage;
-import de.radiohacks.frinmean.model.OutSendVideoMessage;
-import de.radiohacks.frinmean.model.OutSetShowTimeStamp;
-import de.radiohacks.frinmean.model.OutSignUp;
+import de.radiohacks.frinmean.modelshort.OAckCD;
+import de.radiohacks.frinmean.modelshort.OAckMD;
+import de.radiohacks.frinmean.modelshort.OAdUC;
+import de.radiohacks.frinmean.modelshort.OAuth;
+import de.radiohacks.frinmean.modelshort.OCN;
+import de.radiohacks.frinmean.modelshort.OCrCh;
+import de.radiohacks.frinmean.modelshort.ODMFC;
+import de.radiohacks.frinmean.modelshort.ODeCh;
+import de.radiohacks.frinmean.modelshort.OFMFC;
+import de.radiohacks.frinmean.modelshort.OGImM;
+import de.radiohacks.frinmean.modelshort.OGImMMD;
+import de.radiohacks.frinmean.modelshort.OGMI;
+import de.radiohacks.frinmean.modelshort.OGTeM;
+import de.radiohacks.frinmean.modelshort.OGViM;
+import de.radiohacks.frinmean.modelshort.OGViMMD;
+import de.radiohacks.frinmean.modelshort.OIMIC;
+import de.radiohacks.frinmean.modelshort.OLiCh;
+import de.radiohacks.frinmean.modelshort.OLiUs;
+import de.radiohacks.frinmean.modelshort.OReUC;
+import de.radiohacks.frinmean.modelshort.OSImM;
+import de.radiohacks.frinmean.modelshort.OSShT;
+import de.radiohacks.frinmean.modelshort.OSTeM;
+import de.radiohacks.frinmean.modelshort.OSViM;
+import de.radiohacks.frinmean.modelshort.OSiUp;
 
 /**
  * Created by thomas on 19.01.15.
@@ -120,12 +121,12 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/authenticate")
-    public OutAuthenticate AuthenticateUser(@QueryParam(Constants.QPusername) String User,
+    public OAuth AuthenticateUser(@QueryParam(Constants.QPusername) String User,
                                             @QueryParam(Constants.QPpassword) String Password); */
 
-    public OutAuthenticate authenticate(String inuser, String inpassword) {
+    public OAuth authenticate(String inuser, String inpassword) {
         Log.d(TAG, "start authenticate with user=" + inuser + " password=" + inpassword);
-        OutAuthenticate out = null;
+        OAuth out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/authenticate", https, port);
@@ -138,7 +139,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutAuthenticate.class, reader, false);
+                    out = serializer.read(OAuth.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -151,13 +152,13 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/signup")
-    public OutSignUp SingUpUser(@QueryParam(Constants.QPusername) String User,
+    public OSiUp SingUpUser(@QueryParam(Constants.QPusername) String User,
                                 @QueryParam(Constants.QPpassword) String Password,
                                 @QueryParam(Constants.QPemail) String Email); */
 
-    public OutSignUp signup(String inuser, String inpassword, String inemail) {
+    public OSiUp signup(String inuser, String inpassword, String inemail) {
         Log.d(TAG, "start signup with user=" + inuser + " password=" + inpassword + "Email=" + inemail);
-        OutSignUp out = null;
+        OSiUp out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/signup", https, port);
@@ -171,7 +172,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutSignUp.class, reader, false);
+                    out = serializer.read(OSiUp.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -184,13 +185,13 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/createchat")
-    public OutCreateChat CreateChat(@QueryParam(Constants.QPusername) String User,
+    public OCrCh CreateChat(@QueryParam(Constants.QPusername) String User,
                                     @QueryParam(Constants.QPpassword) String Password,
                                     @QueryParam(Constants.QPchatname) String Chatname);*/
 
-    public OutCreateChat createchat(String inuser, String inpassword, String inchatname) {
+    public OCrCh createchat(String inuser, String inpassword, String inchatname) {
         Log.d(TAG, "start createchat with user=" + inuser + " password=" + inpassword);
-        OutCreateChat out = null;
+        OCrCh out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/createchat", https, port);
@@ -204,7 +205,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutCreateChat.class, reader, false);
+                    out = serializer.read(OCrCh.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -217,13 +218,13 @@ public class RestFunctions {
     /* @DELETE
     @Produces(MediaType.APPLICATION_XML)
     @Path("/deletechat")
-    public OutDeleteChat DeleteChat(@QueryParam(Constants.QPusername) String User,
+    public ODeCh DeleteChat(@QueryParam(Constants.QPusername) String User,
                                     @QueryParam(Constants.QPpassword) String Password,
                                     @QueryParam(Constants.QPchatid) int ChatID); */
 
-    public OutDeleteChat deletechat(String inuser, String inpassword, int inchatid) {
+    public ODeCh deletechat(String inuser, String inpassword, int inchatid) {
         Log.d(TAG, "start deletechat with user=" + inuser + " password=" + inpassword);
-        OutDeleteChat out = null;
+        ODeCh out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/deletechat", https, port);
@@ -237,7 +238,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutDeleteChat.class, reader, false);
+                    out = serializer.read(ODeCh.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -250,14 +251,14 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/addusertochat")
-    public OutAddUserToChat AddUserToChat(@QueryParam(Constants.QPusername) String User,
+    public OAdUC AddUserToChat(@QueryParam(Constants.QPusername) String User,
                                           @QueryParam(Constants.QPpassword) String Password,
                                           @QueryParam(Constants.QPuserid) int UserID,
                                           @QueryParam(Constants.QPchatid) int ChatID); */
 
-    public OutAddUserToChat addusertochat(String inuser, String inpassword, int inuserid, int inchatid) {
+    public OAdUC addusertochat(String inuser, String inpassword, int inuserid, int inchatid) {
         Log.d(TAG, "start addusertochat with user=" + inuser + " password=" + inpassword);
-        OutAddUserToChat out = null;
+        OAdUC out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/addusertochat", https, port);
@@ -272,7 +273,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutAddUserToChat.class, reader, false);
+                    out = serializer.read(OAdUC.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -285,14 +286,14 @@ public class RestFunctions {
     /* @DELETE
     @Produces(MediaType.APPLICATION_XML)
     @Path("/removeuserfromchat")
-    public OutRemoveUserFromChat RemoveUserFromChat(@QueryParam(Constants.QPusername) String User,
+    public OReUC RemoveUserFromChat(@QueryParam(Constants.QPusername) String User,
                                                     @QueryParam(Constants.QPpassword) String Password,
                                                     @QueryParam(Constants.QPchatid) int ChatID,
                                                     @QueryParam(Constants.QPuserid) int UserID); */
 
-    public OutRemoveUserFromChat removeuserfromchat(String inuser, String inpassword, int inuserid, int inchatid) {
+    public OReUC removeuserfromchat(String inuser, String inpassword, int inuserid, int inchatid) {
         Log.d(TAG, "start removeuserfromchat with user=" + inuser + " password=" + inpassword);
-        OutRemoveUserFromChat out = null;
+        OReUC out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/removeuserfromchat", https, port);
@@ -307,7 +308,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutRemoveUserFromChat.class, reader, false);
+                    out = serializer.read(OReUC.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -320,14 +321,14 @@ public class RestFunctions {
     /* @DELETE
     @Produces(MediaType.APPLICATION_XML)
     @Path("/deletemessagefromchat")
-    public OutDeleteMessageFromChat deleteMessageFromChat(
+    public ODMFC deleteMessageFromChat(
             @QueryParam(Constants.QPusername) String User,
             @QueryParam(Constants.QPpassword) String Password,
             @QueryParam(Constants.QPmessageid) int MessageID);*/
 
-    public OutDeleteMessageFromChat deleteMessageFromChat(String inuser, String inpassword, int inmessageid) {
+    public ODMFC deleteMessageFromChat(String inuser, String inpassword, int inmessageid) {
         Log.d(TAG, "start removeuserfromchat with user=" + inuser + " password=" + inpassword);
-        OutDeleteMessageFromChat out = null;
+        ODMFC out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/deletemessagefromchat", https, port);
@@ -341,7 +342,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutDeleteMessageFromChat.class, reader, false);
+                    out = serializer.read(ODMFC.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -355,13 +356,13 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/listuser")
-    public OutListUser ListUsers(@QueryParam(Constants.QPusername) String User,
+    public OLiUs ListUsers(@QueryParam(Constants.QPusername) String User,
                                  @QueryParam(Constants.QPpassword) String Password,
                                  @QueryParam(Constants.QPsearch) String search); */
 
-    public OutListUser listuser(String inuser, String inpassword, String insearch) {
+    public OLiUs listuser(String inuser, String inpassword, String insearch) {
         Log.d(TAG, "start listuser with user=" + inuser + " password=" + inpassword + " Search=" + insearch);
-        OutListUser out = null;
+        OLiUs out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/listuser", https, port);
@@ -375,7 +376,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutListUser.class, reader, false);
+                    out = serializer.read(OLiUs.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -388,11 +389,11 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/listchat")
-    public OutListChat ListChats(@QueryParam(Constants.QPusername) String User,
+    public OLiCh ListChats(@QueryParam(Constants.QPusername) String User,
                                  @QueryParam(Constants.QPpassword) String Password); */
-    public OutListChat listchat(String inuser, String inpassword) {
+    public OLiCh listchat(String inuser, String inpassword) {
         Log.d(TAG, "start listchat with user=" + inuser + " password=" + inpassword);
-        OutListChat out = null;
+        OLiCh out = null;
         int retcode = 0;
         if (checkServer()) {
             RestClient rc;
@@ -406,7 +407,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutListChat.class, reader, false);
+                    out = serializer.read(OLiCh.class, reader, false);
                 } else {
                     retcode = rc.getResponseCode();
                 }
@@ -415,7 +416,7 @@ public class RestFunctions {
             }
         }
         if (out != null) {
-            Log.d(TAG, "end listchat Errortext" + out.getErrortext() + "Chatsize = " + String.valueOf(out.getChat().size()));
+            Log.d(TAG, "end listchat Errortext" + out.getET() + "Chatsize = " + String.valueOf(out.getChat().size()));
         } else {
             Log.d(TAG, "end listchat Errortext out = null and Returncode =" + String.valueOf(retcode));
         }
@@ -425,13 +426,13 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/sendtextmessage")
-    public OutSendTextMessage sendTextMessage(@QueryParam(Constants.QPusername) String User,
+    public OSTeM sendTextMessage(@QueryParam(Constants.QPusername) String User,
                                               @QueryParam(Constants.QPpassword) String Password,
                                               @QueryParam(Constants.QPtextmessage) String TextMessage); */
 
-    public OutSendTextMessage sendtextmessage(String inuser, String inpassword, String intextmsg) {
+    public OSTeM sendtextmessage(String inuser, String inpassword, String intextmsg) {
         Log.d(TAG, "start sendtextmessage with user=" + inuser + " password=" + inpassword + "Message=" + intextmsg);
-        OutSendTextMessage out = null;
+        OSTeM out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/sendtextmessage", https, port);
@@ -445,7 +446,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutSendTextMessage.class, reader, false);
+                    out = serializer.read(OSTeM.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -458,13 +459,13 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/gettextmessage")
-    public OutFetchTextMessage getTextMessage(@QueryParam(Constants.QPusername) String User,
+    public OGTeM getTextMessage(@QueryParam(Constants.QPusername) String User,
                                               @QueryParam(Constants.QPpassword) String Password,
                                               @QueryParam(Constants.QPtextmessageid) int TextMessageID); */
 
-    public OutFetchTextMessage gettextmessage(String inuser, String inpassword, int intextmsgid) {
+    public OGTeM gettextmessage(String inuser, String inpassword, int intextmsgid) {
         Log.d(TAG, "start gettextmessage with user=" + inuser + " password=" + inpassword + "Message=" + String.valueOf(intextmsgid));
-        OutFetchTextMessage out = null;
+        OGTeM out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/gettextmessage", https, port);
@@ -478,7 +479,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutFetchTextMessage.class, reader, false);
+                    out = serializer.read(OGTeM.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -491,15 +492,15 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/insertmessageintochat")
-    public OutInsertMessageIntoChat insertMessageIntoChat(@QueryParam(Constants.QPusername) String User,
+    public OIMIC insertMessageIntoChat(@QueryParam(Constants.QPusername) String User,
                                                           @QueryParam(Constants.QPpassword) String Password,
                                                           @QueryParam(Constants.QPchatid) int ChatID,
                                                           @QueryParam(Constants.QPmessageid) int MessageID,
                                                           @QueryParam(Constants.QPmessagetype) String MessageType); */
 
-    public OutInsertMessageIntoChat insertmessageintochat(String inuser, String inpassword, int inchatid, int inmsgid, String inmsgtype) {
+    public OIMIC insertmessageintochat(String inuser, String inpassword, int inchatid, int inmsgid, String inmsgtype) {
         Log.d(TAG, "start insertmessageintochat with user=" + inuser + " password=" + inpassword + "ChatID=" + String.valueOf(inchatid) + " MessageID=" + String.valueOf(inmsgid) + "MessageType=" + inmsgtype);
-        OutInsertMessageIntoChat out = null;
+        OIMIC out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/insertmessageintochat", https, port);
@@ -515,7 +516,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutInsertMessageIntoChat.class, reader, false);
+                    out = serializer.read(OIMIC.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -528,13 +529,13 @@ public class RestFunctions {
     /* @DELETE
     @Produces(MediaType.APPLICATION_XML)
     @Path("/deletemessagefromchat")
-    public OutDeleteMessageFromChat deleteMessageFromChat(@QueryParam(Constants.QPusername) String User,
+    public ODMFC deleteMessageFromChat(@QueryParam(Constants.QPusername) String User,
                                                           @QueryParam(Constants.QPpassword) String Password,
                                                           @QueryParam(Constants.QPmessageid) int MessageID); */
 
-    public OutDeleteMessageFromChat deletemessagefromchat(String inuser, String inpassword, int inmsgid) {
+    public ODMFC deletemessagefromchat(String inuser, String inpassword, int inmsgid) {
         Log.d(TAG, "start deletemessagefromchat with user=" + inuser + " password=" + inpassword + "MessageID=" + String.valueOf(inmsgid));
-        OutDeleteMessageFromChat out = null;
+        ODMFC out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/deletemessagefromchat", https, port);
@@ -548,7 +549,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutDeleteMessageFromChat.class, reader, false);
+                    out = serializer.read(ODMFC.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -561,14 +562,14 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/getmessagefromchat")
-    public OutFetchMessageFromChat getMessageFromChat(@QueryParam(Constants.QPusername) String User,
+    public OFMFC getMessageFromChat(@QueryParam(Constants.QPusername) String User,
                                                       @QueryParam(Constants.QPpassword) String Password,
                                                       @QueryParam(Constants.QPchatid) int ChatID,
                                                       @QueryParam(Constants.QPtimestamp) int Timestamp); */
 
-    public OutFetchMessageFromChat getmessagefromchat(String inuser, String inpassword, int inchatid, long intimestamp) {
+    public OFMFC getmessagefromchat(String inuser, String inpassword, int inchatid, long intimestamp) {
         Log.d(TAG, "start getmessagefromchat with user=" + inuser + " password=" + inpassword + "ChatID=" + String.valueOf(inchatid) + " Timestamp=" + String.valueOf(intimestamp));
-        OutFetchMessageFromChat out = null;
+        OFMFC out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/getmessagefromchat", https, port);
@@ -583,7 +584,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutFetchMessageFromChat.class, reader, false);
+                    out = serializer.read(OFMFC.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -596,15 +597,15 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/checknewmessages")
-    public OutCheckNewMessages checkNewMessages(@QueryParam(Constants.QPusername) String User,
+    public OCN checkNewMessages(@QueryParam(Constants.QPusername) String User,
                                                 @QueryParam(Constants.QPpassword) String Password); */
 
-    public OutCheckNewMessages checknewmessages(String inuser, String inpassword) {
+    public OCN checknewmessages(String inuser, String inpassword) {
         Log.d(TAG, "start checknewmessages with user=" + inuser + " password=" + inpassword);
-        OutCheckNewMessages out = null;
+        OCN out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/checknewmessages", https, port);
+            rc = new RestClient(CommunicationURL + "user/checknew", https, port);
             try {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
@@ -614,7 +615,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutCheckNewMessages.class, reader, false);
+                    out = serializer.read(OCN.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -628,15 +629,15 @@ public class RestFunctions {
     @Path("/upload")
     @Produces(MediaType.APPLICATION_XML)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public OutSendImageMessage uploadImage(
+    public OSImM uploadImage(
             @QueryParam(Constants.QPusername) String User,
             @QueryParam(Constants.QPpassword) String Password,
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
 
-    public OutSendImageMessage sendImageMessage(String inuser, String inpassword, String Message) {
+    public OSImM sendImageMessage(String inuser, String inpassword, String Message) {
         Log.d(TAG, "start sendImageMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
-        OutSendImageMessage out = null;
+        OSImM out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "image/upload", https, port);
@@ -652,7 +653,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutSendImageMessage.class, reader, false);
+                    out = serializer.read(OSImM.class, reader, false);
                 } else {
                     ErrorHelper eh = new ErrorHelper(FrinmeanApplication.getAppContext());
                     eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
@@ -668,14 +669,14 @@ public class RestFunctions {
     /* @GET
         @Path("/getimagemetadata")
         @Produces(MediaType.APPLICATION_XML)
-        public OutGetImageMessageMetaData getimagemetadata(
+        public OGImMMD getimagemetadata(
                 @QueryParam(Constants.QPusername) String User,
                 @QueryParam(Constants.QPpassword) String Password,
                 @QueryParam("imageid") int imageid); */
 
-    public OutGetImageMessageMetaData getImageMessageMetaData(String inuser, String inpassword, int ImgMsgID) {
+    public OGImMMD getImageMessageMetaData(String inuser, String inpassword, int ImgMsgID) {
         Log.d(TAG, "start getImageMessageMetaData with user=" + inuser + " password=" + inpassword + "ImageMessageID=" + String.valueOf(ImgMsgID));
-        OutGetImageMessageMetaData out = new OutGetImageMessageMetaData();
+        OGImMMD out = new OGImMMD();
 
         if (checkServer()) {
             try {
@@ -691,7 +692,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutGetImageMessageMetaData.class, reader, false);
+                    out = serializer.read(OGImMMD.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -708,9 +709,9 @@ public class RestFunctions {
                                   @PathParam(Constants.QPpassword) String Password,
                                   @PathParam(Constants.QPimageid) int imageid); */
 
-    public OutFetchImageMessage fetchImageMessage(String inuser, String inpassword, int ImgMsgID) {
+    public OGImM fetchImageMessage(String inuser, String inpassword, int ImgMsgID) {
         Log.d(TAG, "start fetchImageMessage with user=" + inuser + " password=" + inpassword + "ImageMessageID=" + String.valueOf(ImgMsgID));
-        OutFetchImageMessage out = new OutFetchImageMessage();
+        OGImM out = new OGImM();
 
         if (checkServer()) {
 
@@ -724,11 +725,11 @@ public class RestFunctions {
                 String savedFilename = rc.ExecuteRequestImage(rc.BevorExecuteGetPath(inuser, inpassword, ImgMsgID));
 
                 if (savedFilename != null && !savedFilename.isEmpty()) {
-                    out.setImageMessage(savedFilename);
+                    out.setIM(savedFilename);
                     //MediaStore.Images.Media.insertImage(FrinmeanApplication.getAppContext().getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
 
                 } else {
-                    out.setErrortext("ERROR_DOWNLOAD_IMAGE");
+                    out.setET("ERROR_DOWNLOAD_IMAGE");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -742,15 +743,15 @@ public class RestFunctions {
     @Path("/upload")
     @Produces(MediaType.APPLICATION_XML)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public OutSendVideoMessage uploadVideo(
+    public OSViM uploadVideo(
             @QueryParam(Constants.QPusername) String User,
             @QueryParam(Constants.QPpassword) String Password,
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
 
-    public OutSendVideoMessage sendVideoMessage(String inuser, String inpassword, String Message) {
+    public OSViM sendVideoMessage(String inuser, String inpassword, String Message) {
         Log.d(TAG, "start sendImageMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
-        OutSendVideoMessage out = null;
+        OSViM out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "video/upload", https, port);
@@ -766,7 +767,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutSendVideoMessage.class, reader, false);
+                    out = serializer.read(OSViM.class, reader, false);
                 } else {
                     ErrorHelper eh = new ErrorHelper(FrinmeanApplication.getAppContext());
                     eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
@@ -782,14 +783,14 @@ public class RestFunctions {
     /* @GET
         @Path("/getvideometadata")
         @Produces(MediaType.APPLICATION_XML)
-        public OutGetVideoMessageMetaData getvideometadata(
+        public OGViMMD getvideometadata(
                 @QueryParam(Constants.QPusername) String User,
                 @QueryParam(Constants.QPpassword) String Password,
                 @QueryParam("videoid") int videoid); */
 
-    public OutGetVideoMessageMetaData getVideoMessageMetaData(String inuser, String inpassword, int VidMsgID) {
+    public OGViMMD getVideoMessageMetaData(String inuser, String inpassword, int VidMsgID) {
         Log.d(TAG, "start getVideoMessageMetaData with user=" + inuser + " password=" + inpassword + " VideoMessageID=" + String.valueOf(VidMsgID));
-        OutGetVideoMessageMetaData out = new OutGetVideoMessageMetaData();
+        OGViMMD out = new OGViMMD();
 
         if (checkServer()) {
             try {
@@ -805,7 +806,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutGetVideoMessageMetaData.class, reader, false);
+                    out = serializer.read(OGViMMD.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -822,9 +823,9 @@ public class RestFunctions {
                                   @PathParam(Constants.QPpassword) String Password,
                                   @PathParam(Constants.QPvideoid) int videoid); */
 
-    public OutFetchVideoMessage fetchVideoMessage(String inuser, String inpassword, int VidMsgID) {
+    public OGViM fetchVideoMessage(String inuser, String inpassword, int VidMsgID) {
         Log.d(TAG, "start fetchVideoMessage with user=" + inuser + " password=" + inpassword + " VideoMessageID=" + String.valueOf(VidMsgID));
-        OutFetchVideoMessage out = new OutFetchVideoMessage();
+        OGViM out = new OGViM();
 
         if (checkServer()) {
 
@@ -838,13 +839,13 @@ public class RestFunctions {
                 String savedFilename = rc.ExecuteRequestImage(rc.BevorExecuteGetPath(inuser, inpassword, VidMsgID));
 
                 if (savedFilename != null && !savedFilename.isEmpty()) {
-                    out.setVideoMessage(savedFilename);
+                    out.setVM(savedFilename);
                     // TODO Video muss im MediaStore noch registriert werden
                     //File file = new File(directory + File.separator + Constants.VIDEODIR + File.separator + savedFilename);
                     //MediaStore.Video.Media.(FrinmeanApplication.getAppContext().getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
 
                 } else {
-                    out.setErrortext("ERROR_DOWNLOAD_VIDEO");
+                    out.setET("ERROR_DOWNLOAD_VIDEO");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -858,14 +859,14 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/setshowtimestamp")
-    public OutSetShowTimeStamp setShowTimeStamp(
+    public OSShT setShowTimeStamp(
             @QueryParam(Constants.QPusername) String User,
             @QueryParam(Constants.QPpassword) String Password,
             @QueryParam(Constants.QPmessageid) int MessageID); */
 
-    public OutSetShowTimeStamp setshowtimestamp(String inuser, String inpassword, int msgid) {
+    public OSShT setshowtimestamp(String inuser, String inpassword, int msgid) {
         Log.d(TAG, "start setshowtimestamp with user=" + inuser + " password=" + inpassword + "MessageID=" + String.valueOf(msgid));
-        OutSetShowTimeStamp out = null;
+        OSShT out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/setshowtimestamp", https, port);
@@ -879,7 +880,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutSetShowTimeStamp.class, reader, false);
+                    out = serializer.read(OSShT.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -892,14 +893,14 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/getmessageinformation")
-    public OutGetMessageInformation getMessageInformation(
+    public OGMI getMessageInformation(
             @QueryParam(Constants.QPusername) String User,
             @QueryParam(Constants.QPpassword) String Password,
             @QueryParam(Constants.QPmessageid) int MessageID); */
 
-    public OutGetMessageInformation getmessageinformation(String inuser, String inpassword, int msgid) {
+    public OGMI getmessageinformation(String inuser, String inpassword, int msgid) {
         Log.d(TAG, "start getmessageinformation with user=" + inuser + " password=" + inpassword + "MessageID=" + String.valueOf(msgid));
-        OutGetMessageInformation out = null;
+        OGMI out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/getmessageinformation", https, port);
@@ -913,7 +914,7 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutGetMessageInformation.class, reader, false);
+                    out = serializer.read(OGMI.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -926,15 +927,15 @@ public class RestFunctions {
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("/acknowledgemessagedownload")
-    public OutAcknowledgeMessageDownload acknowledgeMessageDownload(
+    public OAckMD acknowledgeMessageDownload(
             @QueryParam(Constants.QPusername) String User,
             @QueryParam(Constants.QPpassword) String Password,
             @QueryParam(Constants.QPmessageid) int MessageID,
             @QueryParam(Constants.QPacknowledge) String Acknowledge); */
 
-    public OutAcknowledgeMessageDownload acknowledgemessagedownload(String inuser, String inpassword, int msgid, String inacknowledge) {
+    public OAckMD acknowledgemessagedownload(String inuser, String inpassword, int msgid, String inacknowledge) {
         Log.d(TAG, "start acknowledgemessagedownload with user=" + inuser + " password=" + inpassword + " MessageID=" + String.valueOf(msgid) + " Acknowledge=" + inacknowledge);
-        OutAcknowledgeMessageDownload out = null;
+        OAckMD out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "user/acknowledgemessagedownload", https, port);
@@ -949,7 +950,43 @@ public class RestFunctions {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    out = serializer.read(OutAcknowledgeMessageDownload.class, reader, false);
+                    out = serializer.read(OAckMD.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "start acknowledgemessagedownload");
+        return out;
+    }
+
+    /* @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("/acknowledgechatdownload")
+    public OAckCD acknowledgeMessageDownload(
+            @QueryParam(Constants.QPusername) String User,
+            @QueryParam(Constants.QPpassword) String Password,
+            @QueryParam(Constants.QPchatid) int ChatID,
+            @QueryParam(Constants.QPacknowledge) String Acknowledge); */
+
+    public OAckCD acknowledgechatdownload(String inuser, String inpassword, int chatid, String inacknowledge) {
+        Log.d(TAG, "start acknowledgechatdownload with user=" + inuser + " password=" + inpassword + " ChatID=" + String.valueOf(chatid) + " Acknowledge=" + inacknowledge);
+        OAckCD out = null;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "user/acknowledgechatdownload", https, port);
+            try {
+                rc.AddParam(Constants.QPusername, convertB64(inuser));
+                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+                rc.AddParam(Constants.QPchatid, Integer.toString(chatid));
+                rc.AddParam(Constants.QPacknowledge, convertB64(inacknowledge));
+
+                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
+                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OAckCD.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -70,10 +70,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.radiohacks.frinmean.adapters.SingleChatAdapter;
-import de.radiohacks.frinmean.model.OutAddUserToChat;
-import de.radiohacks.frinmean.model.OutFetchMessageFromChat;
-import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
-import de.radiohacks.frinmean.model.OutListUser;
+import de.radiohacks.frinmean.modelshort.OAdUC;
+import de.radiohacks.frinmean.modelshort.ODeCh;
+import de.radiohacks.frinmean.modelshort.OFMFC;
+import de.radiohacks.frinmean.modelshort.OIMIC;
+import de.radiohacks.frinmean.modelshort.OLiUs;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.ErrorHelper;
@@ -409,7 +410,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                 }
             }
         } else if (resultCode == RESULT_CANCELED) {
-            // User cancelled the image capture
+            // Benutzer cancelled the image capture
         } else {
             // Image capture failed, advise user
         }
@@ -496,14 +497,14 @@ public class SingleChatActivity extends ActionBarActivity implements
         Log.d(TAG, "end openEnterUserName");
     }
 
-    private void openSelectUserDialog(final OutListUser in) {
+    private void openSelectUserDialog(final OLiUs in) {
         Log.d(TAG, "start openSelectUserDialog");
         final CharSequence users[];
 
         users = new String[in.getUser().size()];
 
         for (int i = 0; i < in.getUser().size(); i++) {
-            users[i] = String.valueOf(in.getUser().get(i).getUserID()) + " | " + in.getUser().get(i).getUsername() + " | " + in.getUser().get(i).getEmail();
+            users[i] = String.valueOf(in.getUser().get(i).getUID()) + " | " + in.getUser().get(i).getUN() + " | " + in.getUser().get(i).getE();
         }
 
         final List<Integer> selectedItems = new ArrayList<Integer>(1);
@@ -735,16 +736,16 @@ public class SingleChatActivity extends ActionBarActivity implements
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    OutFetchMessageFromChat res = serializer.read(OutFetchMessageFromChat.class, reader, false);
+                    OFMFC res = serializer.read(OFMFC.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
                         eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
-                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                        if (res.getET() != null && !res.getET().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                            eh.CheckErrorText(res.getErrortext());
+                            eh.CheckErrorText(res.getET());
                         } else {
-                            if (res.getMessage() != null && !res.getMessage().isEmpty()) {
+                            if (res.getM() != null && !res.getM().isEmpty()) {
                                 getLoaderManager().restartLoader(MESSAGE_LOADER_ID, null, SingleChatActivity.this);
                                 //long newtime = System.currentTimeMillis() / 1000L;
                                 //Cursor newc = ldb.get(ChatID, newtime);
@@ -765,16 +766,16 @@ public class SingleChatActivity extends ActionBarActivity implements
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    OutInsertMessageIntoChat res = serializer.read(OutInsertMessageIntoChat.class, reader, false);
+                    OIMIC res = serializer.read(OIMIC.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
                         eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
-                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                        if (res.getET() != null && !res.getET().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                            eh.CheckErrorText(res.getErrortext());
+                            eh.CheckErrorText(res.getET());
                         } else {
-                            if (res.getMessageID() > 0) {
+                            if (res.getMID() > 0) {
                                 getLoaderManager().restartLoader(MESSAGE_LOADER_ID, null, SingleChatActivity.this);
                                 //long newtime = System.currentTimeMillis() / 1000L;
                                 //Cursor newc = ldb.get(ChatID, newtime);
@@ -794,14 +795,14 @@ public class SingleChatActivity extends ActionBarActivity implements
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    OutListUser res = serializer.read(OutListUser.class, reader, false);
+                    OLiUs res = serializer.read(OLiUs.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
                         eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
-                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                        if (res.getET() != null && !res.getET().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                            eh.CheckErrorText(res.getErrortext());
+                            eh.CheckErrorText(res.getET());
                         } else {
                             openSelectUserDialog(res);
                         }
@@ -818,16 +819,16 @@ public class SingleChatActivity extends ActionBarActivity implements
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    OutAddUserToChat res = serializer.read(OutAddUserToChat.class, reader, false);
+                    OAdUC res = serializer.read(OAdUC.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
                         eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
-                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                        if (res.getET() != null && !res.getET().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                            eh.CheckErrorText(res.getErrortext());
+                            eh.CheckErrorText(res.getET());
                         } else {
-                            if (res.getResult().equalsIgnoreCase(Constants.RESULT_USER_ADDED_TO_CHAT)) {
+                            if (res.getR().equalsIgnoreCase(Constants.RESULT_USER_ADDED_TO_CHAT)) {
                                 Toast.makeText(SingleChatActivity.this.getBaseContext(), getString(R.string.user_added_to_chat), Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -843,16 +844,16 @@ public class SingleChatActivity extends ActionBarActivity implements
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
-                    OutAddUserToChat res = serializer.read(OutAddUserToChat.class, reader, false);
+                    ODeCh res = serializer.read(ODeCh.class, reader, false);
                     if (res == null) {
                         ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
                         eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                     } else {
-                        if (res.getErrortext() != null && !res.getErrortext().isEmpty()) {
+                        if (res.getET() != null && !res.getET().isEmpty()) {
                             ErrorHelper eh = new ErrorHelper(SingleChatActivity.this);
-                            eh.CheckErrorText(res.getErrortext());
+                            eh.CheckErrorText(res.getET());
                         } else {
-                            if (res.getResult().equalsIgnoreCase(Constants.RESULT_CHAT_DELETED)) {
+                            if (res.getR().equalsIgnoreCase(Constants.RESULT_CHAT_DELETED)) {
                                 Toast.makeText(SingleChatActivity.this.getBaseContext(), getString(R.string.chat_delete), Toast.LENGTH_SHORT).show();
                             }
                         }

@@ -49,6 +49,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import de.radiohacks.frinmean.adapters.ChatAdapter;
+import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.MeBaService;
@@ -59,7 +60,7 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
     private static final int CHAT_LOADER_FULL_ID = 2000;
     private static final int CHAT_LOADER_FORWARD_ID = 3000;
     private ChatAdapter mAdapter;
-    //private int syncFreq;
+    private int syncFreq;
     private int userid;
     private String chatname;
     private String mode;
@@ -83,10 +84,10 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
         if (mode.equalsIgnoreCase(Constants.CHAT_ACTIVITY_FULL)) {
             setHasOptionsMenu(true);
-//            syncFreq = extras.getInt(Constants.PrefSyncfrequency, -1);
-//            if (syncFreq != -1) {
-//                SyncUtils.StartSyncFreq(syncFreq);
-//            }
+            syncFreq = extras.getInt(Constants.PrefSyncfrequency, -1);
+            if (syncFreq != -1) {
+                SyncUtils.StartSyncFreq(syncFreq);
+            }
         } else {
             setHasOptionsMenu(false);
             // Needed to show not the Chat where the Message is send from

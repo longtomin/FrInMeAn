@@ -26,14 +26,14 @@ import java.io.StringWriter;
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.adapters.SyncAdapter;
 import de.radiohacks.frinmean.adapters.SyncUtils;
-import de.radiohacks.frinmean.model.OutAddUserToChat;
-import de.radiohacks.frinmean.model.OutAuthenticate;
-import de.radiohacks.frinmean.model.OutCreateChat;
-import de.radiohacks.frinmean.model.OutDeleteChat;
-import de.radiohacks.frinmean.model.OutDeleteMessageFromChat;
-import de.radiohacks.frinmean.model.OutInsertMessageIntoChat;
-import de.radiohacks.frinmean.model.OutListUser;
-import de.radiohacks.frinmean.model.OutSetShowTimeStamp;
+import de.radiohacks.frinmean.modelshort.OAdUC;
+import de.radiohacks.frinmean.modelshort.OAuth;
+import de.radiohacks.frinmean.modelshort.OCrCh;
+import de.radiohacks.frinmean.modelshort.ODMFC;
+import de.radiohacks.frinmean.modelshort.ODeCh;
+import de.radiohacks.frinmean.modelshort.OIMIC;
+import de.radiohacks.frinmean.modelshort.OLiUs;
+import de.radiohacks.frinmean.modelshort.OSShT;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 
 import static de.radiohacks.frinmean.Constants.CHAT_DB_Columns;
@@ -182,7 +182,7 @@ public class MeBaService extends IntentService {
 
         if (inDelSvr) {
             try {
-                OutDeleteChat out = rf.deletechat(username, password, ChatID);
+                ODeCh out = rf.deletechat(username, password, ChatID);
                 Serializer serializer = new Persister();
                 StringWriter OutString = new StringWriter();
 
@@ -246,12 +246,12 @@ public class MeBaService extends IntentService {
         Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ShowTimestamp + " = ? AND " + T_MESSAGES_ChatID + " = ?", new String[]{"0", String.valueOf(ChatID)}, null);
 
         while (c.moveToNext()) {
-            OutSetShowTimeStamp outsst = rf.setshowtimestamp(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
+            OSShT outsst = rf.setshowtimestamp(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
             if (outsst != null) {
-                if (outsst.getErrortext() == null || outsst.getErrortext().isEmpty()) {
+                if (outsst.getET() == null || outsst.getET().isEmpty()) {
                     ContentValues valuesins = new ContentValues();
-                    valuesins.put(Constants.T_MESSAGES_BADBID, outsst.getMessageID());
-                    valuesins.put(Constants.T_MESSAGES_ShowTimestamp, outsst.getShowTimestamp());
+                    valuesins.put(Constants.T_MESSAGES_BADBID, outsst.getMID());
+                    valuesins.put(Constants.T_MESSAGES_ShowTimestamp, outsst.getShT());
                     ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
                 }
             }
@@ -295,8 +295,8 @@ public class MeBaService extends IntentService {
         client.release();
 
         try {
-            OutInsertMessageIntoChat out = rf.insertmessageintochat(username, password, ChatID, ContentMsgID, msgType);
-            insertFwdMsgIntoDB(ChatID, UserID, out.getMessageID(), out.getSendTimestamp(), msgType, ContentMessage, ContentMsgID);
+            OIMIC out = rf.insertmessageintochat(username, password, ChatID, ContentMsgID, msgType);
+            insertFwdMsgIntoDB(ChatID, UserID, out.getMID(), out.getSdT(), msgType, ContentMessage, ContentMsgID);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -313,7 +313,7 @@ public class MeBaService extends IntentService {
         while (c.moveToNext()) {
             if (indelsvr) {
                 try {
-                    OutDeleteMessageFromChat out = rf.deleteMessageFromChat(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
+                    ODMFC out = rf.deleteMessageFromChat(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
                     Serializer serializer = new Persister();
                     StringWriter OutString = new StringWriter();
 
@@ -357,7 +357,7 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start handleActionAddUserToChat");
 
         try {
-            OutAddUserToChat out = rf.addusertochat(username, password, UserID, ChatID);
+            OAdUC out = rf.addusertochat(username, password, UserID, ChatID);
             Serializer serializer = new Persister();
             StringWriter OutString = new StringWriter();
 
@@ -373,10 +373,10 @@ public class MeBaService extends IntentService {
     private void handleActionCreateChat(String ChatName) {
         Log.d(TAG, "start handleActionCreateChate");
 
-        OutCreateChat out = rf.createchat(username, password, ChatName);
+        OCrCh out = rf.createchat(username, password, ChatName);
 
-        if (out.getErrortext() == null || out.getErrortext().isEmpty()) {
-            if ((out.getChatname().equals(ChatName)) && (out.getChatID() > 0)) {
+        if (out.getET() == null || out.getET().isEmpty()) {
+            if ((out.getCN().equals(ChatName)) && (out.getCID() > 0)) {
                 // mBroadcaster.notifyProgress(Constants.BROADCAST_CREATECHAT, Constants.BROADCAST_CREATECHAT);
                 SyncUtils.TriggerRefresh();
             }
@@ -388,7 +388,7 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start handleActionListUser");
 
         try {
-            OutListUser out = rf.listuser(username, password, in);
+            OLiUs out = rf.listuser(username, password, in);
             Serializer serializer = new Persister();
             StringWriter OutString = new StringWriter();
 
@@ -405,7 +405,7 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start handleActionListUser");
 
         try {
-            OutAuthenticate out = rf.authenticate(username, password);
+            OAuth out = rf.authenticate(username, password);
 
             Serializer serializer = new Persister();
             StringWriter OutString = new StringWriter();

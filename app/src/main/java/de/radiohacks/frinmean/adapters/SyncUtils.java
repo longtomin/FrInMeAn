@@ -85,12 +85,12 @@ public class SyncUtils {
         TriggerRefresh();
     }
 
-    public static void StartSyncFreq(long infreq) {
-//        ContentResolver.addPeriodicSync(mAccount, FrinmeanContentProvider.AUTHORITY, Bundle.EMPTY, infreq);
+    public static void StartSyncFreq(int infreq) {
+        ContentResolver.setIsSyncable(GenericAccountService.GetAccount(Constants.ACCOUNT_TYPE), FrinmeanContentProvider.AUTHORITY, infreq * 60);
     }
 
     public static void StopSync() {
-        //       ContentResolver.removePeriodicSync(mAccount, FrinmeanContentProvider.AUTHORITY, Bundle.EMPTY);
+        ContentResolver.setIsSyncable(GenericAccountService.GetAccount(Constants.ACCOUNT_TYPE), FrinmeanContentProvider.AUTHORITY, 0);
     }
 
     /**

@@ -48,7 +48,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import de.radiohacks.frinmean.model.OutSignUp;
+import de.radiohacks.frinmean.modelshort.OSiUp;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.ErrorHelper;
 import de.radiohacks.frinmean.service.RestFunctions;
@@ -219,40 +219,40 @@ public class SignUpActivity extends Activity {
         return hexString.toString();
     }
 
-    private class SignUpLoader extends AsyncTask<String, Void, OutSignUp> {
+    private class SignUpLoader extends AsyncTask<String, Void, OSiUp> {
 
         private final ProgressDialog dialog = new ProgressDialog(SignUpActivity.this);
 
         @Override
-        protected void onPostExecute(OutSignUp result) {
+        protected void onPostExecute(OSiUp result) {
             Log.d(TAG, "start onPostExecute");
             super.onPostExecute(result);
             dialog.dismiss();
 
             if (result != null) {
-                if (result.getErrortext() != null && !result.getErrortext().isEmpty()) {
-                    if (result.getErrortext().equalsIgnoreCase(Constants.ERROR_USER_ALREADY_EXISTS)) {
+                if (result.getET() != null && !result.getET().isEmpty()) {
+                    if (result.getET().equalsIgnoreCase(Constants.ERROR_USER_ALREADY_EXISTS)) {
                         SharedPreferences shP = PreferenceManager
                                 .getDefaultSharedPreferences(SignUpActivity.this);
                         SharedPreferences.Editor ed = shP.edit();
                         ed.putString(Constants.PrefUsername, username);
                         ed.putString(Constants.PrefPassword, password);
-                        ed.putInt(Constants.PrefUserID, result.getUserID());
+                        ed.putInt(Constants.PrefUserID, result.getUID());
                         ed.commit();
                         Toast.makeText(getApplicationContext(), R.string.signup_user_already_exists_saved, Toast.LENGTH_LONG).show();
                     } else {
                         ErrorHelper eh = new ErrorHelper(SignUpActivity.this);
-                        eh.CheckErrorText(result.getErrortext());
+                        eh.CheckErrorText(result.getET());
                     }
                 } else {
-                    if (result.getSignUp() != null && !result.getSignUp().isEmpty()) {
-                        if (result.getSignUp().equalsIgnoreCase("SUCCESSFUL")) {
+                    if (result.getSU() != null && !result.getSU().isEmpty()) {
+                        if (result.getSU().equalsIgnoreCase("SUCCESSFUL")) {
                             SharedPreferences shP = PreferenceManager
                                     .getDefaultSharedPreferences(SignUpActivity.this);
                             SharedPreferences.Editor ed = shP.edit();
                             ed.putString(Constants.PrefUsername, username);
                             ed.putString(Constants.PrefPassword, password);
-                            ed.putInt(Constants.PrefUserID, result.getUserID());
+                            ed.putInt(Constants.PrefUserID, result.getUID());
                             ed.commit();
                         }
                     }
@@ -271,7 +271,7 @@ public class SignUpActivity extends Activity {
         }
 
         @Override
-        protected OutSignUp doInBackground(String... params) {
+        protected OSiUp doInBackground(String... params) {
             Log.d(TAG, "start doInBackground");
 
             RestFunctions rf = new RestFunctions();

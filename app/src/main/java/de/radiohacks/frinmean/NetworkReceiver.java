@@ -67,6 +67,7 @@ public class NetworkReceiver extends BroadcastReceiver {
                 activeNetwork.isConnectedOrConnecting()) {
             // Connected start sync
             SyncUtils.StartSyncFreq(syncFreq);
+            SyncUtils.TriggerRefresh();
         } else {
             // Not connected stop waking up phone
             SyncUtils.StopSync();
