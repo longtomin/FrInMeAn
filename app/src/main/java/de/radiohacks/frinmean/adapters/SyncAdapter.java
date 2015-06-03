@@ -68,6 +68,7 @@ import de.radiohacks.frinmean.SingleChatActivity;
 import de.radiohacks.frinmean.modelshort.CNC;
 import de.radiohacks.frinmean.modelshort.CNM;
 import de.radiohacks.frinmean.modelshort.M;
+import de.radiohacks.frinmean.modelshort.OAckCD;
 import de.radiohacks.frinmean.modelshort.OAckMD;
 import de.radiohacks.frinmean.modelshort.OCN;
 import de.radiohacks.frinmean.modelshort.OFMFC;
@@ -304,9 +305,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             valuesins.put(T_CHAT_OwningUserID, c.getOU().getOUID());
             valuesins.put(T_CHAT_OwningUserName, c.getOU().getOUN());
             valuesins.put(T_CHAT_ChatName, c.getCN());
-            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
-            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CHAT_CONTENT_URI, valuesins);
-            client.release();
+            if (acknowledgeChat(c.getCN(), c.getCID())) {
+                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
+                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CHAT_CONTENT_URI, valuesins);
+                client.release();
+            }
         }
         Log.d(TAG, "end saveChatsToLDB");
     }
@@ -568,6 +571,25 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
         }
 
+        Log.d(TAG, "end acknowledgeMessage");
+        return ret;
+    }
+
+    private boolean acknowledgeChat(String Chatname, int chatid) {
+        Log.d(TAG, "start acknowledgeMessage");
+
+        boolean ret = false;
+
+        int hashCode = Chatname.hashCode();
+
+        OAckCD oack = rf.acknowledgechatdownload(username, password, chatid, String.valueOf(hashCode));
+        if (oack != null) {
+            if (oack.getET() == null || oack.getET().isEmpty()) {
+                if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
+                    ret = true;
+                }
+            }
+        }
         Log.d(TAG, "end acknowledgeMessage");
         return ret;
     }
