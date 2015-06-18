@@ -33,4 +33,4 @@
     android:contentAuthority="de.radiohacks.frinmean.providers.FrinmeanContentProvider"
     android:isAlwaysSyncable="true"
     android:supportsUploading="true"
-    android:userVisible="true" />
+    android:userVisible="false" />

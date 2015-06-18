@@ -11,7 +11,6 @@ package de.radiohacks.frinmean.modelshort;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Order;
 import org.simpleframework.xml.Root;
 
 
@@ -38,12 +37,6 @@ import org.simpleframework.xml.Root;
  * </pre>
  */
 @Default(DefaultType.FIELD)
-@Order(elements = {
-        "vm",
-        "vs",
-        "vmd5",
-        "et"
-})
 @Root(name = "OGViMMD", strict = false)
 public class OGViMMD {
 

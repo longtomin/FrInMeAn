@@ -29,29 +29,6 @@
 
 package de.radiohacks.frinmean.providers;
 
-/*import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.os.Environment;
-import android.text.Editable;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;*/
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -157,18 +134,8 @@ public class DirectoryChooserDialog {
                     m_chosenDirectoryListener.onChosenDir(m_dir);
                 }
             }
-        }).setNegativeButton("Cancel", null).setNeutralButton("UP", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // Current directory chosen
-                if (m_chosenDirectoryListener != null) {
-                    // Call registered listener supplied with the chosen directory
-                    File f = new File(m_dir);
-
-                    m_chosenDirectoryListener.onChosenDir(f.getParent());
-                }
-            }
         });
+        dialogBuilder.setNegativeButton("Cancel", null);
 
         final AlertDialog dirsDialog = dialogBuilder.create();
 

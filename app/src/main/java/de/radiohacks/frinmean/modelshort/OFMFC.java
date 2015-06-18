@@ -11,6 +11,7 @@ package de.radiohacks.frinmean.modelshort;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ import java.util.List;
 @Root(name = "OFMFC", strict = false)
 public class OFMFC {
 
-    @Element(required = false, name = "M")
+    @ElementList(required = false, name = "M", inline = true)
     protected List<M> m;
     @Element(required = false, name = "ET")
     protected String et;
