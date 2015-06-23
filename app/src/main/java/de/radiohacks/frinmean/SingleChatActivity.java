@@ -54,7 +54,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -158,12 +157,12 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         ListView lv = (ListView) findViewById(R.id.singlechatlist);
 
-        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+ /*       lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
                 final long viewid = id;
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(SingleChatActivity.this);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(SingleChatActivity.this);
                 builder.setTitle(R.string.message_option);
                 builder.setItems(R.array.message_options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -229,9 +228,6 @@ public class SingleChatActivity extends ActionBarActivity implements
                                 break;
                             case 1:
                                 // Weiterleiten
-//                                String selectid = "(" + Constants.T_MESSAGES_ID + " = ?)";
-//                                ContentProviderClient client = SingleChatActivity.this.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-//                                Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, selectid, new String[]{Long.toString(viewid)}, null);
 
                                 Intent startchat = new Intent(SingleChatActivity.this, ChatActivity.class);
                                 startchat.putExtra(Constants.USERID, userid);
@@ -239,29 +235,6 @@ public class SingleChatActivity extends ActionBarActivity implements
                                 startchat.putExtra(Constants.SENDCHATID, ChatID);
                                 startchat.putExtra(Constants.SENDMSGID, viewid);
 
-                                /*String msgTye = c.getString(Constants.ID_MESSAGES_MessageType);
-                                startchat.putExtra(Constants.MESSAGETYPE, msgTye);
-                                if (msgTye.equalsIgnoreCase(Constants.TYP_TEXT)) {
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGEID, c.getInt(Constants.ID_MESSAGES_TextMsgID));
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGE, c.getString(Constants.ID_MESSAGES_TextMsgValue));
-                                } else if (msgTye.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGEID, c.getInt(Constants.ID_MESSAGES_ImageMsgID));
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGE, c.getString(Constants.ID_MESSAGES_ImageMsgValue));
-                                } else if (msgTye.equalsIgnoreCase(Constants.TYP_FILE)) {
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGEID, c.getInt(Constants.ID_MESSAGES_FileMsgID));
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGE, c.getString(Constants.ID_MESSAGES_FileMsgValue));
-                                } else if (msgTye.equalsIgnoreCase(Constants.TYP_CONTACT)) {
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGEID, c.getInt(Constants.ID_MESSAGES_ContactMsgID));
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGE, c.getString(Constants.ID_MESSAGES_ContactMsgValue));
-                                } else if (msgTye.equalsIgnoreCase(Constants.TYP_LOCATION)) {
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGEID, c.getInt(Constants.ID_MESSAGES_LocationMsgID));
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGE, c.getString(Constants.ID_MESSAGES_LocationMsgValue));
-                                } else if (msgTye.equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGEID, c.getInt(Constants.ID_MESSAGES_VideoMsgID));
-                                    startchat.putExtra(Constants.FWDCONTENTMESSAGE, c.getString(Constants.ID_MESSAGES_VideoMsgValue));
-                                }
-                                c.close();
-                                client.release();*/
                                 startActivity(startchat);
                                 break;
                         }
@@ -272,7 +245,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
                 return false;
             }
-        });
+        });*/
 
         lv.setAdapter(mAdapter);
 

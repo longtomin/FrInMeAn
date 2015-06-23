@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -37,12 +38,16 @@ import de.radiohacks.frinmean.modelshort.OSShT;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 
 import static de.radiohacks.frinmean.Constants.CHAT_DB_Columns;
+import static de.radiohacks.frinmean.Constants.ID_MESSAGES_ImageMsgID;
+import static de.radiohacks.frinmean.Constants.ID_MESSAGES_VideoMsgID;
 import static de.radiohacks.frinmean.Constants.MESSAGES_DB_Columns;
 import static de.radiohacks.frinmean.Constants.T_CHAT_BADBID;
 import static de.radiohacks.frinmean.Constants.T_CHAT_ID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ChatID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ShowTimestamp;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgID;
 
 public class MeBaService extends IntentService {
 
@@ -121,6 +126,7 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start onHandleIntent");
         if (intent != null) {
             final String action = intent.getAction();
+
             if (Constants.ACTION_LISTUSER.equalsIgnoreCase(action)) {
                 final String search = intent.getStringExtra(Constants.SEARCH);
                 handleActionListUser(search);
@@ -160,7 +166,7 @@ public class MeBaService extends IntentService {
                 final int uid = intent.getIntExtra(Constants.USERID, -1);
                 handleActionInsertFwdMsgIntoChat(cid, uid, cntmid);
             } else if (Constants.ACTION_DELETEMESSAGEFROMCHAT.equalsIgnoreCase(action)) {
-                final long viewid = intent.getLongExtra(Constants.MESSAGEID, -1);
+                final long viewid = intent.getIntExtra(Constants.MESSAGEID, -1);
                 final boolean delsvr = intent.getBooleanExtra(Constants.DELETEONSERVER, false);
                 final boolean delcontent = intent.getBooleanExtra(Constants.DELETELOCALCONTENT, false);
                 handleActionDeleteMsgFromChat(viewid, delsvr, delcontent);
@@ -201,24 +207,41 @@ public class MeBaService extends IntentService {
 
                 String filename;
                 if (cmsg.getString(Constants.ID_MESSAGES_MessageType).equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                    if (directory.endsWith(File.separator)) {
-                        filename = directory + Constants.IMAGEDIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                    } else {
-                        filename = directory + File.separator + Constants.IMAGEDIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                    }
-                    File delfile = new File(filename);
-                    if (delfile.exists()) {
-                        delfile.delete();
+                    try {
+                        Cursor cresueimg = client.query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ImageMsgID + " = ?", new String[]{String.valueOf(cmsg.getInt(ID_MESSAGES_ImageMsgID))}, null);
+                        if (cresueimg.getCount() == 1) {
+
+                            if (directory.endsWith(File.separator)) {
+                                filename = directory + Constants.IMAGEDIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                            } else {
+                                filename = directory + File.separator + Constants.IMAGEDIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                            }
+                            File delfile = new File(filename);
+                            if (delfile.exists()) {
+                                delfile.delete();
+                            }
+                        }
+                        cresueimg.close();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
                 } else if (cmsg.getString(Constants.ID_MESSAGES_MessageType).equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                    if (directory.endsWith(File.separator)) {
-                        filename = directory + Constants.VIDEODIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                    } else {
-                        filename = directory + File.separator + Constants.VIDEODIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                    }
-                    File delfile = new File(filename);
-                    if (delfile.exists()) {
-                        delfile.delete();
+                    try {
+                        Cursor cresuevid = client.query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_VideoMsgID + " = ?", new String[]{String.valueOf(cmsg.getInt(ID_MESSAGES_VideoMsgID))}, null);
+                        if (cresuevid.getCount() == 1) {
+                            if (directory.endsWith(File.separator)) {
+                                filename = directory + Constants.VIDEODIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                            } else {
+                                filename = directory + File.separator + Constants.VIDEODIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                            }
+                            File delfile = new File(filename);
+                            if (delfile.exists()) {
+                                delfile.delete();
+                            }
+                        }
+                        cresuevid.close();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
                 }
                 int msgid = cmsg.getInt(Constants.ID_MESSAGES__id);
@@ -262,7 +285,7 @@ public class MeBaService extends IntentService {
     }
 
     private void handleActionInsertFwdMsgIntoChat(int ChatID, int UserID, long ViewID) {
-        Log.d(TAG, "start handleActionInsertMsgIntoChat");
+        Log.d(TAG, "start handleActionInsertFwdMsgIntoChat");
 
         String selectid = Constants.T_MESSAGES_ID + " = ?";
         ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
@@ -300,11 +323,11 @@ public class MeBaService extends IntentService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.d(TAG, "end handleActionInsertMsgIntoChat");
+        Log.d(TAG, "end handleActionInsertFwdMsgIntoChat");
     }
 
     private void handleActionDeleteMsgFromChat(long inviewid, boolean indelsvr, boolean indellocal) {
-        Log.d(TAG, "start handleActionInsertMsgIntoChat");
+        Log.d(TAG, "start handleActionDeleteMsgFromChat");
 
         ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
         Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(inviewid)}, null);
@@ -325,24 +348,40 @@ public class MeBaService extends IntentService {
             if (indellocal) {
                 String filename;
                 if (c.getString(Constants.ID_MESSAGES_MessageType).equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                    if (directory.endsWith(File.separator)) {
-                        filename = directory + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                    } else {
-                        filename = directory + File.separator + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                    }
-                    File delfile = new File(filename);
-                    if (delfile.exists()) {
-                        delfile.delete();
+                    try {
+                        Cursor cresueimg = client.query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ImageMsgID + " = ?", new String[]{String.valueOf(c.getInt(ID_MESSAGES_ImageMsgID))}, null);
+                        if (cresueimg.getCount() == 1) {
+                            if (directory.endsWith(File.separator)) {
+                                filename = directory + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                            } else {
+                                filename = directory + File.separator + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                            }
+                            File delfile = new File(filename);
+                            if (delfile.exists()) {
+                                delfile.delete();
+                            }
+                        }
+                        cresueimg.close();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
                 } else if (c.getString(Constants.ID_MESSAGES_MessageType).equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                    if (directory.endsWith(File.separator)) {
-                        filename = directory + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                    } else {
-                        filename = directory + File.separator + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                    }
-                    File delfile = new File(filename);
-                    if (delfile.exists()) {
-                        delfile.delete();
+                    try {
+                        Cursor cresuevid = client.query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_VideoMsgID + " = ?", new String[]{String.valueOf(c.getInt(ID_MESSAGES_VideoMsgID))}, null);
+                        if (cresuevid.getCount() == 1) {
+                            if (directory.endsWith(File.separator)) {
+                                filename = directory + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                            } else {
+                                filename = directory + File.separator + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                            }
+                            File delfile = new File(filename);
+                            if (delfile.exists()) {
+                                delfile.delete();
+                            }
+                        }
+                        cresuevid.close();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
                 }
                 client.getLocalContentProvider().delete(FrinmeanContentProvider.MESSAES_CONTENT_URI, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(inviewid)});
@@ -350,7 +389,7 @@ public class MeBaService extends IntentService {
         }
         c.close();
         client.release();
-        Log.d(TAG, "end handleActionInsertMsgIntoChat");
+        Log.d(TAG, "end handleActionDeleteMsgFromChat");
     }
 
     private void handleActionAddUserToChat(int ChatID, int UserID) {
@@ -402,7 +441,7 @@ public class MeBaService extends IntentService {
     }
 
     private void handleActionAuthenticateUser() {
-        Log.d(TAG, "start handleActionListUser");
+        Log.d(TAG, "start handleActionAuthenticateUser");
 
         try {
             OAuth out = rf.authenticate(username, password);
@@ -416,7 +455,7 @@ public class MeBaService extends IntentService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.d(TAG, "end handleActionListUser");
+        Log.d(TAG, "end handleActionAuthenticateUser");
     }
 
     public void copy(File src, File dst) throws IOException {
@@ -539,7 +578,7 @@ public class MeBaService extends IntentService {
     }
 
     private void insertFwdMsgIntoDB(int ChatID, int UserID, int MsgID, long timeStamp, String MessageType, String ContentMessage, int ContentMsgID) {
-        Log.d(TAG, "start insertMsgIntoDB");
+        Log.d(TAG, "start insertFwdMsgIntoDB");
 
         // Insert new Message into local DB and trigger Sync to upload the Information.
         // To find the not send messages the Backend ID musst be 0 and the
@@ -581,6 +620,6 @@ public class MeBaService extends IntentService {
         client.getLocalContentProvider().insert(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
         client.release();
 
-        Log.d(TAG, "end insertMsgIntoDB");
+        Log.d(TAG, "end insertFwdMsgIntoDB");
     }
 }

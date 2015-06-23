@@ -92,7 +92,7 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
             setHasOptionsMenu(false);
             // Needed to show not the Chat where the Message is send from
             sendChatID = extras.getInt(Constants.SENDCHATID, -1);
-            MessageID = extras.getLong(Constants.SENDMSGID, -1);
+            MessageID = extras.getInt(Constants.SENDMSGID, -1);
         }
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());

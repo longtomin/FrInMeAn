@@ -7,6 +7,10 @@ import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
+
 import org.apache.http.HttpStatus;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -642,9 +646,12 @@ public class RestFunctions {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "image/upload", https, port);
             try {
+                HashCode md5 = Files.hash(new File(Message),
+                        Hashing.md5());
                 rc.AddHeader("enctype", "multipart/form-data");
-                rc.AddParam(Constants.USERNAME, convertB64(inuser));
-                rc.AddParam(Constants.PASSWORD, convertB64(inpassword));
+                rc.AddParam(Constants.QPusername, convertB64(inuser));
+                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+                rc.AddParam(Constants.QPacknowledge, convertB64(md5.toString()));
                 rc.setFilename(Message);
 
                 String ret = rc.ExecuteRequestUploadXML(rc.BevorExecutePost());
@@ -756,9 +763,12 @@ public class RestFunctions {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "video/upload", https, port);
             try {
+                HashCode md5 = Files.hash(new File(Message),
+                        Hashing.md5());
                 rc.AddHeader("enctype", "multipart/form-data");
-                rc.AddParam(Constants.USERNAME, convertB64(inuser));
-                rc.AddParam(Constants.PASSWORD, convertB64(inpassword));
+                rc.AddParam(Constants.QPusername, convertB64(inuser));
+                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+                rc.AddParam(Constants.QPacknowledge, convertB64(md5.toString()));
                 rc.setFilename(Message);
 
                 String ret = rc.ExecuteRequestUploadXML(rc.BevorExecutePost());

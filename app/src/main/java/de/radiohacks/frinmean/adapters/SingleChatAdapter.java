@@ -29,7 +29,9 @@
 
 package de.radiohacks.frinmean.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -45,10 +47,13 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
+import de.radiohacks.frinmean.ChatActivity;
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.R;
+import de.radiohacks.frinmean.service.MeBaService;
 
 public class SingleChatAdapter extends CursorAdapter {
 
@@ -161,23 +166,8 @@ public class SingleChatAdapter extends CursorAdapter {
 
         final String msgType = cur.getString(Constants.ID_MESSAGES_MessageType);
         final int chatID = cur.getInt(Constants.ID_MESSAGES_ChatID);
-        final int msgID = cur.getInt(Constants.ID_MESSAGES_BADBID);
+        final int vid = cur.getInt(Constants.ID_MESSAGES__id);
         String msgOID = cur.getString(Constants.ID_MESSAGES_OwningUserID);
-
-        // Needed for the innerclass in the dilaog.
-        final int imageid = cur.getInt(Constants.ID_MESSAGES_ImageMsgID);
-        final int textid = cur.getInt(Constants.ID_MESSAGES_TextMsgID);
-        final int locationid = cur.getInt(Constants.ID_MESSAGES_LocationMsgID);
-        final int fileid = cur.getInt(Constants.ID_MESSAGES_FileMsgID);
-        final int contactid = cur.getInt(Constants.ID_MESSAGES_ContactMsgID);
-        final int videoid = cur.getInt(Constants.ID_MESSAGES_VideoMsgID);
-        final String imageval = cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-        final String textval = cur.getString(Constants.ID_MESSAGES_TextMsgValue);
-        final String locationoval = cur.getString(Constants.ID_MESSAGES_LocationMsgValue);
-        final String fileval = cur.getString(Constants.ID_MESSAGES_FileMsgValue);
-        final String contactval = cur.getString(Constants.ID_MESSAGES_ContactMsgValue);
-        final String videoval = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-
 
         final boolean mine = msgOID.equalsIgnoreCase(String.valueOf(OID));
         LayoutInflater li = (LayoutInflater) context
@@ -204,7 +194,7 @@ public class SingleChatAdapter extends CursorAdapter {
                 break;
         }
 
-        /* if (ret != null) ret.setOnLongClickListener(new View.OnLongClickListener() {
+        if (ret != null) ret.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -257,7 +247,7 @@ public class SingleChatAdapter extends CursorAdapter {
                                                 delintent.setAction(Constants.ACTION_DELETEMESSAGEFROMCHAT);
                                                 delintent.putExtra(Constants.DELETEONSERVER, delserver);
                                                 delintent.putExtra(Constants.DELETELOCALCONTENT, delcontent);
-                                                delintent.putExtra(Constants.MESSAGEID, msgID);
+                                                delintent.putExtra(Constants.MESSAGEID, vid);
                                                 context.startService(delintent);
                                             }
                                         })
@@ -277,59 +267,7 @@ public class SingleChatAdapter extends CursorAdapter {
                                 startchat.putExtra(Constants.USERID, OID);
                                 startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FORWARD);
                                 startchat.putExtra(Constants.SENDCHATID, chatID);
-
-                                startchat.putExtra(Constants.MESSAGETYPE, msgType);
-                                switch (findMsgType(msgType, mine)) {
-                                    case TEXTMSG_OWN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, textid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, textval);
-                                        break;
-                                    case TEXTMSG_FOREIGN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, textid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, textval);
-                                        break;
-                                    case IMAGEMSG_OWN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, imageid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, imageval);
-                                        break;
-                                    case IMAGEMSG_FOREIGN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, imageid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, imageval);
-                                        break;
-                                    case FILEMSG_OWN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, fileid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, fileval);
-                                        break;
-                                    case FILEMSG_FOREIGN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, fileid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, fileval);
-                                        break;
-                                    case CONTACTMSG_OWN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, contactid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, contactval);
-                                        break;
-                                    case CONTACTMSG_FOREIGN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, contactid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, contactval);
-                                        break;
-                                    case LOCATIONMSG_OWN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, locationid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, locationoval);
-                                        break;
-                                    case LOCATIONMSG_FOREIGN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, locationid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, locationoval);
-                                        break;
-                                    case VIDEOMSG_OWN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, videoid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, videoval);
-                                        break;
-                                    case VIDEOMSG_FOREIGN:
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGEID, videoid);
-                                        startchat.putExtra(Constants.FWDCONTENTMESSAGE, videoval);
-                                        break;
-                                }
-
+                                startchat.putExtra(Constants.SENDMSGID, vid);
                                 context.startActivity(startchat);
                                 break;
                         }
@@ -339,7 +277,7 @@ public class SingleChatAdapter extends CursorAdapter {
                 dlg.show();
                 return false;
             }
-        });*/
+        });
         Log.d(TAG, "end newView");
         return ret;
     }
@@ -396,10 +334,10 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImageButton IButtonOwn = (ImageButton) view.findViewById(R.id.ImageImageButton);
 
                 String tmpimgOwn;
-                if (directory.endsWith("/")) {
-                    tmpimgOwn = Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                if (directory.endsWith(File.separator)) {
+                    tmpimgOwn = Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 } else {
-                    tmpimgOwn = "/" + Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                    tmpimgOwn = File.separator + Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 }
 
                 final String imgfileOwn = directory + tmpimgOwn;
@@ -409,8 +347,8 @@ public class SingleChatAdapter extends CursorAdapter {
                     public void onClick(View v) {
                         Intent intent = new Intent();
                         intent.setAction(android.content.Intent.ACTION_VIEW);
-                        intent.setDataAndType(Uri.parse(imgfileOwn), "image/*");
-
+                        File file = new File(imgfileOwn);
+                        intent.setDataAndType(Uri.fromFile(file), "image/*");
                         mContext.startActivity(intent);
                     }
                 });
@@ -447,10 +385,10 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImageButton IButtonForeign = (ImageButton) view.findViewById(R.id.ImageImageButton);
 
                 String tmpimgForeign;
-                if (directory.endsWith("/")) {
-                    tmpimgForeign = Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                if (directory.endsWith(File.separator)) {
+                    tmpimgForeign = Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 } else {
-                    tmpimgForeign = "/" + Constants.IMAGEDIR + "/" + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                    tmpimgForeign = File.separator + Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 }
 
                 final String imgfileForeign = directory + tmpimgForeign;
@@ -460,8 +398,8 @@ public class SingleChatAdapter extends CursorAdapter {
                     public void onClick(View v) {
                         Intent intent = new Intent();
                         intent.setAction(android.content.Intent.ACTION_VIEW);
-                        intent.setDataAndType(Uri.parse(imgfileForeign), "image/*");
-
+                        File file = new File(imgfileForeign);
+                        intent.setDataAndType(Uri.fromFile(file), "image/*");
                         mContext.startActivity(intent);
                     }
                 });
@@ -498,10 +436,10 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.VideoImageButton);
 
                 String tmpvidOwn;
-                if (directory.endsWith("/")) {
-                    tmpvidOwn = Constants.VIDEODIR + "/" + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                if (directory.endsWith(File.separator)) {
+                    tmpvidOwn = Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 } else {
-                    tmpvidOwn = "/" + Constants.VIDEODIR + "/" + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                    tmpvidOwn = File.separator + Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 }
 
                 final String vidfileOwn = directory + tmpvidOwn;
@@ -511,8 +449,8 @@ public class SingleChatAdapter extends CursorAdapter {
                     public void onClick(View v) {
                         Intent intent = new Intent();
                         intent.setAction(android.content.Intent.ACTION_VIEW);
-                        intent.setDataAndType(Uri.parse(vidfileOwn), "video/*");
-
+                        File file = new File(vidfileOwn);
+                        intent.setDataAndType(Uri.fromFile(file), "video/*");
                         mContext.startActivity(intent);
                     }
                 });
@@ -529,10 +467,10 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.VideoImageButton);
 
                 String tmpvidForeign;
-                if (directory.endsWith("/")) {
-                    tmpvidForeign = Constants.VIDEODIR + "/" + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                if (directory.endsWith(File.separator)) {
+                    tmpvidForeign = Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 } else {
-                    tmpvidForeign = "/" + Constants.VIDEODIR + "/" + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                    tmpvidForeign = File.separator + Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 }
 
                 final String vidfileForeign = directory + tmpvidForeign;
@@ -542,8 +480,8 @@ public class SingleChatAdapter extends CursorAdapter {
                     public void onClick(View v) {
                         Intent intent = new Intent();
                         intent.setAction(android.content.Intent.ACTION_VIEW);
-                        intent.setDataAndType(Uri.parse(vidfileForeign), "video/*");
-
+                        File file = new File(vidfileForeign);
+                        intent.setDataAndType(Uri.fromFile(file), "video/*");
                         mContext.startActivity(intent);
                     }
                 });

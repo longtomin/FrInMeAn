@@ -727,6 +727,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     }
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_IMAGE)) {
+                // TODO Check first if WIFI is on.
                 String imgfile = directory;
                 if (imgfile.endsWith(File.separator)) {
                     imgfile += Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
@@ -749,6 +750,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } /*else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
 
             } */ else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
+                // TODO Check first if WIFI is on.
                 String vidfile = directory;
                 if (vidfile.endsWith(File.separator)) {
                     vidfile += Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
