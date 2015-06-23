@@ -44,13 +44,12 @@
     <string name="pref_title_http" translatable="false">HTTP</string>
     <string name="pref_title_communication">Kommunikation</string>
 
-    <!-- Example settings for Data & Sync -->
     <string name="pref_header_data_sync">Daten &amp; Sync</string>
 
     <string name="pref_title_sync_frequency">Sync Interval</string>
     <string-array name="pref_sync_frequency_titles">
         <item>15 Minuten</item>
-        <item>30 Minutesn</item>
+        <item>30 Minuten</item>
         <item>1 Stunde</item>
         <item>3 Stunden</item>
         <item>6 Stunden</item>

@@ -33,10 +33,10 @@
     <string name="action_settings">Einstellungen</string>
     <string name="action_signup">Anmelden</string>
     <string name="action_createchat">Chat erzeugen</string>
-    <string name="chatname">Chatnamen angeben</string>
+    <string name="chatname">Chatname angeben</string>
     <string name="action_searchuser">Benutzer suchen</string>
     <string name="action_sendcamera">Kamerabild senden</string>
-    <string name="action_sendpicture">Gallerieelment senden</string>
+    <string name="action_sendpicture">Gallerieelement senden</string>
     <string name="action_sendvideo">Video senden</string>
     <string name="action_sendlocation">Standort senden</string>
     <string name="action_sendfile">Datei senden</string>
@@ -93,5 +93,6 @@
     <!-- <string name="hello_world">Hello world!</string> -->
     <string name="title_activity_single_chat">SingleChatActivity</string>
     <string name="title_activity_image_view">ImageViewActivity</string>
+    <string name="pref_title_new_message_notifications">Benachrichtigung bei neuen Nachrichten</string>
 
 </resources>
