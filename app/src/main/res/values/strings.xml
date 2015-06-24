@@ -89,10 +89,9 @@
     <string name="ERROR_USER_ALREADY_EXISTS">Benutzer ist bereits vorhanden!</string>
     <string name="ERROR_NO_ACTIVE_CHATS">Keine aktiven Chats vorhanden!</string>
     <string name="ERROR_FILE_NOT_FOUND">Datei existiert auf dem Server nicht!</string>
-    <string name="title_activity_sign_up">SignUpActivity</string>
-    <!-- <string name="hello_world">Hello world!</string> -->
-    <string name="title_activity_single_chat">SingleChatActivity</string>
-    <string name="title_activity_image_view">ImageViewActivity</string>
+    <string name="title_activity_sign_up">Anmelden</string>
+    <string name="title_activity_single_chat">Einzel Chat</string>
+    <string name="title_activity_image_view">Bildanzeige</string>
     <string name="pref_title_new_message_notifications">Benachrichtigung bei neuen Nachrichten</string>
 
 </resources>

@@ -70,10 +70,12 @@
     <string name="signup_type_same_password_in_password_fields">Passwords are not equal!</string>
     <string name="signup_user_already_exists_saved">User already exists, will be saved for later authentication!</string>
     <string name="title_activity_chat">Chats</string>
-    <string name="title_activity_image_view">ImageViewActivity</string>
-    <string name="title_activity_settings">SettingsActivity</string>
-    <string name="title_activity_sign_up">SignUpActivity</string>
-    <string name="title_activity_single_chat">SingleChatActivity</string>
+    <string name="title_activity_image_view">ImageView</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_sign_up">SignUp</string>
+    <string name="title_activity_single_chat">Single Chat</string>
     <string name="user_added_to_chat">User added to chat.</string>
     <string name="username">Username</string>
+    <string name="pref_title_HTTP_communication">Security</string>
+    <string name="pref_title_content_communication">Content with WIFI</string>
 </resources>

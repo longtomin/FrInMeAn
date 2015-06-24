@@ -143,6 +143,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private Context mContext;
     private boolean networtConnected = false;
     private boolean isWifi = false;
+    private boolean contentall = false;
 
     /**
      * Constructor. Obtains handle to content resolver for later use.
@@ -195,7 +196,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
         this.ringtone = sharedPrefs.getString(Constants.prefRingtone, "DEFAULT_SOUND");
         this.vibrate = sharedPrefs.getBoolean(Constants.prefVibrate, true);
-//        this.userid = Integer.parseInt(sharedPrefs.getString(Constants.PrefUserID, "-1"));
+        this.contentall = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
         Log.d(TAG, "end getPferefenceInfo");
     }
 
@@ -206,7 +207,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         networtConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
-        isWifi = activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+
+        if (contentall) {
+            isWifi = true;
+        } else {
+            isWifi = activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+        }
     }
 
     /**
@@ -228,31 +234,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Beginning network synchronization");
+        getPreferenceInfo();
         checkNetwork();
         if (networtConnected) {
-            getPreferenceInfo();
-            //syncListChats();
             syncCheckNewMessages();
             uploadUnsavedMessages();
             syncGetMessageInformation();
         }
         Log.i(TAG, "Network synchronization complete");
     }
-
-/*    private void syncListChats() {
-        Log.d(TAG, "start syncListChats");
-
-        OutListChat outlistchat = rf.listchat(username, password);
-
-        if (outlistchat != null) {
-            if (outlistchat.getErrortext() == null || outlistchat.getErrortext().isEmpty()) {
-                if (outlistchat.getChat() != null && !outlistchat.getChat().isEmpty()) {
-                    SaveChatsToLDB(outlistchat.getChat());
-                }
-            }
-        }
-        Log.d(TAG, "end syncListChats");
-    } */
 
     private void syncCheckNewMessages() {
         Log.d(TAG, "start syncCheckNewMessages");
@@ -261,7 +251,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         if (outcheck != null) {
             if (outcheck.getET() == null || outcheck.getET().isEmpty()) {
-                if (outcheck != null) {
                     if (outcheck.getCNC() != null && outcheck.getCNC().size() > 0) {
                         SaveChatsToLDB(outcheck.getCNC());
                     }
@@ -271,7 +260,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             syncGetMessageFromChat(c.getCID(), 0, c.getCN());
                         }
                     }
-                }
             }
         }
         Log.d(TAG, "end syncCheckNewMessages");
@@ -727,48 +715,50 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     }
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_IMAGE)) {
-                // TODO Check first if WIFI is on.
-                String imgfile = directory;
-                if (imgfile.endsWith(File.separator)) {
-                    imgfile += Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                } else {
-                    imgfile += File.separator + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                }
-                OSImM outimg = rf.sendImageMessage(username, password, imgfile);
-                if (outimg != null) {
-                    if (outimg.getET() == null || outimg.getET().isEmpty()) {
-                        OIMIC outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outimg.getIID(), TYP_IMAGE);
-                        if (outins != null) {
-                            if (outins.getET() == null || outins.getET().isEmpty()) {
-                                updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outimg.getIID(), TYP_IMAGE, outimg.getIF());
-                                moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getIF());
+                if (isWifi) {
+                    String imgfile = directory;
+                    if (imgfile.endsWith(File.separator)) {
+                        imgfile += Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                    } else {
+                        imgfile += File.separator + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
+                    }
+                    OSImM outimg = rf.sendImageMessage(username, password, imgfile);
+                    if (outimg != null) {
+                        if (outimg.getET() == null || outimg.getET().isEmpty()) {
+                            OIMIC outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outimg.getIID(), TYP_IMAGE);
+                            if (outins != null) {
+                                if (outins.getET() == null || outins.getET().isEmpty()) {
+                                    updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outimg.getIID(), TYP_IMAGE, outimg.getIF());
+                                    moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getIF());
+                                }
                             }
                         }
-                    }
 
+                    }
                 }
             } /*else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
 
             } */ else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
-                // TODO Check first if WIFI is on.
-                String vidfile = directory;
-                if (vidfile.endsWith(File.separator)) {
-                    vidfile += Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                } else {
-                    vidfile += File.separator + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                }
-                OSViM outvid = rf.sendVideoMessage(username, password, vidfile);
-                if (outvid != null) {
-                    if (outvid.getET() == null || outvid.getET().isEmpty()) {
-                        OIMIC outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outvid.getVID(), TYP_VIDEO);
-                        if (outins != null) {
-                            if (outins.getET() == null || outins.getET().isEmpty()) {
-                                updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outvid.getVID(), TYP_VIDEO, outvid.getVF());
-                                moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVF());
+                if (isWifi) {
+                    String vidfile = directory;
+                    if (vidfile.endsWith(File.separator)) {
+                        vidfile += Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                    } else {
+                        vidfile += File.separator + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
+                    }
+                    OSViM outvid = rf.sendVideoMessage(username, password, vidfile);
+                    if (outvid != null) {
+                        if (outvid.getET() == null || outvid.getET().isEmpty()) {
+                            OIMIC outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outvid.getVID(), TYP_VIDEO);
+                            if (outins != null) {
+                                if (outins.getET() == null || outins.getET().isEmpty()) {
+                                    updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outvid.getVID(), TYP_VIDEO, outvid.getVF());
+                                    moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVF());
+                                }
                             }
                         }
-                    }
 
+                    }
                 }
             } /* else if (msgtype.equalsIgnoreCase(TYP_FILE)) {
 

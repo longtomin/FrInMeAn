@@ -60,10 +60,10 @@
     <string name="pref_title_new_message_notifications">Benachrichtigung bei neuen Nachrichten</string>
     <string name="username">Benutzername</string>
     <string name="user_added_to_chat">Benutzer wurde dem Chat hinzugefügt.</string>
-    <string name="title_activity_single_chat">SingleChatActivity</string>
-    <string name="title_activity_sign_up">SignUpActivity</string>
-    <string name="title_activity_settings">SettingsActivity</string>
-    <string name="title_activity_image_view">ImageViewActivity</string>
+    <string name="title_activity_single_chat">Einzel Chat</string>
+    <string name="title_activity_sign_up">Anmelden</string>
+    <string name="title_activity_settings">Einstellungen</string>
+    <string name="title_activity_image_view">Bildanzeige</string>
     <string name="title_activity_chat">Chats</string>
     <string name="signup_user_already_exists_saved">Der Benutzer existiert bereits, wird aber für spätere Authentizifzierung gespeichert!</string>
     <string name="signup_type_same_password_in_password_fields">Passwörter stimmen nicht überein!</string>
@@ -77,4 +77,6 @@
     <string name="pref_title_servername">Servername</string>
     <string name="pref_title_ringtone">Klingelton</string>
     <string name="pref_title_password">Passwort</string>
+    <string name="pref_title_HTTP_communication">Sicherheit</string>
+    <string name="pref_title_content_communication">Bilder/Video im WLAN</string>
 </resources>

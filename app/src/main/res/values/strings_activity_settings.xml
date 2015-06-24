@@ -28,7 +28,7 @@
   -->
 
 <resources>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_settings">Einstellungen</string>
 
     <!-- Strings related to Settings -->
 
@@ -42,7 +42,8 @@
     <string name="pref_title_password">Passwort</string>
     <string name="pref_title_https" translatable="false">HTTPS</string>
     <string name="pref_title_http" translatable="false">HTTP</string>
-    <string name="pref_title_communication">Kommunikation</string>
+    <string name="pref_title_HTTP_communication">Sicherheit</string>
+    <string name="pref_title_content_communication">Bilder/Video im WLAN</string>
 
     <!-- Example settings for Data & Sync -->
     <string name="pref_header_data_sync">Daten &amp; Sync</string>
