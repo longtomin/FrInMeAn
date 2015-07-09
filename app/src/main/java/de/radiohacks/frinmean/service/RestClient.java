@@ -1,55 +1,40 @@
 package de.radiohacks.frinmean.service;
 
-import android.util.Base64;
 import android.util.Log;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.ParseException;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.FrinmeanApplication;
-import de.radiohacks.frinmean.myssl.CustomSSLSocketFactory;
-import de.radiohacks.frinmean.myssl.CustomTrustManager;
 
 /**
  * Created by thomas on 24.08.14.
@@ -59,14 +44,16 @@ public class RestClient {
     private static final String TAG = RestClient.class.getSimpleName();
     private static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
     private static final String ENCODING_GZIP = "gzip";
-    private ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-    private ArrayList<NameValuePair> headers = new ArrayList<NameValuePair>();
+    private static final String LINE_FEED = "\r\n";
+    private HashMap<String, String> params = new HashMap<>();
+    private HashMap<String, String> headers = new HashMap<>();
     private String url;
     private int responseCode;
     private String message;
     private String responseXML;
     private String SaveDirectory;
     private String filename;
+    private String boundary;
     private boolean usehttps;
     private int port;
 
@@ -74,7 +61,7 @@ public class RestClient {
         this.url = urlin;
         this.usehttps = inhttps;
         this.port = inport;
-        headers.add(new BasicNameValuePair(HEADER_ACCEPT_ENCODING, ENCODING_GZIP));
+        headers.put(HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
 
     }
 
@@ -114,263 +101,93 @@ public class RestClient {
         this.filename = in;
     }
 
+    public String getBoundary() {
+        return boundary;
+    }
+
+    public void setBoundary(String in) {
+        this.boundary = in;
+    }
+
     public int getResponseCode() {
         return responseCode;
     }
 
     public void AddParam(String name, String value) {
-        params.add(new BasicNameValuePair(name, value));
+        params.put(name, value);
     }
 
     public void AddHeader(String name, String value) {
         Log.d(TAG, "start AddHeader");
-        headers.add(new BasicNameValuePair(name, value));
+        headers.put(name, value);
         Log.d(TAG, "end AddHeader");
     }
 
-    public HttpDelete BevorExecuteDeleteQuery() throws Exception {
-        Log.d(TAG, "start BevoreExecuteGetQuery");
-        //add parameters
+    public String ExecuteHTTPXML(String type) {
+        HttpURLConnection urlcon = null;
         String combinedParams = "";
-        if (!params.isEmpty()) {
-            combinedParams += "?";
-            for (NameValuePair p : params) {
-                String paramString = p.getName() + "=" + URLEncoder.encode(p.getValue(), "UTF-8");
-                if (combinedParams.length() > 1) {
-                    combinedParams += "&" + paramString;
-                } else {
-                    combinedParams += paramString;
-                }
-            }
-        }
-
-        HttpDelete request = new HttpDelete(url + combinedParams);
-
-        //add headers
-        for (NameValuePair h : headers) {
-            request.addHeader(h.getName(), h.getValue());
-        }
-        Log.d(TAG, "end BevorExecuteGetQuery");
-        return request;
-    }
-
-    public HttpGet BevorExecuteGetQuery() throws Exception {
-        Log.d(TAG, "start BevoreExecuteGetQuery");
-        //add parameters
-        String combinedParams = "";
-        if (!params.isEmpty()) {
-            combinedParams += "?";
-            for (NameValuePair p : params) {
-                String paramString = p.getName() + "=" + URLEncoder.encode(p.getValue(), "UTF-8");
-                if (combinedParams.length() > 1) {
-                    combinedParams += "&" + paramString;
-                } else {
-                    combinedParams += paramString;
-                }
-            }
-        }
-
-        HttpGet request = new HttpGet(url + combinedParams);
-
-        //add headers
-        for (NameValuePair h : headers) {
-            request.addHeader(h.getName(), h.getValue());
-        }
-        Log.d(TAG, "end BevorExecuteGetQuery");
-        return request;
-    }
-
-    public HttpGet BevorExecuteGetPath(String uid, String pw, int id) throws Exception {
-        Log.d(TAG, "start BevorExecuteGetPath");
-        //add parameters
-        String combinedParams = "";
-
-        byte[] datauser;
-        datauser = uid.getBytes("UTF-8");
-        String b64uid = Base64.encodeToString(datauser, Base64.NO_WRAP);
-        datauser = pw.getBytes("UTF-8");
-        String b64pw = Base64.encodeToString(datauser, Base64.NO_WRAP);
-
-        if (url.endsWith("/")) {
-            combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(id), "UTF-8");
-        } else {
-            combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(id), "UTF-8");
-        }
-
-        HttpGet request = new HttpGet(url + combinedParams);
-
-        //add headers
-        for (NameValuePair h : headers) {
-            request.addHeader(h.getName(), h.getValue());
-        }
-        Log.d(TAG, "end BevorExecuteGetPath");
-        return request;
-    }
-
-
-    public HttpPost BevorExecutePost() throws Exception {
-        Log.d(TAG, "start BevorExecutePost");
-        String combinedParams = "";
-        if (!params.isEmpty()) {
-            combinedParams += "?";
-            for (NameValuePair p : params) {
-                String paramString = p.getName() + "=" + URLEncoder.encode(p.getValue(), "UTF-8");
-                if (combinedParams.length() > 1) {
-                    combinedParams += "&" + paramString;
-                } else {
-                    combinedParams += paramString;
-                }
-            }
-        }
-        HttpPost request = new HttpPost(url + combinedParams);
-
-        //add headers
-        for (NameValuePair h : headers) {
-            request.addHeader(h.getName(), h.getValue());
-        }
-
-        Log.d(TAG, "start BevorExecutePost");
-        return request;
-    }
-
-
-    public String ExecuteRequestUploadXML(HttpPost... httpposts) throws ClientProtocolException {
-        Log.d(TAG, "start ExecuteRequestUploadXML");
-
-        HttpClient client = null;
-
-        if (usehttps) {
-            client = getSSLClient();
-        } else {
-            client = new DefaultHttpClient();
-        }
-
-        HttpResponse response;
 
         try {
-            HttpPost httppost = httpposts[0];
-
-            File f = new File(getFilename());
-            if (f.exists()) {
-
-                MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-                builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-                builder.addBinaryBody("file", f, ContentType.MULTIPART_FORM_DATA, f.getName());
-                HttpEntity multipart = builder.build();
-
-                httppost.setEntity(multipart);
-
-                response = client.execute(httppost);
-                responseCode = response.getStatusLine().getStatusCode();
-                HttpEntity entity = response.getEntity();
-
-                if (entity != null) {
-
-                    InputStream instream = entity.getContent();
-                    responseXML = convertStreamToString(instream);
-
-                    // Closing the input stream will trigger connection release
-                    instream.close();
+            if (!params.isEmpty()) {
+                combinedParams += "?";
+                for (HashMap.Entry<String, String> entry : params.entrySet()) {
+                    String paramString = entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
+                    if (combinedParams.length() > 1) {
+                        combinedParams += "&" + paramString;
+                    } else {
+                        combinedParams += paramString;
+                    }
                 }
             }
+            URL u = new URL(url + combinedParams);
+            urlcon = (HttpURLConnection) u.openConnection();
+            urlcon.setInstanceFollowRedirects(false);
+            urlcon.setRequestMethod(type);
+            if (type.equalsIgnoreCase("POST")) {
+                urlcon.setDoOutput(true);
+            }
+            urlcon.setDoInput(true);
+            urlcon.setConnectTimeout(60 * 1000);
+            urlcon.setReadTimeout(60 * 1000);
+            if (!headers.isEmpty()) {
+                for (HashMap.Entry<String, String> entry : headers.entrySet()) {
+                    urlcon.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+            responseCode = urlcon.getResponseCode();
+            message = urlcon.getResponseMessage();
+            InputStream instream = urlcon.getInputStream();
+            responseXML = convertStreamToString(instream);
+
+
+        } catch (MalformedURLException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
         } catch (IOException e) {
+            urlcon.disconnect();
             e.printStackTrace();
         }
-        Log.d(TAG, "end ExecuteRequestUploadXML ");
         return responseXML;
     }
 
-
-    public String ExecuteRequestXML(HttpUriRequest... httpUriRequests) {
-        Log.d(TAG, "start ExecuteRequestXML");
-
-        HttpClient client = null;
-
-        if (usehttps) {
-            client = getSSLClient();
-        } else {
-            client = new DefaultHttpClient();
-        }
-
-        HttpResponse httpResponse;
+    public String ExecuteHTTPSXML(String type) {
+        HttpsURLConnection urlcon = null;
+        String combinedParams = "";
 
         try {
-            httpResponse = client.execute(httpUriRequests[0]);
-            responseCode = httpResponse.getStatusLine().getStatusCode();
-            message = httpResponse.getStatusLine().getReasonPhrase();
 
-            HttpEntity entity = httpResponse.getEntity();
-
-            if (entity != null) {
-
-                InputStream instream = entity.getContent();
-                responseXML = convertStreamToString(instream);
-
-                // Closing the input stream will trigger connection release
-                instream.close();
-            }
-
-        } catch (IOException e) {
-            client.getConnectionManager().shutdown();
-            e.printStackTrace();
-        }
-        Log.d(TAG, "end ExecuteRequestXML");
-        return responseXML;
-    }
-
-    public String ExecuteRequestImage(HttpUriRequest... httpUriRequests) {
-        Log.d(TAG, "start ExecuteRequestImage");
-        String ret = null;
-        HttpClient client = null;
-
-        if (usehttps) {
-            client = getSSLClient();
-        } else {
-            client = new DefaultHttpClient();
-        }
-
-        try {
-            HttpResponse httpResponse;
-            httpResponse = client.execute(httpUriRequests[0]);
-            responseCode = httpResponse.getStatusLine().getStatusCode();
-
-            if (responseCode == 200) {
-                message = httpResponse.getStatusLine().getReasonPhrase();
-                filename = httpResponse.getFirstHeader("filename").getValue();
-                HttpEntity entity = httpResponse.getEntity();
-
-                InputStream instream1 = entity.getContent();
-
-                OutputStream output = new FileOutputStream(SaveDirectory + filename);
-
-                int read;
-
-                byte[] bytes = new byte[1024];
-                while ((read = instream1.read(bytes)) != -1) {
-                    output.write(bytes, 0, read);
-                }
-                output.close();
-                instream1.close();
-                ret = filename;
-            } else {
-                Log.d(TAG, "HTTP Responsecode = " + String.valueOf(responseCode));
-            }
-        } catch (IOException e) {
-            client.getConnectionManager().shutdown();
-            e.printStackTrace();
-        }
-        Log.d(TAG, "start ExecuteRequestImage");
-        return ret;
-    }
-
-    private HttpClient getSSLClient() {
-        HttpClient client = null;
-        SSLContext ctx;
-
-        try {
             // Load CAs from an InputStream
+            // (could be from a resource or ByteArrayInputStream or ...)
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            // From https://www.washington.edu/itconnect/security/ca/load-der.crt
             InputStream caInput = FrinmeanApplication.loadCertAsInputStream();
+            //InputStream caInput = new BufferedInputStream(new FileInputStream("load-der.crt"));
             Certificate ca;
             try {
                 ca = cf.generateCertificate(caInput);
@@ -388,38 +205,93 @@ public class RestClient {
             // Create a TrustManager that trusts the CAs in our KeyStore
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-
             tmf.init(keyStore);
 
             // Create an SSLContext that uses our TrustManager
-            ctx = SSLContext.getInstance("TLS");
-            ctx.init(null, tmf.getTrustManagers(), null);
+            SSLContext context = SSLContext.getInstance("TLS");
+            context.init(null, tmf.getTrustManagers(), null);
 
-            HttpClient tmpclient = new DefaultHttpClient();
-
-            SSLSocketFactory ssf = new CustomSSLSocketFactory(ctx);
-            ssf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-            ClientConnectionManager ccm = tmpclient.getConnectionManager();
-            SchemeRegistry sr = ccm.getSchemeRegistry();
-            sr.register(new Scheme("https", ssf, port));
-            client = new DefaultHttpClient(ccm,
-                    tmpclient.getParams());
-
-        } catch (NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException | KeyStoreException | CertificateException | IOException e) {
+            if (!params.isEmpty()) {
+                combinedParams += "?";
+                for (HashMap.Entry<String, String> entry : params.entrySet()) {
+                    String paramString = entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
+                    if (combinedParams.length() > 1) {
+                        combinedParams += "&" + paramString;
+                    } else {
+                        combinedParams += paramString;
+                    }
+                }
+            }
+            URL u = new URL(url + combinedParams);
+            urlcon = (HttpsURLConnection) u.openConnection();
+            urlcon.setSSLSocketFactory(context.getSocketFactory());
+/*            urlcon.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    HostnameVerifier hv =
+                            HttpsURLConnection.getDefaultHostnameVerifier();
+                    //return hv.verify("frinme.org", session);
+                    return true;
+                }
+            }); */
+            urlcon.setInstanceFollowRedirects(false);
+            urlcon.setRequestMethod(type);
+            if (type.equalsIgnoreCase("POST")) {
+                urlcon.setDoOutput(true);
+            }
+            urlcon.setDoInput(true);
+            urlcon.setConnectTimeout(60 * 1000);
+            urlcon.setReadTimeout(60 * 1000);
+            if (!headers.isEmpty()) {
+                for (HashMap.Entry<String, String> entry : headers.entrySet()) {
+                    urlcon.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+            responseCode = urlcon.getResponseCode();
+            message = urlcon.getResponseMessage();
+            InputStream instream = urlcon.getInputStream();
+            responseXML = convertStreamToString(instream);
+        } catch (MalformedURLException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (IOException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
             e.printStackTrace();
         }
-
-        return client;
+        return responseXML;
     }
 
-    public String BuildURLString() throws Exception {
-        Log.d(TAG, "start BuildURLString");
-        //add parameters
+    public String ExecuteHTTPPostXMLMultipart(String post, String filepath, String filefield, String MimeTyp) throws ParseException, IOException {
+        HttpURLConnection urlcon = null;
+        DataOutputStream outputStream = null;
+        InputStream inputStream = null;
+
+        String twoHyphens = "--";
+        String boundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
+        String lineEnd = "\r\n";
+
+        String result = "";
+
+        int bytesRead, bytesAvailable, bufferSize;
+        byte[] buffer;
+        int maxBufferSize = 1 * 1024 * 1024;
+
+        String[] q = filepath.split("/");
+        int idx = q.length - 1;
+
         String combinedParams = "";
         if (!params.isEmpty()) {
             combinedParams += "?";
-            for (NameValuePair p : params) {
-                String paramString = p.getName() + "=" + URLEncoder.encode(p.getValue(), "UTF-8");
+            for (HashMap.Entry<String, String> entry : params.entrySet()) {
+                String paramString = entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
                 if (combinedParams.length() > 1) {
                     combinedParams += "&" + paramString;
                 } else {
@@ -427,15 +299,114 @@ public class RestClient {
                 }
             }
         }
-        return this.url + combinedParams;
-    }
-
-    public String testDirect() {
 
         try {
+            File file = new File(filepath);
+            FileInputStream fileInputStream = new FileInputStream(file);
+
+            URL u = new URL(this.url + combinedParams);
+            urlcon = (HttpURLConnection) u.openConnection();
+
+            urlcon.setDoInput(true);
+            urlcon.setDoOutput(true);
+            urlcon.setUseCaches(false);
+
+            urlcon.setRequestMethod("POST");
+            urlcon.setRequestProperty("Connection", "Keep-Alive");
+            urlcon.setRequestProperty("User-Agent", Constants.USER_AGENT);
+            urlcon.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+            outputStream = new DataOutputStream(urlcon.getOutputStream());
+            outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"" + filefield + "\"; filename=\"" + q[idx] + "\"" + lineEnd);
+            outputStream.writeBytes("Content-Type: " + MimeTyp + lineEnd);
+            outputStream.writeBytes("Content-Transfer-Encoding: binary" + lineEnd);
+            outputStream.writeBytes(lineEnd);
+
+            bytesAvailable = fileInputStream.available();
+            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            buffer = new byte[bufferSize];
+
+            bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+            while (bytesRead > 0) {
+                outputStream.write(buffer, 0, bufferSize);
+                bytesAvailable = fileInputStream.available();
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+            }
+
+            outputStream.writeBytes(lineEnd);
+
+            // Upload POST Data
+            String[] posts = post.split("&");
+            int max = posts.length;
+            for (int i = 0; i < max; i++) {
+                outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+                String[] kv = posts[i].split("=");
+                outputStream.writeBytes("Content-Disposition: form-data; name=\"" + kv[0] + "\"" + lineEnd);
+                outputStream.writeBytes("Content-Type: text/plain" + lineEnd);
+                outputStream.writeBytes(lineEnd);
+                outputStream.writeBytes(kv[1]);
+                outputStream.writeBytes(lineEnd);
+            }
+
+            outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+            inputStream = urlcon.getInputStream();
+            result = this.convertStreamToString(inputStream);
+            responseCode = urlcon.getResponseCode();
+
+            fileInputStream.close();
+            inputStream.close();
+            outputStream.flush();
+            outputStream.close();
+
+            return result;
+        } catch (Exception e) {
+            Log.e("MultipartRequest", "Multipart Form Upload Error");
+            e.printStackTrace();
+            return "error";
+        }
+    }
+
+    public String ExecuteHTTPSPostXMLMultipart(String post, String filepath, String filefield, String MimeTyp) throws ParseException, IOException {
+        HttpsURLConnection urlcon = null;
+        DataOutputStream outputStream = null;
+        InputStream inputStream = null;
+
+        String twoHyphens = "--";
+        String boundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
+        String lineEnd = "\r\n";
+
+        String result = "";
+
+        int bytesRead, bytesAvailable, bufferSize;
+        byte[] buffer;
+        int maxBufferSize = 1 * 1024 * 1024;
+
+        String[] q = filepath.split("/");
+        int idx = q.length - 1;
+
+        String combinedParams = "";
+        if (!params.isEmpty()) {
+            combinedParams += "?";
+            for (HashMap.Entry<String, String> entry : params.entrySet()) {
+                String paramString = entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
+                if (combinedParams.length() > 1) {
+                    combinedParams += "&" + paramString;
+                } else {
+                    combinedParams += paramString;
+                }
+            }
+        }
+
+        try {
+            // Load CAs from an InputStream
+            // (could be from a resource or ByteArrayInputStream or ...)
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            // From https://www.washington.edu/itconnect/security/ca/load-der.crt
             InputStream caInput = FrinmeanApplication.loadCertAsInputStream();
-            // InputStream caInput = new BufferedInputStream(new FileInputStream("load-der.crt"));
+            //InputStream caInput = new BufferedInputStream(new FileInputStream("load-der.crt"));
             Certificate ca;
             try {
                 ca = cf.generateCertificate(caInput);
@@ -444,38 +415,297 @@ public class RestClient {
                 caInput.close();
             }
 
-// Create a KeyStore containing our trusted CAs
+            // Create a KeyStore containing our trusted CAs
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(null, null);
             keyStore.setCertificateEntry("ca", ca);
 
-// Create a TrustManager that trusts the CAs in our KeyStore
+            // Create a TrustManager that trusts the CAs in our KeyStore
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
             tmf.init(keyStore);
 
-            CustomTrustManager ctm = new CustomTrustManager(keyStore);
-
-// Create an SSLContext that uses our TrustManager
+            // Create an SSLContext that uses our TrustManager
             SSLContext context = SSLContext.getInstance("TLS");
-            // context.init(null, tmf.getTrustManagers(), null);
-            context.init(null, new TrustManager[]{ctm}, null);
+            context.init(null, tmf.getTrustManagers(), null);
 
-// Tell the URLConnection to use a SocketFactory from our SSLContext
-            URL url = new URL(BuildURLString());
-            HttpsURLConnection urlConnection =
-                    (HttpsURLConnection) url.openConnection();
-            urlConnection.setSSLSocketFactory(context.getSocketFactory());
-            InputStream in = urlConnection.getInputStream();
+            File file = new File(filepath);
+            FileInputStream fileInputStream = new FileInputStream(file);
 
-            responseXML = convertStreamToString(in);
+            URL u = new URL(this.url + combinedParams);
+            urlcon = (HttpsURLConnection) u.openConnection();
+            urlcon.setSSLSocketFactory(context.getSocketFactory());
+/*            urlcon.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    HostnameVerifier hv =
+                            HttpsURLConnection.getDefaultHostnameVerifier();
+                    //return hv.verify("frinme.org", session);
+                    return true;
+                }
+            }); */
 
-        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException | CertificateException | IOException e) {
-            e.printStackTrace();
+            urlcon.setDoInput(true);
+            urlcon.setDoOutput(true);
+            urlcon.setUseCaches(false);
+
+            urlcon.setRequestMethod("POST");
+            urlcon.setRequestProperty("Connection", "Keep-Alive");
+            urlcon.setRequestProperty("User-Agent", Constants.USER_AGENT);
+            urlcon.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+            outputStream = new DataOutputStream(urlcon.getOutputStream());
+            outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"" + filefield + "\"; filename=\"" + q[idx] + "\"" + lineEnd);
+            outputStream.writeBytes("Content-Type: " + MimeTyp + lineEnd);
+            outputStream.writeBytes("Content-Transfer-Encoding: binary" + lineEnd);
+            outputStream.writeBytes(lineEnd);
+
+            bytesAvailable = fileInputStream.available();
+            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            buffer = new byte[bufferSize];
+
+            bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+            while (bytesRead > 0) {
+                outputStream.write(buffer, 0, bufferSize);
+                bytesAvailable = fileInputStream.available();
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+            }
+
+            outputStream.writeBytes(lineEnd);
+
+            // Upload POST Data
+            String[] posts = post.split("&");
+            int max = posts.length;
+            for (int i = 0; i < max; i++) {
+                outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+                String[] kv = posts[i].split("=");
+                outputStream.writeBytes("Content-Disposition: form-data; name=\"" + kv[0] + "\"" + lineEnd);
+                outputStream.writeBytes("Content-Type: text/plain" + lineEnd);
+                outputStream.writeBytes(lineEnd);
+                outputStream.writeBytes(kv[1]);
+                outputStream.writeBytes(lineEnd);
+            }
+
+            outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+            inputStream = urlcon.getInputStream();
+            result = this.convertStreamToString(inputStream);
+            responseCode = urlcon.getResponseCode();
+
+            fileInputStream.close();
+            inputStream.close();
+            outputStream.flush();
+            outputStream.close();
+
+            return result;
         } catch (Exception e) {
+            Log.e("MultipartRequest", "Multipart Form Upload Error");
+            e.printStackTrace();
+            return "error";
+        }
+    }
+
+    public String ExecuteHTTPContent(String type) {
+        Log.d(TAG, "start ExecuteRequestImage");
+        String ret = null;
+
+        HttpURLConnection urlcon = null;
+        String combinedParams = "";
+
+        try {
+
+            if (!params.isEmpty()) {
+                combinedParams += "?";
+                for (HashMap.Entry<String, String> entry : params.entrySet()) {
+                    String paramString = entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
+                    if (combinedParams.length() > 1) {
+                        combinedParams += "&" + paramString;
+                    } else {
+                        combinedParams += paramString;
+                    }
+                }
+            }
+            URL u = new URL(url + combinedParams);
+            urlcon = (HttpURLConnection) u.openConnection();
+            urlcon.setInstanceFollowRedirects(false);
+            urlcon.setRequestMethod(type);
+            if (type.equalsIgnoreCase("POST")) {
+                urlcon.setDoOutput(true);
+            }
+            urlcon.setDoInput(true);
+            urlcon.setConnectTimeout(60 * 1000);
+            urlcon.setReadTimeout(60 * 1000);
+            if (!headers.isEmpty()) {
+                for (HashMap.Entry<String, String> entry : headers.entrySet()) {
+                    urlcon.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+            responseCode = urlcon.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                message = urlcon.getResponseMessage();
+                filename = urlcon.getHeaderField("filename");
+                // httpResponse.getFirstHeader("filename").getValue();
+                // HttpEntity entity = httpResponse.getEntity();
+
+                InputStream instream1 = urlcon.getInputStream();
+
+                OutputStream output = new FileOutputStream(SaveDirectory + filename);
+
+                int read;
+
+                byte[] bytes = new byte[1024];
+                while ((read = instream1.read(bytes)) != -1) {
+                    output.write(bytes, 0, read);
+                }
+                output.close();
+                instream1.close();
+                ret = filename;
+            } else {
+                Log.d(TAG, "HTTP Responsecode = " + String.valueOf(responseCode));
+            }
+
+        } catch (MalformedURLException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (IOException e) {
+            urlcon.disconnect();
             e.printStackTrace();
         }
-        return responseXML;
+        return ret;
+    }
+
+    public String ExecuteHTTPSContent(String type) {
+        Log.d(TAG, "start ExecuteRequestImage");
+        String ret = null;
+
+        HttpsURLConnection urlcon = null;
+        String combinedParams = "";
+
+        try {
+            // Load CAs from an InputStream
+            // (could be from a resource or ByteArrayInputStream or ...)
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            // From https://www.washington.edu/itconnect/security/ca/load-der.crt
+            InputStream caInput = FrinmeanApplication.loadCertAsInputStream();
+            //InputStream caInput = new BufferedInputStream(new FileInputStream("load-der.crt"));
+            Certificate ca;
+            try {
+                ca = cf.generateCertificate(caInput);
+                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+            } finally {
+                caInput.close();
+            }
+
+            // Create a KeyStore containing our trusted CAs
+            String keyStoreType = KeyStore.getDefaultType();
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca", ca);
+
+            // Create a TrustManager that trusts the CAs in our KeyStore
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+            tmf.init(keyStore);
+
+            // Create an SSLContext that uses our TrustManager
+            SSLContext context = SSLContext.getInstance("TLS");
+            context.init(null, tmf.getTrustManagers(), null);
+
+            if (!params.isEmpty()) {
+                combinedParams += "?";
+                for (HashMap.Entry<String, String> entry : params.entrySet()) {
+                    String paramString = entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
+                    if (combinedParams.length() > 1) {
+                        combinedParams += "&" + paramString;
+                    } else {
+                        combinedParams += paramString;
+                    }
+                }
+            }
+            URL u = new URL(url + combinedParams);
+            urlcon = (HttpsURLConnection) u.openConnection();
+            urlcon.setSSLSocketFactory(context.getSocketFactory());
+/*            urlcon.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    HostnameVerifier hv =
+                            HttpsURLConnection.getDefaultHostnameVerifier();
+                    //return hv.verify("frinme.org", session);
+                    return true;
+                }
+            }); */
+
+            urlcon.setInstanceFollowRedirects(false);
+            urlcon.setRequestMethod(type);
+            if (type.equalsIgnoreCase("POST")) {
+                urlcon.setDoOutput(true);
+            }
+            urlcon.setDoInput(true);
+            urlcon.setConnectTimeout(60 * 1000);
+            urlcon.setReadTimeout(60 * 1000);
+            if (!headers.isEmpty()) {
+                for (HashMap.Entry<String, String> entry : headers.entrySet()) {
+                    urlcon.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+            responseCode = urlcon.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                message = urlcon.getResponseMessage();
+                filename = urlcon.getHeaderField("filename");
+                // httpResponse.getFirstHeader("filename").getValue();
+                // HttpEntity entity = httpResponse.getEntity();
+
+                InputStream instream1 = urlcon.getInputStream();
+
+                OutputStream output = new FileOutputStream(SaveDirectory + filename);
+
+                int read;
+
+                byte[] bytes = new byte[1024];
+                while ((read = instream1.read(bytes)) != -1) {
+                    output.write(bytes, 0, read);
+                }
+                output.close();
+                instream1.close();
+                ret = filename;
+            } else {
+                Log.d(TAG, "HTTP Responsecode = " + String.valueOf(responseCode));
+            }
+
+        } catch (MalformedURLException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (IOException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            urlcon.disconnect();
+            e.printStackTrace();
+        }
+        return ret;
     }
 }

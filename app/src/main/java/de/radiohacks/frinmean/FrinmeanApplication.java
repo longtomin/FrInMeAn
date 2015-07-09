@@ -47,7 +47,7 @@ public class FrinmeanApplication extends Application {
 
     public static InputStream loadCertAsInputStream() {
         return FrinmeanApplication.context.getResources().openRawResource(
-                R.raw.dc6ri_de_x_509_inkl_ausstellern);
+                R.raw.derp);
     }
 
     @Override

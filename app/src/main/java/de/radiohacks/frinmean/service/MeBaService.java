@@ -3,15 +3,22 @@ package de.radiohacks.frinmean.service;
 import android.app.IntentService;
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
 
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -27,12 +34,22 @@ import java.io.StringWriter;
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.adapters.SyncAdapter;
 import de.radiohacks.frinmean.adapters.SyncUtils;
+import de.radiohacks.frinmean.modelshort.C;
+import de.radiohacks.frinmean.modelshort.M;
+import de.radiohacks.frinmean.modelshort.OAckMD;
 import de.radiohacks.frinmean.modelshort.OAdUC;
 import de.radiohacks.frinmean.modelshort.OAuth;
 import de.radiohacks.frinmean.modelshort.OCrCh;
 import de.radiohacks.frinmean.modelshort.ODMFC;
 import de.radiohacks.frinmean.modelshort.ODeCh;
+import de.radiohacks.frinmean.modelshort.OFMFC;
+import de.radiohacks.frinmean.modelshort.OGImM;
+import de.radiohacks.frinmean.modelshort.OGImMMD;
+import de.radiohacks.frinmean.modelshort.OGTeM;
+import de.radiohacks.frinmean.modelshort.OGViM;
+import de.radiohacks.frinmean.modelshort.OGViMMD;
 import de.radiohacks.frinmean.modelshort.OIMIC;
+import de.radiohacks.frinmean.modelshort.OLiCh;
 import de.radiohacks.frinmean.modelshort.OLiUs;
 import de.radiohacks.frinmean.modelshort.OSShT;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
@@ -41,13 +58,38 @@ import static de.radiohacks.frinmean.Constants.CHAT_DB_Columns;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_ImageMsgID;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_VideoMsgID;
 import static de.radiohacks.frinmean.Constants.MESSAGES_DB_Columns;
+import static de.radiohacks.frinmean.Constants.TYP_CONTACT;
+import static de.radiohacks.frinmean.Constants.TYP_FILE;
+import static de.radiohacks.frinmean.Constants.TYP_IMAGE;
+import static de.radiohacks.frinmean.Constants.TYP_LOCATION;
+import static de.radiohacks.frinmean.Constants.TYP_TEXT;
+import static de.radiohacks.frinmean.Constants.TYP_VIDEO;
 import static de.radiohacks.frinmean.Constants.T_CHAT_BADBID;
+import static de.radiohacks.frinmean.Constants.T_CHAT_ChatName;
 import static de.radiohacks.frinmean.Constants.T_CHAT_ID;
+import static de.radiohacks.frinmean.Constants.T_CHAT_OwningUserID;
+import static de.radiohacks.frinmean.Constants.T_CHAT_OwningUserName;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_BADBID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ChatID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_ContactMsgID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_FileMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgValue;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_LocationMsgID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_MessageTyp;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_NumberAll;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_NumberRead;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_NumberShow;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserName;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_ReadTimestamp;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_SendTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ShowTimestamp;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgValue;
 
 public class MeBaService extends IntentService {
 
@@ -58,6 +100,8 @@ public class MeBaService extends IntentService {
     private String username;
     private String password;
     private String directory;
+    private boolean contentall;
+    private boolean isWifi;
     private BroadcastNotifier mBroadcaster = null;
     private RestFunctions rf;
 
@@ -98,6 +142,15 @@ public class MeBaService extends IntentService {
         return sSyncAdapter.getSyncAdapterBinder();
     }
 
+    private void checkNetwork() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        isWifi = contentall || activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+    }
+
 /*    protected boolean isNetworkConnected() {
         if (conManager != null) {
             if (conManager.getActiveNetworkInfo() != null) {
@@ -118,6 +171,7 @@ public class MeBaService extends IntentService {
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+        this.contentall = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
         Log.d(TAG, "end getPferefenceInfo");
     }
 
@@ -178,9 +232,300 @@ public class MeBaService extends IntentService {
                 final boolean delsvr = intent.getBooleanExtra(Constants.DELETEONSERVER, false);
                 final boolean delcontent = intent.getBooleanExtra(Constants.DELETELOCALCONTENT, false);
                 handleActionDeleteChat(cid, delsvr, delcontent);
+            } else if (Constants.ACTION_REFRESH.equalsIgnoreCase(action)) {
+                final long time = intent.getLongExtra(Constants.TIMESTAMP, -1);
+                handleActionRefresh(time);
             }
         }
         Log.d(TAG, "start onHandleIntent");
+    }
+
+    private boolean acknowledgeMessage(String msgType, String message, int msgid) {
+        Log.d(TAG, "start acknowledgeMessage");
+
+        boolean ret = false;
+
+        if (msgType.equalsIgnoreCase(Constants.TYP_TEXT)) {
+            /* Hasher hasher = Hashing.md5().newHasher();
+            hasher.putBytes(message.getBytes());
+            byte[] md5 = hasher.hash().asBytes(); */
+            int hashCode = message.hashCode();
+
+            OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, String.valueOf(hashCode));
+            if (oack != null) {
+                if (oack.getET() == null || oack.getET().isEmpty()) {
+                    if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
+                        ret = true;
+                    }
+                }
+            }
+        } else if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+            HashCode md5 = null;
+            try {
+                md5 = Files.hash(new File(message),
+                        Hashing.md5());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            assert md5 != null;
+            OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+            if (oack != null) {
+                if (oack.getET() == null || oack.getET().isEmpty()) {
+                    if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
+                        ret = true;
+                    }
+                }
+            }
+        } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+            HashCode md5 = null;
+            try {
+                md5 = Files.hash(new File(message),
+                        Hashing.md5());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            assert md5 != null;
+            OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+            if (oack != null) {
+                if (oack.getET() == null || oack.getET().isEmpty()) {
+                    if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
+                        ret = true;
+                    }
+                }
+            }
+        }
+
+        Log.d(TAG, "end acknowledgeMessage");
+        return ret;
+    }
+
+    private boolean checkfileexists(String fname, String msgType, long fsize, String inmd5sumd) {
+        Log.d(TAG, "start checkfileexists");
+
+        boolean ret = false;
+        File checkfile;
+        String checkfilepath = null;
+
+        if (directory.endsWith(File.separator)) {
+            if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+                checkfilepath = directory + Constants.IMAGEDIR + File.separator + fname;
+            } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+                checkfilepath = directory + Constants.VIDEODIR + File.separator + fname;
+            } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
+                checkfilepath = directory + Constants.FILESDIR + File.separator + fname;
+            }
+        } else {
+            if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+                checkfilepath = directory + File.separator + Constants.IMAGEDIR + File.separator + fname;
+            } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+                checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + fname;
+            } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
+                checkfilepath = directory + File.separator + Constants.FILESDIR + File.separator + fname;
+            }
+        }
+        assert checkfilepath != null;
+        checkfile = new File(checkfilepath);
+
+        if (checkfile.exists()) {
+            if (checkfile.length() == fsize) {
+                // File exists an has right size
+                HashCode md5 = null;
+                try {
+                    md5 = Files.hash(new File(checkfilepath),
+                            Hashing.md5());
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                assert md5 != null;
+                if (md5.toString().equals(inmd5sumd)) {
+                    // MD5Sum is equal File already exists
+                    ret = true;
+                }
+            }
+        }
+        Log.d(TAG, "end checkfileexists");
+        return ret;
+    }
+
+    private void handleActionRefresh(long intime) {
+        Log.d(TAG, "start handleActionRefresh");
+
+        try {
+            OLiCh outListChat = rf.listchat(username, password);
+            if (outListChat != null && outListChat.getET() == null) {
+                ContentProviderClient clientChat = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
+                for (int j = 0; j < outListChat.getChat().size(); j++) {
+                    C c = outListChat.getChat().get(j);
+                    ContentValues valuesinschat = new ContentValues();
+                    valuesinschat.put(T_CHAT_BADBID, c.getCID());
+                    valuesinschat.put(T_CHAT_OwningUserID, c.getOU().getOUID());
+                    valuesinschat.put(T_CHAT_OwningUserName, c.getOU().getOUN());
+                    valuesinschat.put(T_CHAT_ChatName, c.getCN());
+                    ((FrinmeanContentProvider) clientChat.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CHAT_CONTENT_URI, valuesinschat);
+                    OFMFC outFetchMessage = rf.getmessagefromchat(username, password, c.getCID(), intime);
+                    if (outFetchMessage != null && outFetchMessage.getET() == null) {
+                        for (int k = 0; k < outFetchMessage.getM().size(); k++) {
+                            M m = outFetchMessage.getM().get(k);
+                            ContentValues valuesinsmsg = new ContentValues();
+                            valuesinsmsg.put(T_MESSAGES_BADBID, m.getMID());
+                            valuesinsmsg.put(T_MESSAGES_OwningUserID, m.getOU().getOUID());
+                            valuesinsmsg.put(T_MESSAGES_OwningUserName, m.getOU().getOUN());
+                            valuesinsmsg.put(T_MESSAGES_ChatID, c.getCID());
+                            valuesinsmsg.put(T_MESSAGES_MessageTyp, m.getMT());
+                            valuesinsmsg.put(T_MESSAGES_SendTimestamp, m.getSdT());
+                            valuesinsmsg.put(T_MESSAGES_ReadTimestamp, m.getRdT());
+                            valuesinsmsg.put(T_MESSAGES_ShowTimestamp, m.getShT());
+                            valuesinsmsg.put(T_MESSAGES_NumberAll, m.getNT());
+                            valuesinsmsg.put(T_MESSAGES_NumberShow, m.getNS());
+                            valuesinsmsg.put(T_MESSAGES_NumberRead, m.getNR());
+
+                            if (m.getMT().equalsIgnoreCase(TYP_TEXT)) {
+                                valuesinsmsg.put(T_MESSAGES_TextMsgID, m.getTMID());
+                                OGTeM oftm = rf.gettextmessage(username, password, m.getTMID());
+                                if (oftm != null) {
+                                    if (oftm.getET() == null || oftm.getET().isEmpty()) {
+                                        if (acknowledgeMessage(Constants.TYP_TEXT, oftm.getTM(), m.getMID())) {
+                                            valuesinsmsg.put(T_MESSAGES_TextMsgValue, oftm.getTM());
+                                            ContentProviderClient clientmsg = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                            ((FrinmeanContentProvider) clientmsg.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                            clientmsg.release();
+                                        }
+                                    }
+                                }
+                            } else if (m.getMT().equalsIgnoreCase(TYP_IMAGE)) {
+                                valuesinsmsg.put(T_MESSAGES_ImageMsgID, m.getIMID());
+                                OGImMMD outmeta = rf.getImageMessageMetaData(username, password, m.getIMID());
+
+                                if (outmeta != null) {
+                                    if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
+                                        if (!checkfileexists(outmeta.getIM(), TYP_IMAGE, outmeta.getIS(), outmeta.getIMD5())) {
+                                            if (isWifi) {
+                                                OGImM ofim = rf.fetchImageMessage(username, password, m.getIMID());
+                                                if (ofim != null) {
+                                                    if (ofim.getET() == null || ofim.getET().isEmpty()) {
+                                                        String checkfilepath;
+
+                                                        if (directory.endsWith(File.separator)) {
+                                                            checkfilepath = directory + Constants.IMAGEDIR + File.separator + ofim.getIM();
+                                                        } else {
+                                                            checkfilepath = directory + File.separator + Constants.IMAGEDIR + File.separator + ofim.getIM();
+                                                        }
+                                                        if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
+                                                            valuesinsmsg.put(T_MESSAGES_ImageMsgValue, ofim.getIM());
+                                                            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                                            client.release();
+
+                                                            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                                                            Uri contentUri = Uri.fromFile(new File(checkfilepath));
+                                                            mediaScanIntent.setData(contentUri);
+                                                            sendBroadcast(mediaScanIntent);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            String checkfilepath;
+                                            if (directory.endsWith(File.separator)) {
+                                                checkfilepath = directory + Constants.IMAGEDIR + File.separator + outmeta.getIM();
+                                            } else {
+                                                checkfilepath = directory + File.separator + Constants.IMAGEDIR + File.separator + outmeta.getIM();
+                                            }
+                                            if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
+                                                valuesinsmsg.put(T_MESSAGES_ImageMsgValue, outmeta.getIM());
+                                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                                client.release();
+                                            }
+                                        }
+                                    }
+                                }
+                            } else if (m.getMT().equalsIgnoreCase(TYP_CONTACT)) {
+                                valuesinsmsg.put(T_MESSAGES_ContactMsgID, m.getCMID());
+                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                client.release();
+//                OutFetchContactMessage ofcm = checkAndDownloadImageMessage(m.getImageMsgID());
+//                if (ofcm.getET() == null || ofcm.getET().isEmpty()) {
+//                    valuesinsmsg.put(Constants.T_MESSAGES_ContactMsgValue, ofcm.getImageMessage());
+//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+//                }
+                            } else if (m.getMT().equalsIgnoreCase(TYP_FILE)) {
+                                valuesinsmsg.put(T_MESSAGES_FileMsgID, m.getFMID());
+                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                client.release();
+//                OutFetchFileMessage offm = checkAndDownloadImageMessage(m.getImageMsgID());
+//                if (offm.getET() == null || offm.getET().isEmpty()) {
+//                    valuesinsmsg.put(Constants.T_MESSAGES_ContactMsgValue, offm.getImageMessage());
+//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+//                }
+                            } else if (m.getMT().equalsIgnoreCase(TYP_LOCATION)) {
+                                valuesinsmsg.put(T_MESSAGES_LocationMsgID, m.getLMID());
+                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                client.release();
+//                OutFetchLocationMessage oflm = checkAndDownloadImageMessage(m.getImageMsgID());
+//                if (oflm.getET() == null || oflm.getET().isEmpty()) {
+//                    valuesinsmsg.put(Constants.T_MESSAGES_ContactMsgValue, oflm.getImageMessage());
+//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
+//                }
+                            } else if (m.getMT().equalsIgnoreCase(TYP_VIDEO)) {
+                                valuesinsmsg.put(T_MESSAGES_VideoMsgID, m.getVMID());
+                                OGViMMD outmeta = rf.getVideoMessageMetaData(username, password, m.getVMID());
+
+                                if (outmeta != null) {
+                                    if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
+                                        if (!checkfileexists(outmeta.getVM(), TYP_VIDEO, outmeta.getVS(), outmeta.getVMD5())) {
+                                            if (isWifi) {
+                                                OGViM ofvm = rf.fetchVideoMessage(username, password, m.getVMID());
+                                                if (ofvm != null) {
+                                                    if (ofvm.getET() == null || ofvm.getET().isEmpty()) {
+                                                        String checkfilepath;
+
+                                                        if (directory.endsWith(File.separator)) {
+                                                            checkfilepath = directory + Constants.VIDEODIR + File.separator + ofvm.getVM();
+                                                        } else {
+                                                            checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + ofvm.getVM();
+                                                        }
+                                                        if (acknowledgeMessage(Constants.TYP_VIDEO, checkfilepath, m.getMID())) {
+                                                            valuesinsmsg.put(T_MESSAGES_VideoMsgValue, ofvm.getVM());
+                                                            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                                            client.release();
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            String checkfilepath;
+
+                                            if (directory.endsWith(File.separator)) {
+                                                checkfilepath = directory + Constants.VIDEODIR + File.separator + outmeta.getVM();
+                                            } else {
+                                                checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + outmeta.getVM();
+                                            }
+                                            if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
+                                                valuesinsmsg.put(T_MESSAGES_VideoMsgValue, outmeta.getVM());
+                                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
+                                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                                client.release();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "end handleActionRefresh");
     }
 
     private void handleActionDeleteChat(int ChatID, boolean inDelSvr, boolean inDelContent) {

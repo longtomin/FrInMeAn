@@ -20,7 +20,6 @@
     <string name="ERROR_USER_NOT_ACTIVE">User not active!</string>
     <string name="ERROR_WRONG_PASSWORD">Incorrect password!</string>
     <string name="SelectOwnImage">Choose own image</string>
-    <string name="action_createchat">Create chat</string>
     <string name="action_searchuser">Search user</string>
     <string name="action_sendcamera">Send camera foto</string>
     <string name="action_sendcontact">Sned contact</string>
@@ -78,4 +77,6 @@
     <string name="username">Username</string>
     <string name="pref_title_HTTP_communication">Security</string>
     <string name="pref_title_content_communication">Content with WIFI</string>
+    <string name="option_createchat">Create Chat</string>
+    <string name="option_refresh">Refresh</string>
 </resources>

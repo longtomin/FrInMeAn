@@ -20,7 +20,6 @@
     <string name="ERROR_USER_NOT_ACTIVE">User ist nicht aktiv!</string>
     <string name="ERROR_WRONG_PASSWORD">Passwort nicht korrekt!</string>
     <string name="SelectOwnImage">Eigenes Bild auswählen</string>
-    <string name="action_createchat">Chat erzeugen</string>
     <string name="action_searchuser">Benutzer suchen</string>
     <string name="action_sendcamera">Kamerabild senden</string>
     <string name="action_sendcontact">Kontakt senden</string>
@@ -79,4 +78,6 @@
     <string name="pref_title_password">Passwort</string>
     <string name="pref_title_HTTP_communication">Sicherheit</string>
     <string name="pref_title_content_communication">Bilder/Video im WLAN</string>
+    <string name="option_createchat">Chat erzeugen</string>
+    <string name="option_refresh">Neu Laden</string>
 </resources>

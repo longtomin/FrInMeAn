@@ -45,8 +45,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TimePicker;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import de.radiohacks.frinmean.adapters.ChatAdapter;
 import de.radiohacks.frinmean.adapters.SyncUtils;
@@ -57,10 +62,10 @@ import de.radiohacks.frinmean.service.MeBaService;
 
 public class ChatFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String TAG = ChatFragment.class.getSimpleName();
     private static final int CHAT_LOADER_FULL_ID = 2000;
     private static final int CHAT_LOADER_FORWARD_ID = 3000;
     private ChatAdapter mAdapter;
-    private int syncFreq;
     private int userid;
     private String chatname;
     private String mode;
@@ -68,11 +73,6 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
     private long MessageID;
     private String MessageType;
     private String MessageContent;
-
-    /**
-     * Options menu used to populate ActionBar.
-     */
-    private Menu mOptionsMenu;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,7 +84,7 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
         if (mode.equalsIgnoreCase(Constants.CHAT_ACTIVITY_FULL)) {
             setHasOptionsMenu(true);
-            syncFreq = extras.getInt(Constants.PrefSyncfrequency, -1);
+            int syncFreq = extras.getInt(Constants.PrefSyncfrequency, -1);
             if (syncFreq != -1) {
                 SyncUtils.StartSyncFreq(syncFreq);
             }
@@ -192,7 +192,10 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
         super.onCreateOptionsMenu(menu, inflater);
 
         if (mode.equalsIgnoreCase(Constants.CHAT_ACTIVITY_FULL)) {
-            mOptionsMenu = menu;
+            /*
+      Options menu used to populate ActionBar.
+     */
+            Menu mOptionsMenu = menu;
             inflater.inflate(R.menu.chat, menu);
         }
     }
@@ -204,7 +207,10 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
         // as you specify a parent activity in AndroidManifest.xml.
 
         switch (item.getItemId()) {
-            case R.id.action_createchat:
+            case R.id.action_show_refresh:
+                openRefresh();
+                return true;
+            case R.id.option_createchat:
                 openCreateChat();
                 return true;
             case R.id.action_settings:
@@ -219,14 +225,14 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
     private void openCreateChat() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
 
-        alertDialogBuilder.setTitle(R.string.action_createchat);
+        alertDialogBuilder.setTitle(R.string.option_createchat);
         alertDialogBuilder.setMessage(R.string.chatname);
 
         final EditText input = new EditText(getActivity());
         alertDialogBuilder.setView(input);
 
 
-        alertDialogBuilder.setPositiveButton(R.string.action_createchat
+        alertDialogBuilder.setPositiveButton(R.string.option_createchat
                 , new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
 
@@ -246,6 +252,36 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
         AlertDialog alertDialog = alertDialogBuilder.create();
         // show alert
+        alertDialog.show();
+    }
+
+    private void openRefresh() {
+        final View dialogView = View.inflate(getActivity(), R.layout.date_time_picker, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+
+        dialogView.findViewById(R.id.date_time_set).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                DatePicker datePicker = (DatePicker) dialogView.findViewById(R.id.date_picker);
+                TimePicker timePicker = (TimePicker) dialogView.findViewById(R.id.time_picker);
+
+                Calendar calendar = new GregorianCalendar(datePicker.getYear(),
+                        datePicker.getMonth(),
+                        datePicker.getDayOfMonth(),
+                        timePicker.getCurrentHour(),
+                        timePicker.getCurrentMinute());
+
+                long time = calendar.getTimeInMillis() / 1000;
+                Intent iRefresh = new Intent(getActivity(), MeBaService.class);
+                iRefresh.setAction(Constants.ACTION_REFRESH);
+                iRefresh.putExtra(Constants.TIMESTAMP, time);
+                getActivity().startService(iRefresh);
+
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.setView(dialogView);
         alertDialog.show();
     }
 }

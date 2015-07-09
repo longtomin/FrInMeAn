@@ -208,11 +208,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         networtConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
 
-        if (contentall) {
-            isWifi = true;
-        } else {
-            isWifi = activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
-        }
+        isWifi = contentall || activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
     }
 
     /**
@@ -429,7 +425,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                         } else {
                                             checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + ofvm.getVM();
                                         }
-                                        if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
+                                        if (acknowledgeMessage(Constants.TYP_VIDEO, checkfilepath, m.getMID())) {
                                             valuesins.put(T_MESSAGES_VideoMsgValue, ofvm.getVM());
                                             ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
                                             ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
@@ -478,10 +474,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             long[] vibpattern = {500, 100, 500};
             // Build notification
-            // Actions are just fake
             Notification.Builder nb = new Notification.Builder(this.getContext());
-            nb.setContentTitle("FrInMeAn");
-            nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat " + ChatName).setSmallIcon(R.drawable.ic_stat_frinmean);
+            nb.setContentTitle(ChatName);
+            nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat").setSmallIcon(R.drawable.ic_stat_frinmean);
             nb.setSound(Uri.parse(ringtone));
             nb.setContentIntent(pIntent);
 

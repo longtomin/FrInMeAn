@@ -27,7 +27,8 @@
   ~ either expressed or implied, of the FreeBSD Project.
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
@@ -48,7 +49,7 @@
     </FrameLayout>
 
 
-    <LinearLayout
+    <LinearLayout xmlns:emojicon="http://schemas.android.com/apk/res-auto"
         android:id="@+id/footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,7 +57,8 @@
         android:background="@color/background_material_light"
         android:orientation="horizontal">
 
-        <EditText
+
+        <com.rockerhieu.emojicon.EmojiconEditText
             android:id="@+id/chatText"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -69,9 +71,33 @@
             android:layout_weight=".80"
             android:inputType="textMultiLine"
             android:textColor="#000"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:text="I \ue32d emojicon"
+            emojicon:emojiconSize="28sp" />
 
-        <Button
+        <fragment
+            android:id="@+id/emojicons"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            class="com.rockerhieu.emojicon.EmojiconsFragment"
+            tools:layout="@layout/emojicons" /> -->
+
+<!--        <EditText
+            android:id="@+id/chatText"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/chatText"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_margin="5dp"
+            android:layout_toLeftOf="@+id/buttonSend"
+            android:layout_weight=".80"
+            android:inputType="textMultiLine"
+            android:textColor="#000"
+            android:textSize="20sp" /> -->
+
+<!--        <Button
             android:id="@+id/buttonSend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -81,4 +107,52 @@
             android:layout_weight=".20"
             android:drawableBottom="@drawable/ic_action_send_now" />
     </LinearLayout>
+</RelativeLayout> -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/emoji_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:padding="4dp"
+        android:src="@drawable/smiley" />
+
+    <Button
+        android:id="@+id/buttonSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:padding="4dp"
+        android:src="@drawable/ic_action_send_now" />
+
+    <de.radiohacks.frinmean.emojicon.EmojiconEditText
+        android:id="@+id/chatText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@id/buttonSend"
+        android:layout_toRightOf="@id/emoji_btn"
+        android:inputType="textMultiLine"
+        android:textColor="#000"
+        android:textSize="20sp"
+        emojicon:emojiconSize="28sp" />
+
+    <ListView
+        android:id="@+id/singlechatlist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/chatText"
+        android:fadingEdge="vertical"
+        android:fadingEdgeLength="10dp"
+        android:longClickable="true"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll" />
 </RelativeLayout>

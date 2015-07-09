@@ -46,7 +46,6 @@ import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
  * Static helper methods for working with the sync framework.
  */
 public class SyncUtils {
-    private static Account mAccount;
 
     /**
      * Create an entry for this application in the system account list, if it isn't already there.
@@ -60,7 +59,7 @@ public class SyncUtils {
                 .getDefaultSharedPreferences(context).getBoolean(Constants.PREF_SETUP_COMPLETE, false);
 
         // Create account, if it's missing. (Either first run, or user has deleted account.)
-        mAccount = GenericAccountService.GetAccount(Constants.ACCOUNT_TYPE);
+        Account mAccount = GenericAccountService.GetAccount(Constants.ACCOUNT_TYPE);
         AccountManager accountManager =
                 (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
         if (accountManager.addAccountExplicitly(mAccount, null, null)) {

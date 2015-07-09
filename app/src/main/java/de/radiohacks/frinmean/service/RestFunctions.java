@@ -11,7 +11,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
-import org.apache.http.HttpStatus;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
@@ -19,6 +18,9 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.FileNameMap;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 
 import de.radiohacks.frinmean.Constants;
@@ -137,9 +139,14 @@ public class RestFunctions {
             try {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
 
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -170,9 +177,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPemail, convertB64(inemail));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -203,9 +214,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatname, convertB64(inchatname));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -236,9 +251,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteDeleteQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("DELETE");
+                } else {
+                    ret = rc.ExecuteHTTPXML("DELETE");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -271,9 +290,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
                 rc.AddParam(Constants.QPuserid, Integer.toString(inuserid));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -306,9 +329,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
                 rc.AddParam(Constants.QPuserid, Integer.toString(inuserid));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteDeleteQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("DELETE");
+                } else {
+                    ret = rc.ExecuteHTTPXML("DELETE");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -340,9 +367,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPmessageid, Integer.toString(inmessageid));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteDeleteQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("DELETE");
+                } else {
+                    ret = rc.ExecuteHTTPXML("DELETE");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -374,9 +405,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPsearch, convertB64(insearch));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -405,9 +440,13 @@ public class RestFunctions {
             try {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -444,9 +483,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPtextmessage, convertB64(intextmsg));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -477,9 +520,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPtextmessageid, Integer.toString(intextmsgid));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -514,9 +561,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
                 rc.AddParam(Constants.QPmessageid, Integer.toString(inmsgid));
                 rc.AddParam(Constants.QPmessagetype, convertB64(inmsgtype));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -547,9 +598,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(inmsgid));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteDeleteQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -582,9 +637,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
                 rc.AddParam(Constants.QPtimestamp, String.valueOf(intimestamp));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -613,9 +672,13 @@ public class RestFunctions {
             try {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -648,15 +711,26 @@ public class RestFunctions {
             try {
                 HashCode md5 = Files.hash(new File(Message),
                         Hashing.md5());
-                rc.AddHeader("enctype", "multipart/form-data");
+                String boundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
+                rc.setBoundary(boundary);
+
+                FileNameMap fileNameMap = URLConnection.getFileNameMap();
+                String mime = fileNameMap.getContentTypeFor("file://" + Message);
+                String[] q = Message.split("/");
+                int idx = q.length - 1;
+
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPacknowledge, convertB64(md5.toString()));
-                rc.setFilename(Message);
 
-                String ret = rc.ExecuteRequestUploadXML(rc.BevorExecutePost());
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSPostXMLMultipart("FileName=" + q[idx], Message, "file", mime);
+                } else {
+                    ret = rc.ExecuteHTTPPostXMLMultipart("FileName=" + q[idx], Message, "file", mime);
+                }
 
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -693,9 +767,13 @@ public class RestFunctions {
                 rc.AddParam("username", convertB64(inuser));
                 rc.AddParam("password", convertB64(inpassword));
                 rc.AddParam("imageid", URLEncoder.encode(imgid.toString(), "UTF-8"));
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -722,14 +800,31 @@ public class RestFunctions {
 
         if (checkServer()) {
 
-            RestClient rc;
-            rc = new RestClient(CommunicationURL + "image/download", https, port);
-
-            rc.AddHeader("Accept", "image/jpeg");
-            rc.setSaveDirectory(directory + File.separator + Constants.IMAGEDIR + File.separator);
-
+            byte[] datauser;
             try {
-                String savedFilename = rc.ExecuteRequestImage(rc.BevorExecuteGetPath(inuser, inpassword, ImgMsgID));
+                datauser = inuser.getBytes("UTF-8");
+
+                String b64uid = Base64.encodeToString(datauser, Base64.NO_WRAP);
+                datauser = inpassword.getBytes("UTF-8");
+                String b64pw = Base64.encodeToString(datauser, Base64.NO_WRAP);
+                String combinedParams = "";
+                if (CommunicationURL.endsWith("/")) {
+                    combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(ImgMsgID), "UTF-8");
+                } else {
+                    combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(ImgMsgID), "UTF-8");
+                }
+
+                RestClient rc;
+                rc = new RestClient(CommunicationURL + "image/download/" + combinedParams, https, port);
+
+                rc.AddHeader("Accept", "image/jpeg");
+                rc.setSaveDirectory(directory + File.separator + Constants.IMAGEDIR + File.separator);
+                String savedFilename = null;
+                if (https) {
+                    savedFilename = rc.ExecuteHTTPSContent("GET");
+                } else {
+                    savedFilename = rc.ExecuteHTTPContent("GET");
+                }
 
                 if (savedFilename != null && !savedFilename.isEmpty()) {
                     out.setIM(savedFilename);
@@ -757,23 +852,35 @@ public class RestFunctions {
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
 
     public OSViM sendVideoMessage(String inuser, String inpassword, String Message) {
-        Log.d(TAG, "start sendImageMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
+        Log.d(TAG, "start sendVideoMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
         OSViM out = null;
         if (checkServer()) {
             RestClient rc;
             rc = new RestClient(CommunicationURL + "video/upload", https, port);
+
             try {
                 HashCode md5 = Files.hash(new File(Message),
                         Hashing.md5());
-                rc.AddHeader("enctype", "multipart/form-data");
+                String boundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
+                rc.setBoundary(boundary);
+
+                FileNameMap fileNameMap = URLConnection.getFileNameMap();
+                String mime = fileNameMap.getContentTypeFor("file://" + Message);
+                String[] q = Message.split("/");
+                int idx = q.length - 1;
+
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPacknowledge, convertB64(md5.toString()));
-                rc.setFilename(Message);
 
-                String ret = rc.ExecuteRequestUploadXML(rc.BevorExecutePost());
+                String ret = "";
+                if (https) {
+                    ret = rc.ExecuteHTTPSPostXMLMultipart("FileName=" + q[idx], Message, "file", mime);
+                } else {
+                    ret = rc.ExecuteHTTPPostXMLMultipart("FileName=" + q[idx], Message, "file", mime);
+                }
 
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -810,9 +917,13 @@ public class RestFunctions {
                 rc.AddParam("username", convertB64(inuser));
                 rc.AddParam("password", convertB64(inpassword));
                 rc.AddParam("videoid", URLEncoder.encode(vidid.toString(), "UTF-8"));
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -838,15 +949,32 @@ public class RestFunctions {
         OGViM out = new OGViM();
 
         if (checkServer()) {
+            byte[] datauser;
+            try {
+                datauser = inuser.getBytes("UTF-8");
+
+                String b64uid = Base64.encodeToString(datauser, Base64.NO_WRAP);
+                datauser = inpassword.getBytes("UTF-8");
+                String b64pw = Base64.encodeToString(datauser, Base64.NO_WRAP);
+                String combinedParams = "";
+                if (CommunicationURL.endsWith("/")) {
+                    combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), "UTF-8");
+                } else {
+                    combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), "UTF-8");
+                }
 
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "video/download", https, port);
+                rc = new RestClient(CommunicationURL + "video/download/" + combinedParams, https, port);
 
             rc.AddHeader("Accept", "video/mp4");
             rc.setSaveDirectory(directory + File.separator + Constants.VIDEODIR + File.separator);
 
-            try {
-                String savedFilename = rc.ExecuteRequestImage(rc.BevorExecuteGetPath(inuser, inpassword, VidMsgID));
+                String savedFilename = null;
+                if (https) {
+                    savedFilename = rc.ExecuteHTTPSContent("GET");
+                } else {
+                    savedFilename = rc.ExecuteHTTPContent("GET");
+                }
 
                 if (savedFilename != null && !savedFilename.isEmpty()) {
                     out.setVM(savedFilename);
@@ -864,7 +992,6 @@ public class RestFunctions {
         Log.d(TAG, "end fetchVideoMessage");
         return out;
     }
-
 
     /* @GET
     @Produces(MediaType.APPLICATION_XML)
@@ -884,9 +1011,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPmessageid, Integer.toString(msgid));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -918,9 +1049,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPusername, convertB64(inuser));
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPmessageid, Integer.toString(msgid));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -954,9 +1089,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPmessageid, Integer.toString(msgid));
                 rc.AddParam(Constants.QPacknowledge, convertB64(inacknowledge));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
@@ -990,9 +1129,13 @@ public class RestFunctions {
                 rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(chatid));
                 rc.AddParam(Constants.QPacknowledge, convertB64(inacknowledge));
-
-                String ret = rc.ExecuteRequestXML(rc.BevorExecuteGetQuery());
-                if (rc.getResponseCode() == HttpStatus.SC_OK) {
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 

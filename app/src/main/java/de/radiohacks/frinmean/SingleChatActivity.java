@@ -49,15 +49,20 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.Toast;
 
 import org.simpleframework.xml.Serializer;
@@ -69,6 +74,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.radiohacks.frinmean.adapters.SingleChatAdapter;
+import de.radiohacks.frinmean.emojicon.Emojicon;
+import de.radiohacks.frinmean.emojicon.EmojiconEditText;
+import de.radiohacks.frinmean.emojicon.EmojiconGridView;
+import de.radiohacks.frinmean.emojicon.EmojiconsPopup;
 import de.radiohacks.frinmean.modelshort.OAdUC;
 import de.radiohacks.frinmean.modelshort.ODeCh;
 import de.radiohacks.frinmean.modelshort.OFMFC;
@@ -78,7 +87,6 @@ import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.ErrorHelper;
 import de.radiohacks.frinmean.service.MeBaService;
-
 
 public class SingleChatActivity extends ActionBarActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -91,13 +99,11 @@ public class SingleChatActivity extends ActionBarActivity implements
 
     private SingleChatReceiver mSingleChatReceiver = new SingleChatReceiver();
     private SingleChatAdapter mAdapter;
-    private String username;
     private String directory;
     private int userid;
     private int ChatID;
-    private String ChatName;
     private int OwningUserID;
-    private EditText Message;
+    private EmojiconEditText Message;
 
     public static String getDataColumn(Context context, Uri uri, String selection,
                                        String[] selectionArgs) {
@@ -128,7 +134,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         Intent i = getIntent();
         ChatID = i.getIntExtra(Constants.CHATID, 0);
-        ChatName = i.getStringExtra(Constants.CHATNAME);
+        String chatName = i.getStringExtra(Constants.CHATNAME);
         OwningUserID = i.getIntExtra(Constants.OWNINGUSERID, -1);
         userid = i.getIntExtra(Constants.USERID, -1);
 
@@ -147,7 +153,7 @@ public class SingleChatActivity extends ActionBarActivity implements
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        actionBar.setTitle(ChatName);
+        actionBar.setTitle(chatName);
 
         actionBar.setDisplayShowCustomEnabled(true);
 
@@ -156,96 +162,6 @@ public class SingleChatActivity extends ActionBarActivity implements
 
 
         ListView lv = (ListView) findViewById(R.id.singlechatlist);
-
- /*       lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
-                final long viewid = id;
-
-                final AlertDialog.Builder builder = new AlertDialog.Builder(SingleChatActivity.this);
-                builder.setTitle(R.string.message_option);
-                builder.setItems(R.array.message_options, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // The 'which' argument contains the index position
-                        // of the selected item
-                        switch (which) {
-                            case 0:
-                                // Löschen
-                                final CharSequence[] items = {SingleChatActivity.this.getText(R.string.delete_on_server), SingleChatActivity.this.getText(R.string.delete_local_content)};
-                                // arraylist to keep the selected items
-                                final ArrayList seletedItems = new ArrayList();
-
-                                AlertDialog.Builder delbuilder = new AlertDialog.Builder(SingleChatActivity.this);
-                                delbuilder.setTitle(SingleChatActivity.this.getText(R.string.delete_options));
-                                delbuilder.setMultiChoiceItems(items, null,
-                                        new DialogInterface.OnMultiChoiceClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int indexSelected,
-                                                                boolean isChecked) {
-                                                if (isChecked) {
-                                                    // If the user checked the item, add it to the selected items
-                                                    seletedItems.add(indexSelected);
-                                                } else if (seletedItems.contains(indexSelected)) {
-                                                    // Else, if the item is already in the array, remove it
-                                                    seletedItems.remove(Integer.valueOf(indexSelected));
-                                                }
-                                            }
-                                        })
-                                        // Set the action buttons
-                                        .setPositiveButton(SingleChatActivity.this.getText(R.string.delete), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                Intent delintent = new Intent(SingleChatActivity.this, MeBaService.class);
-
-                                                boolean delserver = false;
-                                                boolean delcontent = false;
-                                                for (int j = 0; j < seletedItems.size(); j++) {
-                                                    CharSequence option = items[j];
-                                                    String stmpoption = option.toString();
-                                                    if (stmpoption.equalsIgnoreCase(SingleChatActivity.this.getText(R.string.delete_on_server).toString())) {
-                                                        delserver = true;
-                                                    }
-                                                    if (stmpoption.equalsIgnoreCase(SingleChatActivity.this.getText(R.string.delete_local_content).toString())) {
-                                                        delcontent = true;
-                                                    }
-                                                }
-                                                delintent.setAction(Constants.ACTION_DELETEMESSAGEFROMCHAT);
-                                                delintent.putExtra(Constants.DELETEONSERVER, delserver);
-                                                delintent.putExtra(Constants.DELETELOCALCONTENT, delcontent);
-                                                delintent.putExtra(Constants.MESSAGEID, viewid);
-                                                SingleChatActivity.this.startService(delintent);
-                                            }
-                                        })
-                                        .setNegativeButton(SingleChatActivity.this.getText(R.string.cancel), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                //  Your code when user clicked on Cancel
-
-                                            }
-                                        });
-                                AlertDialog deldlg = delbuilder.create();
-                                deldlg.show();
-                                break;
-                            case 1:
-                                // Weiterleiten
-
-                                Intent startchat = new Intent(SingleChatActivity.this, ChatActivity.class);
-                                startchat.putExtra(Constants.USERID, userid);
-                                startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FORWARD);
-                                startchat.putExtra(Constants.SENDCHATID, ChatID);
-                                startchat.putExtra(Constants.SENDMSGID, viewid);
-
-                                startActivity(startchat);
-                                break;
-                        }
-                    }
-                });
-                AlertDialog dlg = builder.create();
-                dlg.show();
-
-                return false;
-            }
-        });*/
 
         lv.setAdapter(mAdapter);
 
@@ -268,7 +184,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                 mSingleChatReceiver,
                 statusIntentFilter);
 
-        Message = (EditText) findViewById(R.id.chatText);
+        Message = (EmojiconEditText) findViewById(R.id.chatText);
         Button send = (Button) findViewById(R.id.buttonSend);
         send.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
@@ -298,15 +214,112 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         startService(iSetShowTime);
 
-        /* Fuer Testzwecke um den Chat komplett neu zu laden */
-        /* Intent picintent = new Intent(this, MeBaService.class);
-        picintent.putExtra(Constants.CHATNAME, ChatName);
-        picintent.putExtra(Constants.CHATID, ChatID);
 
-        picintent.setAction(Constants.ACTION_FULLSYNC);
-        startService(picintent); */
+        final View rootView = findViewById(R.id.root_view);
+        final ImageView emojiButton = (ImageView) findViewById(R.id.emoji_btn);
+
+        // Give the topmost view of your activity layout hierarchy. This will be used to measure soft keyboard height
+        final EmojiconsPopup popup = new EmojiconsPopup(rootView, this);
+
+        //Will automatically set size according to the soft keyboard size
+        popup.setSizeForSoftKeyboard();
+
+        //If the emoji popup is dismissed, change emojiButton to smiley icon
+        popup.setOnDismissListener(new OnDismissListener() {
+
+            @Override
+            public void onDismiss() {
+                changeEmojiKeyboardIcon(emojiButton, R.drawable.smiley);
+            }
+        });
+
+        //If the text keyboard closes, also dismiss the emoji popup
+        popup.setOnSoftKeyboardOpenCloseListener(new EmojiconsPopup.OnSoftKeyboardOpenCloseListener() {
+
+            @Override
+            public void onKeyboardOpen(int keyBoardHeight) {
+
+            }
+
+            @Override
+            public void onKeyboardClose() {
+                if (popup.isShowing())
+                    popup.dismiss();
+            }
+        });
+
+        //On emoji clicked, add it to edittext
+        popup.setOnEmojiconClickedListener(new EmojiconGridView.OnEmojiconClickedListener() {
+
+            @Override
+            public void onEmojiconClicked(Emojicon emojicon) {
+                if (Message == null || emojicon == null) {
+                    return;
+                }
+
+                int start = Message.getSelectionStart();
+                int end = Message.getSelectionEnd();
+                if (start < 0) {
+                    Message.append(emojicon.getEmoji());
+                } else {
+                    Message.getText().replace(Math.min(start, end),
+                            Math.max(start, end), emojicon.getEmoji(), 0,
+                            emojicon.getEmoji().length());
+                }
+            }
+        });
+
+        //On backspace clicked, emulate the KEYCODE_DEL key event
+        popup.setOnEmojiconBackspaceClickedListener(new EmojiconsPopup.OnEmojiconBackspaceClickedListener() {
+
+            @Override
+            public void onEmojiconBackspaceClicked(View v) {
+                KeyEvent event = new KeyEvent(
+                        0, 0, 0, KeyEvent.KEYCODE_DEL, 0, 0, 0, 0, KeyEvent.KEYCODE_ENDCALL);
+                Message.dispatchKeyEvent(event);
+            }
+        });
+
+        // To toggle between text keyboard and emoji keyboard keyboard(Popup)
+        emojiButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                //If popup is not showing => emoji keyboard is not visible, we need to show it
+                if (!popup.isShowing()) {
+
+                    //If keyboard is visible, simply show the emoji popup
+                    if (popup.isKeyBoardOpen()) {
+                        popup.showAtBottom();
+                        changeEmojiKeyboardIcon(emojiButton, R.drawable.ic_action_keyboard);
+                    }
+
+                    //else, open the text keyboard first and immediately after that show the emoji popup
+                    else {
+                        Message.setFocusableInTouchMode(true);
+                        Message.requestFocus();
+                        popup.showAtBottomPending();
+                        final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputMethodManager.showSoftInput(Message, InputMethodManager.SHOW_IMPLICIT);
+                        changeEmojiKeyboardIcon(emojiButton, R.drawable.ic_action_keyboard);
+                    }
+                }
+
+                //If popup is showing, simply dismiss it to show the undelying text keyboard
+                else {
+                    popup.dismiss();
+                }
+            }
+        });
+
+
 
         Log.d(TAG, "end onCreate");
+    }
+
+    private void changeEmojiKeyboardIcon(ImageView iconToBeChanged, int drawableResourceId) {
+        iconToBeChanged.setImageResource(drawableResourceId);
     }
 
     @Override
@@ -340,7 +353,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                 .getDefaultSharedPreferences(this);
 
         //server = sharedPrefs.getString("prefServername", "NULL");
-        username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
+        String username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         //password = sharedPrefs.getString("prefPassword", "NULL");
         // userid = sharedPrefs.getInt("prefUserID", 0);
         directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");

@@ -56,6 +56,7 @@ public class Constants {
     public static final String ACTION_CHECKNEWMESSAGES = "checknewmessages";
     public static final String ACTION_SETSHOWTIMESTAMP = "setshowtimestamp";
     public static final String ACTION_GETMESSAGEINFORMATION = "getmessageinformation";
+    public static final String ACTION_REFRESH = "refresh";
 
     /*
     App own action without correspondance in the backend
@@ -226,6 +227,8 @@ public class Constants {
             + android.os.Build.VERSION.RELEASE + ";"
             + Locale.getDefault().toString() + "; " + android.os.Build.DEVICE
             + "/" + android.os.Build.ID + ")";
+
+    public static final String CHARSET = "UTF-8";
 
     public static final String DATABASE_NAME = "Frinme.db";
     public static final String MESSAGES_TABLE_NAME = "frinme_messages";
