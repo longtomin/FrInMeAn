@@ -196,7 +196,7 @@ public class SignUpActivity extends Activity {
         MessageDigest digest = null;
         try {
             digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(in.getBytes("UTF-8"));
+            byte[] hash = digest.digest(in.getBytes(Constants.CHARSET));
 
             for (int i = 0; i < hash.length; i++) {
 

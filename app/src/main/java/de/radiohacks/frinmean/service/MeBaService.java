@@ -918,6 +918,7 @@ public class MeBaService extends IntentService {
         ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
         client.getLocalContentProvider().insert(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
         client.release();
+        SyncUtils.TriggerRefresh();
 
         Log.d(TAG, "end insertMsgIntoDB");
     }
@@ -964,6 +965,7 @@ public class MeBaService extends IntentService {
         ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
         client.getLocalContentProvider().insert(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
         client.release();
+        SyncUtils.TriggerRefresh();
 
         Log.d(TAG, "end insertFwdMsgIntoDB");
     }

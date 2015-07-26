@@ -120,7 +120,7 @@ public class RestFunctions {
     }
 
     private String convertB64(String in) throws UnsupportedEncodingException {
-        byte[] datauser = in.getBytes("UTF-8");
+        byte[] datauser = in.getBytes(Constants.CHARSET);
         return Base64.encodeToString(datauser, Base64.NO_WRAP);
     }
 
@@ -802,16 +802,16 @@ public class RestFunctions {
 
             byte[] datauser;
             try {
-                datauser = inuser.getBytes("UTF-8");
+                datauser = inuser.getBytes(Constants.CHARSET);
 
                 String b64uid = Base64.encodeToString(datauser, Base64.NO_WRAP);
                 datauser = inpassword.getBytes("UTF-8");
                 String b64pw = Base64.encodeToString(datauser, Base64.NO_WRAP);
                 String combinedParams = "";
                 if (CommunicationURL.endsWith("/")) {
-                    combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(ImgMsgID), "UTF-8");
+                    combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(ImgMsgID), Constants.CHARSET);
                 } else {
-                    combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(ImgMsgID), "UTF-8");
+                    combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(ImgMsgID), Constants.CHARSET);
                 }
 
                 RestClient rc;
@@ -951,16 +951,16 @@ public class RestFunctions {
         if (checkServer()) {
             byte[] datauser;
             try {
-                datauser = inuser.getBytes("UTF-8");
+                datauser = inuser.getBytes(Constants.CHARSET);
 
                 String b64uid = Base64.encodeToString(datauser, Base64.NO_WRAP);
-                datauser = inpassword.getBytes("UTF-8");
+                datauser = inpassword.getBytes(Constants.CHARSET);
                 String b64pw = Base64.encodeToString(datauser, Base64.NO_WRAP);
                 String combinedParams = "";
                 if (CommunicationURL.endsWith("/")) {
-                    combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), "UTF-8");
+                    combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), Constants.CHARSET);
                 } else {
-                    combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), "UTF-8");
+                    combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), Constants.CHARSET);
                 }
 
             RestClient rc;

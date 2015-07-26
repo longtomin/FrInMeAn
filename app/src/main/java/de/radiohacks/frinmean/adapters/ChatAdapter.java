@@ -32,6 +32,7 @@ package de.radiohacks.frinmean.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,14 +42,17 @@ import android.widget.TextView;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.R;
+import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 
 
 public class ChatAdapter extends CursorAdapter {
 
     private static final String TAG = ChatAdapter.class.getSimpleName();
+    private Context mContext;
 
     public ChatAdapter(Context context, Cursor cursor) {
         super(context, cursor, true);
+        mContext = context;
         Log.d(TAG, "start & End ChatAdapter");
     }
 
@@ -67,5 +71,26 @@ public class ChatAdapter extends CursorAdapter {
 
         TextView text1 = (TextView) view.findViewById(R.id.owningUserName);
         text1.setText(cursor.getString(Constants.ID_CHAT_OwningUserName));
+
+        int newMsg = count(FrinmeanContentProvider.MESSAES_CONTENT_URI, null, new String[]{Constants.T_MESSAGES_ShowTimestamp + "= 0"});
+        if (newMsg > 0) {
+            TextView nMsg = (TextView) view.findViewById(R.id.numbernewmessages);
+            nMsg.setText(newMsg);
+        }
     }
+
+    public int count(Uri uri, String selection, String[] selectionArgs) {
+        Cursor cursor = mContext.getContentResolver().query(uri, new String[]{"count(*)"},
+                selection, selectionArgs, null);
+        if (cursor.getCount() == 0) {
+            cursor.close();
+            return 0;
+        } else {
+            cursor.moveToFirst();
+            int result = cursor.getInt(0);
+            cursor.close();
+            return result;
+        }
+    }
+
 }

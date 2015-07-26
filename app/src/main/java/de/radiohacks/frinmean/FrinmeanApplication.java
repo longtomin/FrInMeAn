@@ -47,7 +47,7 @@ public class FrinmeanApplication extends Application {
 
     public static InputStream loadCertAsInputStream() {
         return FrinmeanApplication.context.getResources().openRawResource(
-                R.raw.derp);
+                R.raw.frinme);
     }
 
     @Override

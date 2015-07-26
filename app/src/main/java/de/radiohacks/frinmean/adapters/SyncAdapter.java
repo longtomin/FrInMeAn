@@ -233,8 +233,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         getPreferenceInfo();
         checkNetwork();
         if (networtConnected) {
-            syncCheckNewMessages();
             uploadUnsavedMessages();
+            syncCheckNewMessages();
             syncGetMessageInformation();
         }
         Log.i(TAG, "Network synchronization complete");
