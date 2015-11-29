@@ -44,7 +44,6 @@ public class NetworkReceiver extends BroadcastReceiver {
     public static final String TAG = "NetworkReceiver";
     private int syncFreq = 0;
 
-
     public NetworkReceiver() {
     }
 
@@ -58,6 +57,7 @@ public class NetworkReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "start onReceive");
         getPreferenceInfo(context);
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -72,5 +72,6 @@ public class NetworkReceiver extends BroadcastReceiver {
             // Not connected stop waking up phone
             SyncUtils.StopSync();
         }
+        Log.d(TAG, "end onReceive");
     }
 }

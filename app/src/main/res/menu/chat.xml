@@ -28,7 +28,8 @@
   -->
 
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:yourapp="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_show_refresh"
         android:icon="@drawable/ic_action_refresh"
@@ -36,9 +37,9 @@
         android:title="@string/option_refresh" />
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="200"
-        android:showAsAction="never"
-        android:title="@string/action_settings" />
+        android:orderInCategory="700"
+        android:title="@string/action_settings"
+        yourapp:showAsAction="never" />
     <item
         android:id="@+id/option_createchat"
         android:orderInCategory="300"

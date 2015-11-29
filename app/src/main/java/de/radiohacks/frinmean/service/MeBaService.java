@@ -86,6 +86,8 @@ import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserName;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ReadTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_SendTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ShowTimestamp;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_TIME_BADBID;
+import static de.radiohacks.frinmean.Constants.T_MESSAGES_TIME_UserID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgID;
@@ -99,6 +101,7 @@ public class MeBaService extends IntentService {
     public ConnectivityManager conManager = null;
     private String username;
     private String password;
+    private int userid;
     private String directory;
     private boolean contentall;
     private boolean isWifi;
@@ -172,6 +175,7 @@ public class MeBaService extends IntentService {
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         this.contentall = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
+        this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
         Log.d(TAG, "end getPferefenceInfo");
     }
 
@@ -357,8 +361,8 @@ public class MeBaService extends IntentService {
             OLiCh outListChat = rf.listchat(username, password);
             if (outListChat != null && outListChat.getET() == null) {
                 ContentProviderClient clientChat = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
-                for (int j = 0; j < outListChat.getChat().size(); j++) {
-                    C c = outListChat.getChat().get(j);
+                for (int j = 0; j < outListChat.getC().size(); j++) {
+                    C c = outListChat.getC().get(j);
                     ContentValues valuesinschat = new ContentValues();
                     valuesinschat.put(T_CHAT_BADBID, c.getCID());
                     valuesinschat.put(T_CHAT_OwningUserID, c.getOU().getOUID());
@@ -389,8 +393,8 @@ public class MeBaService extends IntentService {
                                     if (oftm.getET() == null || oftm.getET().isEmpty()) {
                                         if (acknowledgeMessage(Constants.TYP_TEXT, oftm.getTM(), m.getMID())) {
                                             valuesinsmsg.put(T_MESSAGES_TextMsgValue, oftm.getTM());
-                                            ContentProviderClient clientmsg = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                            ((FrinmeanContentProvider) clientmsg.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                            ContentProviderClient clientmsg = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                                            ((FrinmeanContentProvider) clientmsg.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                             clientmsg.release();
                                         }
                                     }
@@ -415,8 +419,8 @@ public class MeBaService extends IntentService {
                                                         }
                                                         if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
                                                             valuesinsmsg.put(T_MESSAGES_ImageMsgValue, ofim.getIM());
-                                                            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                                            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                                                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                                             client.release();
 
                                                             Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
@@ -436,8 +440,8 @@ public class MeBaService extends IntentService {
                                             }
                                             if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
                                                 valuesinsmsg.put(T_MESSAGES_ImageMsgValue, outmeta.getIM());
-                                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                                 client.release();
                                             }
                                         }
@@ -445,8 +449,8 @@ public class MeBaService extends IntentService {
                                 }
                             } else if (m.getMT().equalsIgnoreCase(TYP_CONTACT)) {
                                 valuesinsmsg.put(T_MESSAGES_ContactMsgID, m.getCMID());
-                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                 client.release();
 //                OutFetchContactMessage ofcm = checkAndDownloadImageMessage(m.getImageMsgID());
 //                if (ofcm.getET() == null || ofcm.getET().isEmpty()) {
@@ -455,8 +459,8 @@ public class MeBaService extends IntentService {
 //                }
                             } else if (m.getMT().equalsIgnoreCase(TYP_FILE)) {
                                 valuesinsmsg.put(T_MESSAGES_FileMsgID, m.getFMID());
-                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                 client.release();
 //                OutFetchFileMessage offm = checkAndDownloadImageMessage(m.getImageMsgID());
 //                if (offm.getET() == null || offm.getET().isEmpty()) {
@@ -465,8 +469,8 @@ public class MeBaService extends IntentService {
 //                }
                             } else if (m.getMT().equalsIgnoreCase(TYP_LOCATION)) {
                                 valuesinsmsg.put(T_MESSAGES_LocationMsgID, m.getLMID());
-                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                 client.release();
 //                OutFetchLocationMessage oflm = checkAndDownloadImageMessage(m.getImageMsgID());
 //                if (oflm.getET() == null || oflm.getET().isEmpty()) {
@@ -493,8 +497,8 @@ public class MeBaService extends IntentService {
                                                         }
                                                         if (acknowledgeMessage(Constants.TYP_VIDEO, checkfilepath, m.getMID())) {
                                                             valuesinsmsg.put(T_MESSAGES_VideoMsgValue, ofvm.getVM());
-                                                            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                                            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                                                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                                             client.release();
                                                         }
                                                     }
@@ -510,14 +514,15 @@ public class MeBaService extends IntentService {
                                             }
                                             if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
                                                 valuesinsmsg.put(T_MESSAGES_VideoMsgValue, outmeta.getVM());
-                                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-                                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesinsmsg);
+                                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                                 client.release();
                                             }
                                         }
                                     }
                                 }
                             }
+                            inserIntoTimeTable(m.getMID(), userid);
                         }
                     }
                 }
@@ -527,6 +532,16 @@ public class MeBaService extends IntentService {
         }
         Log.d(TAG, "end handleActionRefresh");
     }
+
+    private void inserIntoTimeTable(int inBAID, int inUSID) {
+        ContentValues valuesins = new ContentValues();
+        valuesins.put(T_MESSAGES_TIME_BADBID, inBAID);
+        valuesins.put(T_MESSAGES_TIME_UserID, inUSID);
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
+        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
+        client.release();
+    }
+
 
     private void handleActionDeleteChat(int ChatID, boolean inDelSvr, boolean inDelContent) {
         Log.d(TAG, "start handleActionDeleteChat");
@@ -545,15 +560,15 @@ public class MeBaService extends IntentService {
             }
         }
         if (inDelContent) {
-            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-            Cursor cmsg = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ChatID + " = ?", new String[]{String.valueOf(ChatID)}, null);
+            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+            Cursor cmsg = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ChatID + " = ?", new String[]{String.valueOf(ChatID)}, null);
 
             while (cmsg.moveToNext()) {
 
                 String filename;
                 if (cmsg.getString(Constants.ID_MESSAGES_MessageType).equalsIgnoreCase(Constants.TYP_IMAGE)) {
                     try {
-                        Cursor cresueimg = client.query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ImageMsgID + " = ?", new String[]{String.valueOf(cmsg.getInt(ID_MESSAGES_ImageMsgID))}, null);
+                        Cursor cresueimg = client.query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ImageMsgID + " = ?", new String[]{String.valueOf(cmsg.getInt(ID_MESSAGES_ImageMsgID))}, null);
                         if (cresueimg.getCount() == 1) {
 
                             if (directory.endsWith(File.separator)) {
@@ -572,7 +587,7 @@ public class MeBaService extends IntentService {
                     }
                 } else if (cmsg.getString(Constants.ID_MESSAGES_MessageType).equalsIgnoreCase(Constants.TYP_VIDEO)) {
                     try {
-                        Cursor cresuevid = client.query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_VideoMsgID + " = ?", new String[]{String.valueOf(cmsg.getInt(ID_MESSAGES_VideoMsgID))}, null);
+                        Cursor cresuevid = client.query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_VideoMsgID + " = ?", new String[]{String.valueOf(cmsg.getInt(ID_MESSAGES_VideoMsgID))}, null);
                         if (cresuevid.getCount() == 1) {
                             if (directory.endsWith(File.separator)) {
                                 filename = directory + Constants.VIDEODIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_VideoMsgValue);
@@ -590,7 +605,7 @@ public class MeBaService extends IntentService {
                     }
                 }
                 int msgid = cmsg.getInt(Constants.ID_MESSAGES__id);
-                client.getLocalContentProvider().delete(FrinmeanContentProvider.MESSAES_CONTENT_URI, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(msgid)});
+                client.getLocalContentProvider().delete(FrinmeanContentProvider.MESSAGES_CONTENT_URI, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(msgid)});
             }
             cmsg.close();
 
@@ -598,7 +613,7 @@ public class MeBaService extends IntentService {
                     , CHAT_DB_Columns, T_CHAT_BADBID + " = ?", new String[]{String.valueOf(ChatID)}, null);
 
             while (cchat.moveToNext()) {
-                int chatid = cchat.getInt(Constants.ID_CHAT__id);
+                int chatid = cchat.getInt(Constants.ID_CHAT_ID);
                 client.getLocalContentProvider().delete(FrinmeanContentProvider.CHAT_CONTENT_URI, T_CHAT_ID + " = ?", new String[]{String.valueOf(chatid)});
             }
             cchat.close();
@@ -610,8 +625,8 @@ public class MeBaService extends IntentService {
     private void handleActionSetShowTimestamp(int ChatID) {
         Log.d(TAG, "start handleActionSetShowTimestamp");
 
-        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ShowTimestamp + " = ? AND " + T_MESSAGES_ChatID + " = ?", new String[]{"0", String.valueOf(ChatID)}, null);
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ShowTimestamp + " = ? AND " + T_MESSAGES_ChatID + " = ?", new String[]{"0", String.valueOf(ChatID)}, null);
 
         while (c.moveToNext()) {
             OSShT outsst = rf.setshowtimestamp(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
@@ -620,7 +635,7 @@ public class MeBaService extends IntentService {
                     ContentValues valuesins = new ContentValues();
                     valuesins.put(Constants.T_MESSAGES_BADBID, outsst.getMID());
                     valuesins.put(Constants.T_MESSAGES_ShowTimestamp, outsst.getShT());
-                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
                 }
             }
         }
@@ -633,8 +648,8 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start handleActionInsertFwdMsgIntoChat");
 
         String selectid = Constants.T_MESSAGES_ID + " = ?";
-        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, selectid, new String[]{Long.toString(ViewID)}, null);
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, selectid, new String[]{Long.toString(ViewID)}, null);
         c.moveToFirst();
         int ContentMsgID = 0;
         String ContentMessage = "";
@@ -674,14 +689,15 @@ public class MeBaService extends IntentService {
     private void handleActionDeleteMsgFromChat(long inviewid, boolean indelsvr, boolean indellocal) {
         Log.d(TAG, "start handleActionDeleteMsgFromChat");
 
-        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(inviewid)}, null);
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(inviewid)}, null);
         //c.moveToFirst();
 
         while (c.moveToNext()) {
             if (indelsvr) {
                 try {
-                    ODMFC out = rf.deleteMessageFromChat(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
+                    int x = c.getInt(Constants.ID_MESSAGES_BADBID);
+                    ODMFC out = rf.deletemessagefromchat(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
                     Serializer serializer = new Persister();
                     StringWriter OutString = new StringWriter();
 
@@ -694,7 +710,7 @@ public class MeBaService extends IntentService {
                 String filename;
                 if (c.getString(Constants.ID_MESSAGES_MessageType).equalsIgnoreCase(Constants.TYP_IMAGE)) {
                     try {
-                        Cursor cresueimg = client.query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ImageMsgID + " = ?", new String[]{String.valueOf(c.getInt(ID_MESSAGES_ImageMsgID))}, null);
+                        Cursor cresueimg = client.query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ImageMsgID + " = ?", new String[]{String.valueOf(c.getInt(ID_MESSAGES_ImageMsgID))}, null);
                         if (cresueimg.getCount() == 1) {
                             if (directory.endsWith(File.separator)) {
                                 filename = directory + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
@@ -712,7 +728,7 @@ public class MeBaService extends IntentService {
                     }
                 } else if (c.getString(Constants.ID_MESSAGES_MessageType).equalsIgnoreCase(Constants.TYP_VIDEO)) {
                     try {
-                        Cursor cresuevid = client.query(FrinmeanContentProvider.MESSAES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_VideoMsgID + " = ?", new String[]{String.valueOf(c.getInt(ID_MESSAGES_VideoMsgID))}, null);
+                        Cursor cresuevid = client.query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_VideoMsgID + " = ?", new String[]{String.valueOf(c.getInt(ID_MESSAGES_VideoMsgID))}, null);
                         if (cresuevid.getCount() == 1) {
                             if (directory.endsWith(File.separator)) {
                                 filename = directory + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
@@ -729,7 +745,7 @@ public class MeBaService extends IntentService {
                         e.printStackTrace();
                     }
                 }
-                client.getLocalContentProvider().delete(FrinmeanContentProvider.MESSAES_CONTENT_URI, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(inviewid)});
+                client.getLocalContentProvider().delete(FrinmeanContentProvider.MESSAGES_CONTENT_URI, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(inviewid)});
             }
         }
         c.close();
@@ -915,8 +931,8 @@ public class MeBaService extends IntentService {
             valuesins.put(Constants.T_MESSAGES_VideoMsgID, 0);
             valuesins.put(Constants.T_MESSAGES_VideoMsgValue, Message);
         }
-        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        client.getLocalContentProvider().insert(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+        client.getLocalContentProvider().insert(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
         client.release();
         SyncUtils.TriggerRefresh();
 
@@ -962,9 +978,11 @@ public class MeBaService extends IntentService {
             valuesins.put(Constants.T_MESSAGES_VideoMsgID, ContentMsgID);
             valuesins.put(Constants.T_MESSAGES_VideoMsgValue, ContentMessage);
         }
-        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAES_CONTENT_URI);
-        client.getLocalContentProvider().insert(FrinmeanContentProvider.MESSAES_CONTENT_URI, valuesins);
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+        client.getLocalContentProvider().insert(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
         client.release();
+
+        inserIntoTimeTable(MsgID, UserID);
         SyncUtils.TriggerRefresh();
 
         Log.d(TAG, "end insertFwdMsgIntoDB");

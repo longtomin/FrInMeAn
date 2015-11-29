@@ -19,12 +19,14 @@ import de.radiohacks.frinmean.Constants;
 public class FrinmeanContentProvider extends ContentProvider {
 
     public static final String AUTHORITY = "de.radiohacks.frinmean.providers.FrinmeanContentProvider";
-    public static final Uri MESSAES_CONTENT_URI = Uri.parse("content://" + AUTHORITY
+    public static final Uri MESSAGES_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + Constants.MESSAGES_TABLE_NAME);
     public static final Uri CHAT_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + Constants.CHAT_TABLE_NAME);
     public static final Uri USER_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + Constants.USER_TABLE_NAME);
+    public static final Uri MESSAGES_TIME_CONTENT_URI = Uri.parse("content://" + AUTHORITY
+            + "/" + Constants.MESSAGE_TIME_TABLE_NAME);
     private static final String TAG = FrinmeanContentProvider.class.getSimpleName();
     // Used for the UriMacher
     private static final int Frinmean_messages = 1000;
@@ -61,6 +63,15 @@ public class FrinmeanContentProvider extends ContentProvider {
     private static final int USER_Username = 3030;
     private static final int USER_AuthenticationTime = 3040;
     private static final int USER_Email = 3050;
+    private static final int Frinmean_messages_time = 4000;
+    private static final int MESSAGES_TIME_ID = 4010;
+    private static final int MESSAGES_TIME_BADBID = 4020;
+    private static final int MESSAGES_TIME_UserID = 4030;
+    private static final int MESSAGES_TIME_Username = 4040;
+    private static final int MESSAGES_TIME_SendTimestamp = 4050;
+    private static final int MESSAGES_TIME_ReadTimestamp = 4060;
+    private static final int MESSAGES_TIME_ShowTimestamp = 4070;
+
     private static final UriMatcher sURIMatcher = new UriMatcher(
             UriMatcher.NO_MATCH);
 
@@ -105,6 +116,17 @@ public class FrinmeanContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_Username, USER_Username);
         sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_AuthenticationTime, USER_AuthenticationTime);
         sURIMatcher.addURI(AUTHORITY, Constants.USER_TABLE_NAME + "/#/" + Constants.T_USER_Email, USER_Email);
+    }
+
+    static {
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGE_TIME_TABLE_NAME, Frinmean_messages_time);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGE_TIME_TABLE_NAME + "/#/" + Constants.T_MESSAGES_TIME_ID, MESSAGES_TIME_ID);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGE_TIME_TABLE_NAME + "/#/" + Constants.T_MESSAGES_TIME_BADBID, MESSAGES_TIME_BADBID);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGE_TIME_TABLE_NAME + "/#/" + Constants.T_MESSAGES_TIME_UserID, MESSAGES_TIME_UserID);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGE_TIME_TABLE_NAME + "/#/" + Constants.T_MESSAGES_TIME_UserName, MESSAGES_TIME_Username);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGE_TIME_TABLE_NAME + "/#/" + Constants.T_MESSAGES_TIME_SendTimestamp, MESSAGES_TIME_SendTimestamp);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGE_TIME_TABLE_NAME + "/#/" + Constants.T_MESSAGES_TIME_ReadTimestamp, MESSAGES_TIME_ReadTimestamp);
+        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGE_TIME_TABLE_NAME + "/#/" + Constants.T_MESSAGES_TIME_ShowTimestamp, MESSAGES_TIME_ShowTimestamp);
     }
 
     // database
@@ -283,8 +305,46 @@ public class FrinmeanContentProvider extends ContentProvider {
                 default:
                     throw new IllegalArgumentException("Unknown URI: " + uri);
             }
-        }
+        } else if (uriType >= 4000 && uriType <= 4060) {
+            // Check if the caller has requested a column which does not exists
+            checkColumns(projection, Constants.MESSAGE_TIME_TABLE_NAME);
 
+            queryBuilder.setTables(Constants.MESSAGE_TIME_TABLE_NAME);
+            switch (uriType) {
+                case Frinmean_messages_time:
+                    break;
+                case MESSAGES_TIME_ID:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_TIME_ID + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case MESSAGES_TIME_BADBID:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_TIME_BADBID + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case MESSAGES_TIME_UserID:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_TIME_UserID + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case MESSAGES_TIME_Username:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_TIME_UserName + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case MESSAGES_TIME_SendTimestamp:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_TIME_SendTimestamp + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case MESSAGES_TIME_ReadTimestamp:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_TIME_ReadTimestamp + "="
+                            + uri.getLastPathSegment());
+                    break;
+                case MESSAGES_TIME_ShowTimestamp:
+                    queryBuilder.appendWhere(Constants.T_MESSAGES_TIME_ShowTimestamp + "="
+                            + uri.getLastPathSegment());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown URI: " + uri);
+            }
+        }
         SQLiteDatabase db = database.getWritableDatabase();
         Cursor cursor = queryBuilder.query(db, projection, selection,
                 selectionArgs, null, null, sortOrder);
@@ -319,6 +379,10 @@ public class FrinmeanContentProvider extends ContentProvider {
                 id = sqlDB.insert(Constants.USER_TABLE_NAME, null, values);
                 ret = Uri.parse(Constants.USER_TABLE_NAME + "/" + id);
                 break;
+            case Frinmean_messages_time:
+                id = sqlDB.insert(Constants.MESSAGE_TIME_TABLE_NAME, null, values);
+                ret = Uri.parse(Constants.MESSAGE_TIME_TABLE_NAME + "/" + id);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -342,6 +406,10 @@ public class FrinmeanContentProvider extends ContentProvider {
                 break;
             case Frinmean_users:
                 rowsDeleted = sqlDB.delete(Constants.USER_TABLE_NAME, selection,
+                        selectionArgs);
+                break;
+            case Frinmean_messages_time:
+                rowsDeleted = sqlDB.delete(Constants.MESSAGE_TIME_TABLE_NAME, selection,
                         selectionArgs);
                 break;
             case MESSAGES_ID:
@@ -377,6 +445,17 @@ public class FrinmeanContentProvider extends ContentProvider {
                             selectionArgs);
                 }
                 break;
+            case MESSAGES_TIME_ID:
+                String msgtimeid = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsDeleted = sqlDB.delete(Constants.USER_TABLE_NAME,
+                            Constants.DATABASE_NAME + "." + Constants.MESSAGE_TIME_TABLE_NAME + "=" + msgtimeid, null);
+                } else {
+                    rowsDeleted = sqlDB.delete(Constants.USER_TABLE_NAME,
+                            Constants.USER_TABLE_NAME + "." + Constants.MESSAGE_TIME_TABLE_NAME + "=" + msgtimeid + " and " + selection,
+                            selectionArgs);
+                }
+                break;
 
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -403,6 +482,10 @@ public class FrinmeanContentProvider extends ContentProvider {
                 break;
             case Frinmean_users:
                 rowsUpdated = sqlDB.update(Constants.USER_TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
+            case Frinmean_messages_time:
+                rowsUpdated = sqlDB.update(Constants.MESSAGE_TIME_TABLE_NAME, values, selection,
                         selectionArgs);
                 break;
             case MESSAGES_ID:
@@ -435,6 +518,17 @@ public class FrinmeanContentProvider extends ContentProvider {
                 } else {
                     rowsUpdated = sqlDB.update(Constants.USER_TABLE_NAME, values,
                             Constants.T_USER_ID + "=" + userid + " and " + selection,
+                            selectionArgs);
+                }
+                break;
+            case MESSAGES_TIME_ID:
+                String msgtimeid = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsUpdated = sqlDB.update(Constants.MESSAGE_TIME_TABLE_NAME, values,
+                            Constants.T_USER_ID + "=" + msgtimeid, null);
+                } else {
+                    rowsUpdated = sqlDB.update(Constants.MESSAGE_TIME_TABLE_NAME, values,
+                            Constants.T_USER_ID + "=" + msgtimeid + " and " + selection,
                             selectionArgs);
                 }
                 break;
@@ -512,6 +606,26 @@ public class FrinmeanContentProvider extends ContentProvider {
                 }
                 ret = Uri.parse(Constants.USER_TABLE_NAME + "/" + id);
                 break;
+            case Frinmean_messages_time:
+                // First check if values has the BADBID (Backend-ID) and UserUD
+                if (values.containsKey(Constants.T_MESSAGES_TIME_BADBID) && values.containsKey(Constants.T_MESSAGES_TIME_UserID)) {
+                    int foundID = getMessageInformationID(values.getAsInteger(Constants.T_MESSAGES_TIME_BADBID), values.getAsInteger(Constants.T_MESSAGES_TIME_UserID));
+                    if (foundID == -1) {
+                        // Backend-ID found, make an update
+                        id = sqlDB.insert(Constants.MESSAGE_TIME_TABLE_NAME, null, values);
+                        // notifyChange = true;
+                    } else {
+                        // Backend-ID not found so insert
+                        id = sqlDB.update(Constants.MESSAGE_TIME_TABLE_NAME, values,
+                                Constants.T_MESSAGES_TIME_ID + "=" + foundID, null);
+                    }
+                } else {
+                    // No Beckend ID given, jsut insert.
+                    id = sqlDB.insert(Constants.MESSAGE_TIME_TABLE_NAME, null, values);
+                    // notifyChange = true;
+                }
+                ret = Uri.parse(Constants.MESSAGE_TIME_TABLE_NAME + "/" + id);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -536,6 +650,9 @@ public class FrinmeanContentProvider extends ContentProvider {
             } else if (tablename.equalsIgnoreCase(Constants.USER_TABLE_NAME)) {
                 availableColumns = new HashSet<>(
                         Arrays.asList(Constants.USER_DB_Columns));
+            } else if (tablename.equalsIgnoreCase(Constants.MESSAGE_TIME_TABLE_NAME)) {
+                availableColumns = new HashSet<>(
+                        Arrays.asList(Constants.MESSAGES_TIME_DB_Columns));
             }
             // Check if all columns which are requested are available
             assert availableColumns != null;
@@ -568,7 +685,26 @@ public class FrinmeanContentProvider extends ContentProvider {
                 ret = c.getInt(c.getColumnIndex(Constants.T_USER_BADBID));
             }
             c.close();
+        } else if (tablename.equalsIgnoreCase(Constants.MESSAGE_TIME_TABLE_NAME)) {
+            Cursor c = db.query(tablename, new String[]{Constants.T_MESSAGES_TIME_BADBID}, Constants.T_MESSAGES_TIME_BADBID + " =?", new String[]{Integer.toString(inid)}, null, null, null, null);
+            if (c.moveToFirst()) {
+                ret = c.getInt(c.getColumnIndex(Constants.T_MESSAGES_TIME_BADBID));
+            }
+            c.close();
         }
+        Log.d(TAG, "end getID");
+        return ret;
+    }
+
+    private int getMessageInformationID(int msgid, int userid) {
+        Log.d(TAG, "start getID");
+        int ret = -1;
+        SQLiteDatabase db = database.getReadableDatabase();
+        Cursor c = db.query(Constants.MESSAGE_TIME_TABLE_NAME, new String[]{Constants.T_MESSAGES_TIME_ID}, Constants.T_MESSAGES_TIME_BADBID + " = ? and " + Constants.T_MESSAGES_TIME_UserID + "= ?", new String[]{Integer.toString(msgid), Integer.toString(userid)}, null, null, null, null);
+        if (c.moveToFirst()) {
+            ret = c.getInt(c.getColumnIndex(Constants.T_MESSAGES_TIME_ID));
+        }
+        c.close();
         Log.d(TAG, "end getID");
         return ret;
     }

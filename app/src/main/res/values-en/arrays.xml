@@ -31,5 +31,6 @@
     <string-array name="message_options">
         <item>Delete</item>
         <item>Forward</item>
+      <item>Time-Information</item>
     </string-array>
 </resources>

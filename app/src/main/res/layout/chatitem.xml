@@ -28,7 +28,6 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/chatline"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -58,23 +57,6 @@
         android:layout_below="@id/chatName"
         android:layout_marginTop="5dp"
         android:layout_toRightOf="@+id/chatImage"
-        android:maxLines="1"
-        android:textSize="14sp" />
-
-    <TextView
-        android:id="@+id/numbernewmessages"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="false"
-        android:layout_alignParentEnd="false"
-        android:layout_alignParentLeft="false"
-        android:layout_alignParentRight="false"
-        android:layout_alignRight="@+id/chatName"
-        android:layout_alignWithParentIfMissing="false"
-        android:layout_centerVertical="true"
-        android:layout_marginBottom="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"
         android:maxLines="1"
         android:textSize="14sp" />
 

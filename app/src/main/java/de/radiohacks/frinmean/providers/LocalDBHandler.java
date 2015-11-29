@@ -68,10 +68,21 @@ public class LocalDBHandler extends SQLiteOpenHelper {
             + Constants.T_USER_Email + " VARCHAR(100), "
             + Constants.T_USER_AuthenticationTime + " INTEGER);";
 
-    private static final String INDEX_NAME = "frinme_messages_idx";
+    private static final String TABLE_MESSAGE_TIME_CREATE
+            = "CREATE TABLE " + Constants.MESSAGE_TIME_TABLE_NAME
+            + " (" + Constants.T_MESSAGES_TIME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + Constants.T_MESSAGES_TIME_BADBID + " INTEGER, "
+            + Constants.T_MESSAGES_TIME_UserID + " INTEGER, "
+            + Constants.T_MESSAGES_TIME_UserName + " VARCHAR(45), "
+            + Constants.T_MESSAGES_TIME_SendTimestamp + " LONG DEFAULT 0, "
+            + Constants.T_MESSAGES_TIME_ReadTimestamp + " LONG DEFAULT 0, "
+            + Constants.T_MESSAGES_TIME_ShowTimestamp + " LONG DEFAULT 0);";
 
-    private static final String INDEX_CREATE = "CREATE INDEX " + INDEX_NAME + " on " + Constants.MESSAGES_TABLE_NAME + " (" + Constants.T_MESSAGES_ChatID + ", " + Constants.T_MESSAGES_SendTimestamp + ");";
+    private static final String MESSAGES_INDEX_NAME = "frinme_messages_idx";
+    private static final String MESSAGES_TIME_INDEX_NAME = "frinme_messages_time_idx";
 
+    private static final String MESSAGES_INDEX_CREATE = "CREATE INDEX " + MESSAGES_INDEX_NAME + " on " + Constants.MESSAGES_TABLE_NAME + " (" + Constants.T_MESSAGES_ChatID + ", " + Constants.T_MESSAGES_SendTimestamp + ");";
+    private static final String MESSAGES_TIME_INDEX_CREATE = "CREATE INDEX " + MESSAGES_TIME_INDEX_NAME + " on " + Constants.MESSAGE_TIME_TABLE_NAME + " (" + Constants.T_MESSAGES_TIME_BADBID + ", " + Constants.T_MESSAGES_TIME_UserID + ");";
 
     public LocalDBHandler(Context context) {
         super(context, Constants.DATABASE_NAME, null, DATABASE_VERSION);
@@ -83,7 +94,9 @@ public class LocalDBHandler extends SQLiteOpenHelper {
         db.execSQL(TABLE_MESSAGES_CREATE);
         db.execSQL(TABLE_CHAT_CREATE);
         db.execSQL(TABLE_USER_CREATE);
-        db.execSQL(INDEX_CREATE);
+        db.execSQL(TABLE_MESSAGE_TIME_CREATE);
+        db.execSQL(MESSAGES_INDEX_CREATE);
+        db.execSQL(MESSAGES_TIME_INDEX_CREATE);
         Log.d(TAG, "end onCreate");
     }
 

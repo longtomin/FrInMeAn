@@ -74,9 +74,15 @@
     <string name="title_activity_sign_up">SignUp</string>
     <string name="title_activity_single_chat">Single Chat</string>
     <string name="user_added_to_chat">User added to chat.</string>
-    <string name="username">Username</string>
+    <string name="username">Username </string>
     <string name="pref_title_HTTP_communication">Security</string>
     <string name="pref_title_content_communication">Content with WIFI</string>
     <string name="option_createchat">Create Chat</string>
     <string name="option_refresh">Refresh</string>
+    <string name="timeinformation">Time-Information</string>
+    <string name="notread">Downloaded : Not downloaded yet</string>
+    <string name="notshow">Shown : Not shown yet</string>
+    <string name="read">Downloaded : </string>
+    <string name="show">Shown : </string>
+    <string name="send">Sent : </string>
 </resources>

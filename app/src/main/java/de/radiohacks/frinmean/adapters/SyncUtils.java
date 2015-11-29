@@ -37,6 +37,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.account.GenericAccountService;
@@ -47,6 +48,8 @@ import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
  */
 public class SyncUtils {
 
+    public static final String TAG = "SyncUtils";
+
     /**
      * Create an entry for this application in the system account list, if it isn't already there.
      *
@@ -54,6 +57,7 @@ public class SyncUtils {
      */
     @TargetApi(Build.VERSION_CODES.FROYO)
     public static void CreateSyncAccount(Context context) {
+        Log.d(TAG, "start CreateSyncAccount");
         boolean newAccount = false;
         boolean setupComplete = PreferenceManager
                 .getDefaultSharedPreferences(context).getBoolean(Constants.PREF_SETUP_COMPLETE, false);
@@ -82,14 +86,20 @@ public class SyncUtils {
                     .putBoolean(Constants.PREF_SETUP_COMPLETE, true).commit();
         }
         TriggerRefresh();
+        Log.d(TAG, "end CreateSyncAccount");
     }
 
     public static void StartSyncFreq(int infreq) {
+        Log.d(TAG, "start StartSyncFreq");
         ContentResolver.setIsSyncable(GenericAccountService.GetAccount(Constants.ACCOUNT_TYPE), FrinmeanContentProvider.AUTHORITY, infreq * 60);
+        ContentResolver.addPeriodicSync(GenericAccountService.GetAccount(Constants.ACCOUNT_TYPE), FrinmeanContentProvider.AUTHORITY, Bundle.EMPTY, infreq * 60);
+        Log.d(TAG, "end StartSyncFreq");
     }
 
     public static void StopSync() {
+        Log.d(TAG, "start StopSync");
         ContentResolver.setIsSyncable(GenericAccountService.GetAccount(Constants.ACCOUNT_TYPE), FrinmeanContentProvider.AUTHORITY, 0);
+        Log.d(TAG, "start StopSync");
     }
 
     /**
@@ -104,6 +114,7 @@ public class SyncUtils {
      * the OS additional freedom in scheduling your sync request.
      */
     public static void TriggerRefresh() {
+        Log.d(TAG, "start TriggerRefresh");
         Bundle b = new Bundle();
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -112,5 +123,6 @@ public class SyncUtils {
                 GenericAccountService.GetAccount(Constants.ACCOUNT_TYPE), // Sync account
                 FrinmeanContentProvider.AUTHORITY,                 // Content authority
                 b);                                             // Extras
+        Log.d(TAG, "end TriggerRefresh");
     }
 }

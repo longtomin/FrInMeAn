@@ -29,20 +29,26 @@
 
 package de.radiohacks.frinmean.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import java.io.File;
@@ -53,7 +59,10 @@ import java.util.Date;
 import de.radiohacks.frinmean.ChatActivity;
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.R;
+import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.MeBaService;
+
+import static de.radiohacks.frinmean.Constants.MESSAGES_TIME_DB_Columns;
 
 public class SingleChatAdapter extends CursorAdapter {
 
@@ -167,6 +176,7 @@ public class SingleChatAdapter extends CursorAdapter {
         final String msgType = cur.getString(Constants.ID_MESSAGES_MessageType);
         final int chatID = cur.getInt(Constants.ID_MESSAGES_ChatID);
         final int vid = cur.getInt(Constants.ID_MESSAGES__id);
+        final int baid = cur.getInt(Constants.ID_MESSAGES_BADBID);
         String msgOID = cur.getString(Constants.ID_MESSAGES_OwningUserID);
 
         final boolean mine = msgOID.equalsIgnoreCase(String.valueOf(OID));
@@ -270,6 +280,89 @@ public class SingleChatAdapter extends CursorAdapter {
                                 startchat.putExtra(Constants.SENDMSGID, vid);
                                 context.startActivity(startchat);
                                 break;
+                            case 2:
+                                // Zeit-Informationen
+                                Dialog progresDialog = new Dialog(mContext);
+
+                                LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+                                progresDialog.setTitle(R.string.timeinformation);
+                                progresDialog.setCanceledOnTouchOutside(true);
+                                //progresDialog.setContentView(R.layout.time_information);
+
+                                View dialogview = inflater.inflate(R.layout.time_information, null);
+                                progresDialog.setContentView(dialogview);
+                                TableLayout table_dialog = (TableLayout) dialogview.findViewById(R.id.time_table);
+                                table_dialog.setVerticalScrollBarEnabled(true);
+                                //TableLayout table_dialog = (TableLayout)progresDialog.findViewById(R.id.time_table);
+                                progresDialog.setContentView(dialogview);
+
+//                                ContentProviderClient clientmsg = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+//                                Cursor mid = clientmsg.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns,
+//                                        Constants.T_MESSAGES_ID + " = ?", new String[]{String.valueOf(vid)}, null);
+//                                int baenid = mid.getInt(Constants.ID_MESSAGES_BADBID);
+//                                mid.close();
+//                                clientmsg.release();
+
+                                long send = 0L;
+
+                                ContentProviderClient clientdifferent = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
+                                Cursor cd = clientdifferent.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
+                                        Constants.T_MESSAGES_TIME_BADBID + " = ?", new String[]{String.valueOf(baid)}, null);
+
+                                while (cd.moveToNext()) {
+
+                                    //TableRow row = new TableRow(mContext);
+                                    //row.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
+
+                                    TextView username = new TextView(mContext);
+                                    username.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                                    username.setTextSize(18);
+                                    username.setPadding(5, 5, 5, 5);
+                                    username.setText(mContext.getResources().getString(R.string.username) + cd.getString(Constants.ID_MESSAGES_TIME_UserName));
+                                    table_dialog.addView(username);
+
+                                    TextView readtime = new TextView(mContext);
+                                    readtime.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                                    readtime.setTextSize(14);
+                                    readtime.setPadding(5, 5, 5, 5);
+                                    long read = cd.getLong(Constants.ID_MESSAGES_TIME_ReadTimestamp);
+                                    if (read == 0) {
+                                        readtime.setText(mContext.getResources().getString(R.string.notread));
+                                    } else {
+                                        Date rDate = new java.util.Date(read * 1000);
+                                        readtime.setText(mContext.getResources().getString(R.string.read) + new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
+                                    }
+                                    table_dialog.addView(readtime);
+
+                                    TextView showtime = new TextView(mContext);
+                                    showtime.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                                    showtime.setTextSize(14);
+                                    showtime.setPadding(5, 5, 5, 5);
+                                    long show = cd.getLong(Constants.ID_MESSAGES_TIME_ShowTimestamp);
+                                    if (show == 0) {
+                                        showtime.setText(mContext.getResources().getString(R.string.notshow));
+                                    } else {
+                                        Date sDate = new java.util.Date(show * 1000);
+                                        showtime.setText(mContext.getResources().getString(R.string.show) + new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
+                                    }
+                                    table_dialog.addView(showtime);
+
+                                    send = cd.getLong(Constants.ID_MESSAGES_TIME_ShowTimestamp);
+                                }
+                                TextView sendtime = new TextView(mContext);
+                                sendtime.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                                sendtime.setTextSize(16);
+                                sendtime.setPadding(5, 5, 5, 5);
+                                sendtime.setTextColor(Color.RED);
+                                sendtime.setGravity(Gravity.CENTER);
+                                Date seDate = new java.util.Date(send * 1000);
+                                sendtime.setText(mContext.getResources().getString(R.string.send) + new SimpleDateFormat(Constants.DATETIMEFORMAT).format(seDate));
+                                table_dialog.addView(sendtime);
+                                cd.close();
+                                clientdifferent.release();
+                                progresDialog.show();
+                                break;
                         }
                     }
                 });
@@ -282,6 +375,7 @@ public class SingleChatAdapter extends CursorAdapter {
         return ret;
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Override
     public void bindView(View view, Context context, Cursor cur) {
         Log.d(TAG, "start bindView");

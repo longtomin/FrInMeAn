@@ -48,7 +48,7 @@
     <string name="option_refresh">Neu laden</string>
     <string name="title_activity_chat">Chats</string>
     <string name="no_chats">Keine Chats vorhanden</string>
-    <string name="username">Benutzername</string>
+    <string name="username">Benutzername </string>
     <string name="password">Passwort</string>
     <string name="password_again">Passwort erneut</string>
     <string name="email">Email Adresse</string>
@@ -94,5 +94,11 @@
     <!-- <string name="hello_world">Hello world!</string> -->
     <string name="title_activity_single_chat">SingleChatActivity</string>
     <string name="title_activity_image_view">ImageViewActivity</string>
-
+    <string name="timeinformation">Zeit-Informationen</string>
+    <string name="notread">Heruntergeladen : Noch nicht heruntergeladen</string>
+    <string name="notshow">Angezeigt : Noch nicht angezeigt</string>
+    <string name="read">Heruntergeladen : </string>
+    <string name="show">Angezeigt : </string>
+    <string name="pref_title_HTTP_communication">Sicherheit</string>
+    <string name="send">Gesendet :</string>
 </resources>

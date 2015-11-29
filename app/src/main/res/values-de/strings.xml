@@ -57,7 +57,7 @@
     <string name="pref_ringtone_silent">Lautlos</string>
     <string name="pref_title_communication">Kommunikation</string>
     <string name="pref_title_new_message_notifications">Benachrichtigung bei neuen Nachrichten</string>
-    <string name="username">Benutzername</string>
+    <string name="username">Benutzername </string>
     <string name="user_added_to_chat">Benutzer wurde dem Chat hinzugefügt.</string>
     <string name="title_activity_single_chat">Einzel Chat</string>
     <string name="title_activity_sign_up">Anmelden</string>
@@ -80,4 +80,10 @@
     <string name="pref_title_content_communication">Bilder/Video im WLAN</string>
     <string name="option_createchat">Chat erzeugen</string>
     <string name="option_refresh">Neu Laden</string>
+    <string name="timeinformation">Zeit-Informationen</string>
+    <string name="notread">Heruntergeladen : Noch nicht heruntergeladen</string>
+    <string name="notshow">Angezeigt : Noch nicht angezeigt</string>
+    <string name="show">Angezeigt : </string>
+    <string name="read">Heruntergeladen : </string>
+    <string name="send">Gesendet : </string>
 </resources>

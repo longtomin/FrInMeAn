@@ -234,6 +234,8 @@ public class Constants {
     public static final String MESSAGES_TABLE_NAME = "frinme_messages";
     public static final String CHAT_TABLE_NAME = "frinme_chats";
     public static final String USER_TABLE_NAME = "frinme_users";
+    public static final String MESSAGE_TIME_TABLE_NAME = "frinme_messages_time";
+
     public static final String T_MESSAGES_ID = "_id"; // int(10)
     public static final String T_MESSAGES_BADBID = "ID"; // int(10)
     public static final String T_MESSAGES_OwningUserID = "OwningUserID"; //int(10)
@@ -312,6 +314,22 @@ public class Constants {
             T_USER_Email,
             T_USER_Username};
 
+    public static final String T_MESSAGES_TIME_ID = "_id";
+    public static final String T_MESSAGES_TIME_BADBID = "ID";
+    public static final String T_MESSAGES_TIME_UserID = "UserID";
+    public static final String T_MESSAGES_TIME_UserName = "Username";
+    public static final String T_MESSAGES_TIME_SendTimestamp = "SendTimeStamp"; // datetime NOT NULL,
+    public static final String T_MESSAGES_TIME_ReadTimestamp = "ReadTimeStamp"; // datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+    public static final String T_MESSAGES_TIME_ShowTimestamp = "ShowTimeStamp"; // datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+    public static final String[] MESSAGES_TIME_DB_Columns = {
+            T_MESSAGES_TIME_ID,
+            T_MESSAGES_TIME_BADBID,
+            T_MESSAGES_TIME_UserID,
+            T_MESSAGES_TIME_UserName,
+            T_MESSAGES_TIME_SendTimestamp,
+            T_MESSAGES_TIME_ReadTimestamp,
+            T_MESSAGES_TIME_ShowTimestamp};
+
     /*
     Integer-ID of the Database Rows
      */
@@ -341,11 +359,25 @@ public class Constants {
     public static final int ID_MESSAGES_NumberRead = 22;
     public static final int ID_MESSAGES_NumberShow = 23;
 
-    public static final int ID_CHAT__id = 0;
+    public static final int ID_CHAT_ID = 0;
     public static final int ID_CHAT_BADBID = 1;
     public static final int ID_CHAT_OwningUserID = 2;
     public static final int ID_CHAT_OwningUserName = 3;
     public static final int ID_CHAT_ChatName = 4;
+
+    public static final int ID_USER_ID = 0;
+    public static final int ID_USER_BADBID = 1;
+    public static final int ID_USER_Username = 2;
+    public static final int ID_USER_Email = 3;
+    public static final int ID_USER_AuthenticationTime = 4;
+
+    public static final int ID_MESSAGES_TIME_ID = 0;
+    public static final int ID_MESSAGES_TIME_BADBID = 1;
+    public static final int ID_MESSAGES_TIME_UserID = 2;
+    public static final int ID_MESSAGES_TIME_UserName = 3;
+    public static final int ID_MESSAGES_TIME_SendTimestamp = 4;
+    public static final int ID_MESSAGES_TIME_ReadTimestamp = 5;
+    public static final int ID_MESSAGES_TIME_ShowTimestamp = 6;
 
     /*
     Constants for Preferences
