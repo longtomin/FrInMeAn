@@ -348,7 +348,9 @@ public class SingleChatAdapter extends CursorAdapter {
                                     }
                                     table_dialog.addView(showtime);
 
-                                    send = cd.getLong(Constants.ID_MESSAGES_TIME_ShowTimestamp);
+                                    if (send == 0) {
+                                        send = cd.getLong(Constants.ID_MESSAGES_TIME_ShowTimestamp);
+                                    }
                                 }
                                 TextView sendtime = new TextView(mContext);
                                 sendtime.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
