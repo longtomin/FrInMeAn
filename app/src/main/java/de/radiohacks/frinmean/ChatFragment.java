@@ -37,10 +37,10 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -50,6 +50,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TimePicker;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -95,11 +96,17 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
             MessageID = extras.getInt(Constants.SENDMSGID, -1);
         }
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
-
+//        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+//        String directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+        String basedir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR;
+        File baseFile = new File(basedir);
+        if (!baseFile.exists()) {
+            if (!baseFile.mkdirs()) {
+                Log.e(TAG, "Base Directory creation failed");
+            }
+        }
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(baseFile.toString()));
         }
     }
 

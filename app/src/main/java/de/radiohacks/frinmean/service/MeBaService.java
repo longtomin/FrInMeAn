@@ -102,7 +102,10 @@ public class MeBaService extends IntentService {
     private String username;
     private String password;
     private int userid;
-    private String directory;
+    private String basedir;
+    private String imgdir;
+    private String viddir;
+    private String fildir;
     private boolean contentall;
     private boolean isWifi;
     private BroadcastNotifier mBroadcaster = null;
@@ -110,6 +113,34 @@ public class MeBaService extends IntentService {
 
     public MeBaService() {
         super("MeBaService");
+        basedir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR;
+        File baseFile = new File(basedir);
+        if (!baseFile.exists()) {
+            if (!baseFile.mkdir()) {
+                Log.e(TAG, "Base Directory creation failed");
+            }
+        }
+        imgdir = basedir + File.separator + Constants.IMAGEDIR + File.separator;
+        File imgFile = new File(imgdir);
+        if (!imgFile.exists()) {
+            if (!imgFile.mkdir()) {
+                Log.e(TAG, "Image Directory creation failed");
+            }
+        }
+        viddir = basedir + File.separator + Constants.VIDEODIR + File.separator;
+        File vidFile = new File(imgdir);
+        if (!vidFile.exists()) {
+            if (!vidFile.mkdir()) {
+                Log.e(TAG, "Video Directory creation failed");
+            }
+        }
+        fildir = basedir + File.separator + Constants.FILESDIR + File.separator;
+        File filFile = new File(imgdir);
+        if (!filFile.exists()) {
+            if (!filFile.mkdir()) {
+                Log.e(TAG, "File Directory creation failed");
+            }
+        }
     }
 
     @Override
@@ -122,14 +153,9 @@ public class MeBaService extends IntentService {
         rf = new RestFunctions();
 
         getPreferenceInfo();
-        if (directory.equalsIgnoreCase("NULL")) {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
-            }
-        } else {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
-            }
+
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(basedir));
         }
 
         synchronized (sSyncAdapterLock) {
@@ -173,7 +199,7 @@ public class MeBaService extends IntentService {
 
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
-        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+//        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         this.contentall = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
         this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
         Log.d(TAG, "end getPferefenceInfo");
@@ -184,6 +210,7 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start onHandleIntent");
         if (intent != null) {
             final String action = intent.getAction();
+            checkNetwork();
 
             if (Constants.ACTION_LISTUSER.equalsIgnoreCase(action)) {
                 final String search = intent.getStringExtra(Constants.SEARCH);
@@ -312,23 +339,14 @@ public class MeBaService extends IntentService {
         File checkfile;
         String checkfilepath = null;
 
-        if (directory.endsWith(File.separator)) {
-            if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                checkfilepath = directory + Constants.IMAGEDIR + File.separator + fname;
-            } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                checkfilepath = directory + Constants.VIDEODIR + File.separator + fname;
-            } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
-                checkfilepath = directory + Constants.FILESDIR + File.separator + fname;
-            }
-        } else {
-            if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                checkfilepath = directory + File.separator + Constants.IMAGEDIR + File.separator + fname;
-            } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + fname;
-            } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
-                checkfilepath = directory + File.separator + Constants.FILESDIR + File.separator + fname;
-            }
+        if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+            checkfilepath = imgdir + fname;
+        } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+            checkfilepath = viddir + fname;
+        } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
+            checkfilepath = fildir + fname;
         }
+
         assert checkfilepath != null;
         checkfile = new File(checkfilepath);
 
@@ -405,6 +423,7 @@ public class MeBaService extends IntentService {
 
                                 if (outmeta != null) {
                                     if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
+
                                         if (!checkfileexists(outmeta.getIM(), TYP_IMAGE, outmeta.getIS(), outmeta.getIMD5())) {
                                             if (isWifi) {
                                                 OGImM ofim = rf.fetchImageMessage(username, password, m.getIMID());
@@ -412,13 +431,9 @@ public class MeBaService extends IntentService {
                                                     if (ofim.getET() == null || ofim.getET().isEmpty()) {
                                                         String checkfilepath;
 
-                                                        if (directory.endsWith(File.separator)) {
-                                                            checkfilepath = directory + Constants.IMAGEDIR + File.separator + ofim.getIM();
-                                                        } else {
-                                                            checkfilepath = directory + File.separator + Constants.IMAGEDIR + File.separator + ofim.getIM();
-                                                        }
+                                                        checkfilepath = imgdir + ofim.getIM();
                                                         if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                                            valuesinsmsg.put(T_MESSAGES_ImageMsgValue, ofim.getIM());
+                                                            valuesinsmsg.put(T_MESSAGES_ImageMsgValue, checkfilepath);
                                                             ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                                                             ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                                             client.release();
@@ -433,13 +448,9 @@ public class MeBaService extends IntentService {
                                             }
                                         } else {
                                             String checkfilepath;
-                                            if (directory.endsWith(File.separator)) {
-                                                checkfilepath = directory + Constants.IMAGEDIR + File.separator + outmeta.getIM();
-                                            } else {
-                                                checkfilepath = directory + File.separator + Constants.IMAGEDIR + File.separator + outmeta.getIM();
-                                            }
+                                            checkfilepath = imgdir + outmeta.getIM();
                                             if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                                valuesinsmsg.put(T_MESSAGES_ImageMsgValue, outmeta.getIM());
+                                                valuesinsmsg.put(T_MESSAGES_ImageMsgValue, checkfilepath);
                                                 ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                                                 ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                                 client.release();
@@ -488,15 +499,9 @@ public class MeBaService extends IntentService {
                                                 OGViM ofvm = rf.fetchVideoMessage(username, password, m.getVMID());
                                                 if (ofvm != null) {
                                                     if (ofvm.getET() == null || ofvm.getET().isEmpty()) {
-                                                        String checkfilepath;
-
-                                                        if (directory.endsWith(File.separator)) {
-                                                            checkfilepath = directory + Constants.VIDEODIR + File.separator + ofvm.getVM();
-                                                        } else {
-                                                            checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + ofvm.getVM();
-                                                        }
+                                                        String checkfilepath = viddir + ofvm.getVM();
                                                         if (acknowledgeMessage(Constants.TYP_VIDEO, checkfilepath, m.getMID())) {
-                                                            valuesinsmsg.put(T_MESSAGES_VideoMsgValue, ofvm.getVM());
+                                                            valuesinsmsg.put(T_MESSAGES_VideoMsgValue, checkfilepath);
                                                             ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                                                             ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                                             client.release();
@@ -505,15 +510,9 @@ public class MeBaService extends IntentService {
                                                 }
                                             }
                                         } else {
-                                            String checkfilepath;
-
-                                            if (directory.endsWith(File.separator)) {
-                                                checkfilepath = directory + Constants.VIDEODIR + File.separator + outmeta.getVM();
-                                            } else {
-                                                checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + outmeta.getVM();
-                                            }
+                                            String checkfilepath = viddir + outmeta.getVM();
                                             if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                                valuesinsmsg.put(T_MESSAGES_VideoMsgValue, outmeta.getVM());
+                                                valuesinsmsg.put(T_MESSAGES_VideoMsgValue, checkfilepath);
                                                 ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                                                 ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                                 client.release();
@@ -530,6 +529,7 @@ public class MeBaService extends IntentService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // ToDo setze Preference wenn Backup durchgeführt ist. Wichtig für StartActivity im onResume.
         Log.d(TAG, "end handleActionRefresh");
     }
 
@@ -570,13 +570,7 @@ public class MeBaService extends IntentService {
                     try {
                         Cursor cresueimg = client.query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ImageMsgID + " = ?", new String[]{String.valueOf(cmsg.getInt(ID_MESSAGES_ImageMsgID))}, null);
                         if (cresueimg.getCount() == 1) {
-
-                            if (directory.endsWith(File.separator)) {
-                                filename = directory + Constants.IMAGEDIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                            } else {
-                                filename = directory + File.separator + Constants.IMAGEDIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                            }
-                            File delfile = new File(filename);
+                            File delfile = new File(cmsg.getString(Constants.ID_MESSAGES_ImageMsgValue));
                             if (delfile.exists()) {
                                 delfile.delete();
                             }
@@ -589,12 +583,7 @@ public class MeBaService extends IntentService {
                     try {
                         Cursor cresuevid = client.query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_VideoMsgID + " = ?", new String[]{String.valueOf(cmsg.getInt(ID_MESSAGES_VideoMsgID))}, null);
                         if (cresuevid.getCount() == 1) {
-                            if (directory.endsWith(File.separator)) {
-                                filename = directory + Constants.VIDEODIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                            } else {
-                                filename = directory + File.separator + Constants.VIDEODIR + File.separator + cmsg.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                            }
-                            File delfile = new File(filename);
+                            File delfile = new File(cmsg.getString(Constants.ID_MESSAGES_VideoMsgValue));
                             if (delfile.exists()) {
                                 delfile.delete();
                             }
@@ -712,12 +701,7 @@ public class MeBaService extends IntentService {
                     try {
                         Cursor cresueimg = client.query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ImageMsgID + " = ?", new String[]{String.valueOf(c.getInt(ID_MESSAGES_ImageMsgID))}, null);
                         if (cresueimg.getCount() == 1) {
-                            if (directory.endsWith(File.separator)) {
-                                filename = directory + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                            } else {
-                                filename = directory + File.separator + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                            }
-                            File delfile = new File(filename);
+                            File delfile = new File(c.getString(Constants.ID_MESSAGES_ImageMsgValue));
                             if (delfile.exists()) {
                                 delfile.delete();
                             }
@@ -730,12 +714,7 @@ public class MeBaService extends IntentService {
                     try {
                         Cursor cresuevid = client.query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_VideoMsgID + " = ?", new String[]{String.valueOf(c.getInt(ID_MESSAGES_VideoMsgID))}, null);
                         if (cresuevid.getCount() == 1) {
-                            if (directory.endsWith(File.separator)) {
-                                filename = directory + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                            } else {
-                                filename = directory + File.separator + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                            }
-                            File delfile = new File(filename);
+                            File delfile = new File(c.getString(Constants.ID_MESSAGES_VideoMsgValue));
                             if (delfile.exists()) {
                                 delfile.delete();
                             }
@@ -842,22 +821,15 @@ public class MeBaService extends IntentService {
 
         File orgFile = new File(Message);
 
-        String localfname = new String();
-        if (directory.endsWith(File.separator)) {
-            localfname += directory + Constants.IMAGEDIR;
-        } else {
-            localfname += directory + File.separator + Constants.IMAGEDIR;
-        }
-
-        if (!orgFile.getAbsolutePath().equalsIgnoreCase(localfname + File.separator + orgFile.getName())) {
+        if (!orgFile.getAbsolutePath().equalsIgnoreCase(imgdir + orgFile.getName())) {
             // Copy file
             try {
-                copy(orgFile, new File(localfname + File.separator + orgFile.getName()));
+                copy(orgFile, new File(imgdir + orgFile.getName()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        insertNewMsgIntoDB(ChatID, UserID, Constants.TYP_IMAGE, orgFile.getName());
+        insertNewMsgIntoDB(ChatID, UserID, Constants.TYP_IMAGE, imgdir + orgFile.getName());
         Log.d(TAG, "end insertImageMesgIntoDB");
     }
 
@@ -870,22 +842,15 @@ public class MeBaService extends IntentService {
 
         File orgFile = new File(Message);
 
-        String localfname = new String();
-        if (directory.endsWith(File.separator)) {
-            localfname += directory + Constants.VIDEODIR;
-        } else {
-            localfname += directory + File.separator + Constants.VIDEODIR;
-        }
-
-        if (!orgFile.getAbsolutePath().equalsIgnoreCase(localfname + File.separator + orgFile.getName())) {
+        if (!orgFile.getAbsolutePath().equalsIgnoreCase(viddir + orgFile.getName())) {
             // Copy file
             try {
-                copy(orgFile, new File(localfname + File.separator + orgFile.getName()));
+                copy(orgFile, new File(viddir + orgFile.getName()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        insertNewMsgIntoDB(ChatID, UserID, Constants.TYP_VIDEO, orgFile.getName());
+        insertNewMsgIntoDB(ChatID, UserID, Constants.TYP_VIDEO, viddir + orgFile.getName());
         Log.d(TAG, "end insertVideoMesgIntoDB");
     }
 

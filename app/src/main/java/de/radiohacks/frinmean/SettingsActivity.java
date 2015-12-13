@@ -30,25 +30,19 @@
 package de.radiohacks.frinmean;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.widget.Toast;
+import android.util.Log;
 
 import java.io.File;
 
-import de.radiohacks.frinmean.providers.DirectoryChooserDialog;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.MeBaService;
 
@@ -70,6 +64,7 @@ public class SettingsActivity extends PreferenceActivity {
      * as a master/detail two-pane view on tablets. When true, a single pane is
      * shown on tablets.
      */
+    private static final String TAG = SettingsActivity.class.getSimpleName();
     private static final boolean ALWAYS_SIMPLE_PREFS = true;
     private static final int REQUEST_DIRECTORY = 0;
     private static final int REQUEST_USER_THUMBNAIL = 1;
@@ -157,19 +152,30 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences sharedPrefs = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        String directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
-        if (directory.equalsIgnoreCase("NULL")) {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
-            }
-        } else {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+        String basedir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR;
+        File baseFile = new File(basedir);
+        if (!baseFile.exists()) {
+            if (!baseFile.mkdirs()) {
+                Log.e(TAG, "Base Directory creation failed");
             }
         }
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(baseFile.toString()));
+        }
+
+//        SharedPreferences sharedPrefs = PreferenceManager
+//                .getDefaultSharedPreferences(this);
+
+//        String directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+//        if (directory.equalsIgnoreCase("NULL")) {
+//            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+//                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+//            }
+//        } else {
+//            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+//                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+//            }
+//        }
 
     }
 
@@ -216,7 +222,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         // Add 'general' preferences.
         addPreferencesFromResource(R.xml.pref_general);
-        Preference filePicker = findPreference(Constants.PrefDirectory);
+/*        Preference filePicker = findPreference(Constants.PrefDirectory);
         filePicker.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -276,7 +282,7 @@ public class SettingsActivity extends PreferenceActivity {
                 m_newFolderEnabled = !m_newFolderEnabled;
                 return true;
             }
-        });
+        })*/
 
 
                 /* Intent i = new Intent(SettingsActivity.this, FilePickerActivity.class);
@@ -332,7 +338,7 @@ public class SettingsActivity extends PreferenceActivity {
         return isXLargeTablet(this) && !isSimplePreferences(this);
     }
 
-    @Override
+/*    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -379,7 +385,7 @@ public class SettingsActivity extends PreferenceActivity {
         } else if (requestCode == REQUEST_USER_THUMBNAIL) {
 
         }
-    }
+    }*/
 
     @Override
     protected void onStop() {

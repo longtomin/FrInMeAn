@@ -40,6 +40,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.io.File;
+
 import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
 
@@ -51,7 +53,7 @@ public class StartActivity extends Activity {
     private int userid;
     private String username;
     private String password;
-    private String directory;
+    //    private String directory;
     private int syncFreq;
     private String server = "NULL";
 
@@ -62,14 +64,15 @@ public class StartActivity extends Activity {
         setContentView(R.layout.activity_start);
 
         getPreferenceInfo();
-        if (directory.equalsIgnoreCase("NULL")) {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+        String basedir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR;
+        File baseFile = new File(basedir);
+        if (!baseFile.exists()) {
+            if (!baseFile.mkdirs()) {
+                Log.e(TAG, "Base Directory creation failed");
             }
-        } else {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
-            }
+        }
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(baseFile.toString()));
         }
 
         if (server.equalsIgnoreCase("NULL")) {
@@ -130,7 +133,7 @@ public class StartActivity extends Activity {
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         this.syncFreq = Integer.parseInt(sharedPrefs.getString(Constants.PrefSyncfrequency, "-1"));
-        this.directory = sharedPrefs.getString("prefDirectory", "NULL");
+//        this.directory = sharedPrefs.getString("prefDirectory", "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
 

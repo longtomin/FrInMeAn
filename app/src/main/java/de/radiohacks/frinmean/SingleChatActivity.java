@@ -109,7 +109,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
     private SingleChatReceiver mSingleChatReceiver = new SingleChatReceiver();
     private SingleChatAdapter mAdapter;
-    private String directory;
+    //    private String directory;
     private int userid;
     private int ChatID;
     private int OwningUserID;
@@ -150,14 +150,15 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         getPreferenceInfo();
 
-        if (directory.equalsIgnoreCase("NULL")) {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+        String basedir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR;
+        File baseFile = new File(basedir);
+        if (!baseFile.exists()) {
+            if (!baseFile.mkdirs()) {
+                Log.e(TAG, "Base Directory creation failed");
             }
-        } else {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
-            }
+        }
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(baseFile.toString()));
         }
 
         ActionBar actionBar = getSupportActionBar();
@@ -168,7 +169,7 @@ public class SingleChatActivity extends ActionBarActivity implements
         actionBar.setDisplayShowCustomEnabled(true);
 
         getLoaderManager().initLoader(MESSAGE_LOADER_ID, null, this);
-        mAdapter = new SingleChatAdapter(this, null, userid, directory);
+        mAdapter = new SingleChatAdapter(this, null, userid);
 
 
         ListView lv = (ListView) findViewById(R.id.singlechatlist);
@@ -365,7 +366,7 @@ public class SingleChatActivity extends ActionBarActivity implements
         String username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         //password = sharedPrefs.getString("prefPassword", "NULL");
         // userid = sharedPrefs.getInt("prefUserID", 0);
-        directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+        // directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         Log.d(TAG, "end getPreferenceInfo");
     }
 
@@ -396,7 +397,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                 if (mediaType.startsWith("image")) {
                     String newfile = compressImage(filePath);
                     picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
-                    picintent.putExtra(Constants.IMAGELOCATION, filePath);
+                    picintent.putExtra(Constants.IMAGELOCATION, newfile);
                     startService(picintent);
 
                 } else if (mediaType.startsWith("video")) {
@@ -702,12 +703,8 @@ public class SingleChatActivity extends ActionBarActivity implements
     }
 
     public String getFilename() {
-        String uriSting;
-        if (directory.endsWith(File.separator)) {
-            uriSting = (this.directory + Constants.IMAGEDIR + File.separator + System.currentTimeMillis() + ".jpg");
-        } else {
-            uriSting = (this.directory + File.separator + Constants.IMAGEDIR + File.separator + System.currentTimeMillis() + ".jpg");
-        }
+        String uriSting = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR + File.separator;
+        uriSting += System.currentTimeMillis() + ".jpg";
         return uriSting;
     }
 
@@ -851,6 +848,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
 //          write the compressed bitmap at the destination specified by filename.
             scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

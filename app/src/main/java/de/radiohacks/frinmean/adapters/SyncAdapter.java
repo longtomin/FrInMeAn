@@ -56,8 +56,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -143,7 +141,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final ContentResolver mContentResolver;
     private String username;
     private String password;
-    private String directory;
+    //    private String directory;
     private int userid;
     private String ringtone;
     private boolean vibrate;
@@ -152,6 +150,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private boolean networtConnected = false;
     private boolean isWifi = false;
     private boolean contentall = false;
+    private String basedir;
+    private String imgdir;
+    private String viddir;
+    private String fildir;
 
     /**
      * Constructor. Obtains handle to content resolver for later use.
@@ -162,13 +164,35 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver = mContext.getContentResolver();
         getPreferenceInfo();
         rf = new RestFunctions();
-        if (directory.equalsIgnoreCase("NULL")) {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
+        basedir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR;
+        File baseFile = new File(basedir);
+        if (!baseFile.exists()) {
+            if (!baseFile.mkdirs()) {
+                Log.e(TAG, "Base Directory creation failed");
             }
-        } else {
-            if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-                Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
+        }
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(baseFile.toString()));
+        }
+        imgdir = basedir + File.separator + Constants.IMAGEDIR;
+        File imgFile = new File(imgdir);
+        if (!imgFile.exists()) {
+            if (!imgFile.mkdirs()) {
+                Log.e(TAG, "Image Directory creation failed");
+            }
+        }
+        viddir = basedir + File.separator + Constants.VIDEODIR;
+        File vidFile = new File(viddir);
+        if (!vidFile.exists()) {
+            if (!vidFile.mkdirs()) {
+                Log.e(TAG, "Video Directory creation failed");
+            }
+        }
+        fildir = basedir + File.separator + Constants.FILESDIR;
+        File filFile = new File(fildir);
+        if (!filFile.exists()) {
+            if (!filFile.mkdirs()) {
+                Log.e(TAG, "File Directory creation failed");
             }
         }
     }
@@ -182,7 +206,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver = context.getContentResolver();
         getPreferenceInfo();
         rf = new RestFunctions();
-        if (directory.equalsIgnoreCase("NULL")) {
+        String basedir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR;
+        File baseFile = new File(basedir);
+        if (!baseFile.exists()) {
+            if (!baseFile.mkdirs()) {
+                Log.e(TAG, "Base Directory creation failed");
+            }
+        }
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(baseFile.toString()));
+        }
+
+        /*        if (directory.equalsIgnoreCase("NULL")) {
             if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
                 Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
             }
@@ -190,7 +225,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
                 Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
             }
-        }
+        } */
     }
 
     protected void getPreferenceInfo() {
@@ -200,7 +235,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
-        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+//        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
         this.ringtone = sharedPrefs.getString(Constants.prefRingtone, "DEFAULT_SOUND");
         this.vibrate = sharedPrefs.getBoolean(Constants.prefVibrate, true);
@@ -360,12 +395,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 if (ofim != null) {
                                     if (ofim.getET() == null || ofim.getET().isEmpty()) {
                                         String checkfilepath;
+                                        checkfilepath = imgdir + File.separator + ofim.getIM();
 
-                                        if (directory.endsWith(File.separator)) {
-                                            checkfilepath = directory + Constants.IMAGEDIR + File.separator + ofim.getIM();
-                                        } else {
-                                            checkfilepath = directory + File.separator + Constants.IMAGEDIR + File.separator + ofim.getIM();
-                                        }
                                         if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
                                             valuesins.put(T_MESSAGES_ImageMsgValue, ofim.getIM());
                                             ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -382,12 +413,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 }
                             }
                         } else {
-                            String checkfilepath;
-                            if (directory.endsWith(File.separator)) {
-                                checkfilepath = directory + Constants.IMAGEDIR + File.separator + outmeta.getIM();
-                            } else {
-                                checkfilepath = directory + File.separator + Constants.IMAGEDIR + File.separator + outmeta.getIM();
-                            }
+                            String checkfilepath = imgdir + File.separator + outmeta.getIM();
                             if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
                                 valuesins.put(T_MESSAGES_ImageMsgValue, outmeta.getIM());
                                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -441,11 +467,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     if (ofvm.getET() == null || ofvm.getET().isEmpty()) {
                                         String checkfilepath;
 
-                                        if (directory.endsWith(File.separator)) {
-                                            checkfilepath = directory + Constants.VIDEODIR + File.separator + ofvm.getVM();
-                                        } else {
-                                            checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + ofvm.getVM();
-                                        }
+                                        checkfilepath = viddir + File.separator + ofvm.getVM();
                                         if (acknowledgeMessage(Constants.TYP_VIDEO, checkfilepath, m.getMID())) {
                                             valuesins.put(T_MESSAGES_VideoMsgValue, ofvm.getVM());
                                             ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -457,13 +479,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 }
                             }
                         } else {
-                            String checkfilepath;
-
-                            if (directory.endsWith(File.separator)) {
-                                checkfilepath = directory + Constants.VIDEODIR + File.separator + outmeta.getVM();
-                            } else {
-                                checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + outmeta.getVM();
-                            }
+                            String checkfilepath = viddir + File.separator + outmeta.getVM();
                             if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
                                 valuesins.put(T_MESSAGES_VideoMsgValue, outmeta.getVM());
                                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -548,39 +564,38 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             try {
                 md5 = Files.hash(new File(message),
                         Hashing.md5());
+                assert md5 != null;
+                OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+                if (oack != null) {
+                    if (oack.getET() == null || oack.getET().isEmpty()) {
+                        if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
+                            ret = true;
+                        }
+                    }
+                }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
-            assert md5 != null;
-            OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
-            if (oack != null) {
-                if (oack.getET() == null || oack.getET().isEmpty()) {
-                    if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
-                        ret = true;
-                    }
-                }
             }
         } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
             HashCode md5 = null;
             try {
                 md5 = Files.hash(new File(message),
                         Hashing.md5());
+                assert md5 != null;
+                OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+                if (oack != null) {
+                    if (oack.getET() == null || oack.getET().isEmpty()) {
+                        if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
+                            ret = true;
+                        }
+                    }
+                }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            assert md5 != null;
-            OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
-            if (oack != null) {
-                if (oack.getET() == null || oack.getET().isEmpty()) {
-                    if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
-                        ret = true;
-                    }
-                }
-            }
         }
-
         Log.d(TAG, "end acknowledgeMessage");
         return ret;
     }
@@ -609,25 +624,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         boolean ret = false;
         File checkfile;
-        String checkfilepath = null;
+        String checkfilepath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR + File.separator;
 
-        if (directory.endsWith(File.separator)) {
-            if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                checkfilepath = directory + Constants.IMAGEDIR + File.separator + fname;
-            } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                checkfilepath = directory + Constants.VIDEODIR + File.separator + fname;
-            } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
-                checkfilepath = directory + Constants.FILESDIR + File.separator + fname;
-            }
-        } else {
-            if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                checkfilepath = directory + File.separator + Constants.IMAGEDIR + File.separator + fname;
-            } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
-                checkfilepath = directory + File.separator + Constants.VIDEODIR + File.separator + fname;
-            } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
-                checkfilepath = directory + File.separator + Constants.FILESDIR + File.separator + fname;
-            }
+        if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+            checkfilepath += Constants.IMAGEDIR + File.separator;
+        } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
+            checkfilepath += Constants.VIDEODIR + File.separator;
+        } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
+            checkfilepath += Constants.FILESDIR + File.separator;
         }
+
+        checkfilepath += fname;
+
         assert checkfilepath != null;
         checkfile = new File(checkfilepath);
 
@@ -653,7 +661,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         return ret;
     }
 
-    private void moveFileToDestination(String origFile, String subdir, String serverfilename) {
+/*    private void moveFileToDestination(String origFile, String subdir, String serverfilename) {
         Log.d(TAG, "start moveFileToDestination");
         File source = new File(origFile);
 
@@ -679,7 +687,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             e.printStackTrace();
         }
         Log.d(TAG, "end moveFileToDestination");
-    }
+    }*/
 
     /*
     Update local Database with values returned from the server after the upload
@@ -693,7 +701,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             valuesins.put(T_MESSAGES_TextMsgID, msgid);
         } else if (MessageType.equalsIgnoreCase(TYP_IMAGE)) {
             valuesins.put(T_MESSAGES_ImageMsgID, msgid);
-            valuesins.put(T_MESSAGES_ImageMsgValue, Message);
+            String path = imgdir + File.separator + Message;
+            valuesins.put(T_MESSAGES_ImageMsgValue, path);
         } else if (MessageType.equalsIgnoreCase(TYP_LOCATION)) {
             valuesins.put(T_MESSAGES_LocationMsgID, msgid);
             valuesins.put(T_MESSAGES_LocationMsgValue, Message);
@@ -702,10 +711,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             valuesins.put(T_MESSAGES_ContactMsgValue, Message);
         } else if (MessageType.equalsIgnoreCase(TYP_FILE)) {
             valuesins.put(T_MESSAGES_FileMsgID, msgid);
-            valuesins.put(T_MESSAGES_FileMsgValue, Message);
+            String path = fildir + File.separator + Message;
+            valuesins.put(T_MESSAGES_FileMsgValue, path);
         } else if (MessageType.equalsIgnoreCase(TYP_VIDEO)) {
             valuesins.put(T_MESSAGES_VideoMsgID, msgid);
-            valuesins.put(T_MESSAGES_VideoMsgValue, Message);
+            String path = viddir + File.separator + Message;
+            valuesins.put(T_MESSAGES_VideoMsgValue, path);
         }
         ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
         client.getLocalContentProvider().update(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins, T_MESSAGES_ID + " = ?", new String[]{String.valueOf(id)});
@@ -739,13 +750,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_IMAGE)) {
                 if (isWifi) {
-                    String imgfile = directory;
+/*                    String imgfile = directory;
                     if (imgfile.endsWith(File.separator)) {
                         imgfile += Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
                     } else {
                         imgfile += File.separator + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                    }
-                    OSImM outimg = rf.sendImageMessage(username, password, imgfile);
+                    } */
+//                    OSImM outimg = rf.sendImageMessage(username, password, imgfile);
+                    OSImM outimg = rf.sendImageMessage(username, password, c.getString(Constants.ID_MESSAGES_ImageMsgValue));
                     if (outimg != null) {
                         if (outimg.getET() == null || outimg.getET().isEmpty()) {
                             OIMIC outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outimg.getIID(), TYP_IMAGE);
@@ -753,7 +765,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 if (outins.getET() == null || outins.getET().isEmpty()) {
                                     updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outimg.getIID(), TYP_IMAGE, outimg.getIF());
                                     inserIntoTimeTable(outins.getMID(), userid);
-                                    moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getIF());
+                                    //moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getIF());
                                 }
                             }
                         }
@@ -764,13 +776,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             } */ else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
                 if (isWifi) {
-                    String vidfile = directory;
+/*                    String vidfile = directory;
                     if (vidfile.endsWith(File.separator)) {
                         vidfile += Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
                     } else {
                         vidfile += File.separator + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                    }
-                    OSViM outvid = rf.sendVideoMessage(username, password, vidfile);
+                    }*/
+//                    OSViM outvid = rf.sendVideoMessage(username, password, vidfile);
+                    OSViM outvid = rf.sendVideoMessage(username, password, c.getString(Constants.ID_MESSAGES_VideoMsgValue));
                     if (outvid != null) {
                         if (outvid.getET() == null || outvid.getET().isEmpty()) {
                             OIMIC outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outvid.getVID(), TYP_VIDEO);
@@ -778,7 +791,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 if (outins.getET() == null || outins.getET().isEmpty()) {
                                     updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outvid.getVID(), TYP_VIDEO, outvid.getVF());
                                     inserIntoTimeTable(outins.getMID(), userid);
-                                    moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVF());
+                                    //moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVF());
                                 }
                             }
                         }

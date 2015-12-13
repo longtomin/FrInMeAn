@@ -3,6 +3,7 @@ package de.radiohacks.frinmean.service;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
@@ -74,15 +75,36 @@ public class RestFunctions {
     private boolean https;
     private String CommunicationURL;
     private int port;
-    private String directory;
-    private ErrorHelper eh;
+    private String imgdir;
+    private String viddir;
+    private String fildir;
 
     public RestFunctions() {
         conManager = (ConnectivityManager) FrinmeanApplication.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         mContext = FrinmeanApplication.getAppContext();
-        eh = new ErrorHelper(mContext);
         getPreferenceInfo();
         buildServerURL();
+        imgdir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR + File.separator + Constants.IMAGEDIR + File.separator;
+        File imgFile = new File(imgdir);
+        if (!imgFile.exists()) {
+            if (!imgFile.mkdirs()) {
+                Log.e(TAG, "Image Directory creation failed");
+            }
+        }
+        viddir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR + File.separator + Constants.VIDEODIR + File.separator;
+        File vidFile = new File(viddir);
+        if (!vidFile.exists()) {
+            if (!vidFile.mkdirs()) {
+                Log.e(TAG, "Video Directory creation failed");
+            }
+        }
+        fildir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR + File.separator + Constants.FILESDIR + File.separator;
+        File filFile = new File(fildir);
+        if (!filFile.exists()) {
+            if (!filFile.mkdirs()) {
+                Log.e(TAG, "File Directory creation failed");
+            }
+        }
     }
 
     protected boolean isNetworkConnected() {
@@ -109,7 +131,7 @@ public class RestFunctions {
         } else {
             this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "80"));
         }
-        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+//        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
 
@@ -133,12 +155,6 @@ public class RestFunctions {
         }
         Log.d(TAG, "end checkServer");
         return ret;
-    }
-
-    private void checkerrortext(String in) {
-        if ((in != null || !in.isEmpty())) {
-            eh.CheckErrorText(in);
-        }
     }
 
     private String convertB64(String in) throws UnsupportedEncodingException {
@@ -174,7 +190,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OAuth.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -223,7 +238,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OSiUp.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -272,7 +286,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OCrCh.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -310,7 +323,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(ODeCh.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -361,7 +373,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OAdUC.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -402,7 +413,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OReUC.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -440,7 +450,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OLiUs.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -476,7 +485,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OLiCh.class, reader, false);
-                    checkerrortext(out.getET());
                 } else {
                     retcode = rc.getResponseCode();
                 }
@@ -531,7 +539,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OSTeM.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -569,7 +576,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OGTeM.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -623,7 +629,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OIMIC.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -662,7 +667,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(ODMFC.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -703,7 +707,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OFMFC.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -739,7 +742,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OCN.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -792,10 +794,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OSImM.class, reader, false);
-                    checkerrortext(out.getET());
-                } else {
-                    ErrorHelper eh = new ErrorHelper(FrinmeanApplication.getAppContext());
-                    eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -836,7 +834,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OGImMMD.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -877,7 +874,7 @@ public class RestFunctions {
                 rc = new RestClient(CommunicationURL + "image/download/" + combinedParams, https, port);
 
                 rc.AddHeader("Accept", "image/jpeg");
-                rc.setSaveDirectory(directory + File.separator + Constants.IMAGEDIR + File.separator);
+                rc.setSaveDirectory(imgdir);
                 String savedFilename = null;
                 if (https) {
                     savedFilename = rc.ExecuteHTTPSContent("GET");
@@ -888,10 +885,6 @@ public class RestFunctions {
                 if (savedFilename != null && !savedFilename.isEmpty()) {
                     out.setIM(savedFilename);
                     //MediaStore.Images.Media.insertImage(FrinmeanApplication.getAppContext().getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
-
-                } else {
-                    out.setET("ERROR_DOWNLOAD_IMAGE");
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -945,10 +938,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OSViM.class, reader, false);
-                    checkerrortext(out.getET());
-                } else {
-                    ErrorHelper eh = new ErrorHelper(FrinmeanApplication.getAppContext());
-                    eh.CheckErrorText(Constants.ERROR_NO_CONNECTION_TO_SERVER);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -989,7 +978,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OGViMMD.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1029,7 +1017,7 @@ public class RestFunctions {
                 rc = new RestClient(CommunicationURL + "video/download/" + combinedParams, https, port);
 
                 rc.AddHeader("Accept", "video/mp4");
-                rc.setSaveDirectory(directory + File.separator + Constants.VIDEODIR + File.separator);
+                rc.setSaveDirectory(viddir);
 
                 String savedFilename = null;
                 if (https) {
@@ -1044,9 +1032,6 @@ public class RestFunctions {
                     //File file = new File(directory + File.separator + Constants.VIDEODIR + File.separator + savedFilename);
                     //MediaStore.Video.Media.(FrinmeanApplication.getAppContext().getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
 
-                } else {
-                    out.setET("ERROR_DOWNLOAD_VIDEO");
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1094,7 +1079,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OSShT.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1136,7 +1120,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OGMI.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1186,7 +1169,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OAckMD.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1237,7 +1219,6 @@ public class RestFunctions {
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OAckCD.class, reader, false);
-                    checkerrortext(out.getET());
                 }
             } catch (Exception e) {
                 e.printStackTrace();

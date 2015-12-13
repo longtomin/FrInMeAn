@@ -172,6 +172,7 @@ public class Constants {
     public final static String CHATIAMGEDIR = "images/chatimage";
     public final static String FILESDIR = "files";
     public final static String VIDEODIR = "videos";
+    public final static String BASEDIR = "FrInMeAn";
 
     /*
     Constants for query parameters
@@ -388,7 +389,7 @@ public class Constants {
     public static final String PrefHTTPSCommunication = "prefHTTPSCommunication";
     public static final String PrefUsername = "prefUsername";
     public static final String PrefPassword = "prefPassword";
-    public static final String PrefDirectory = "prefDirectory";
+    //public static final String PrefDirectory = "prefDirectory";
     public static final String PrefSyncfrequency = "prefSyncfrequency";
     public static final String PrefUserID = "prefUserID";
     public static final String prefRingtone = "prefRingtone";

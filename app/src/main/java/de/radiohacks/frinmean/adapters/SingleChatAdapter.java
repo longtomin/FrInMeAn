@@ -81,13 +81,13 @@ public class SingleChatAdapter extends CursorAdapter {
     private static final int VIDEOMSG_FOREIGN = 11;
 
     private int OID = 0;
-    private String directory;
+//    private String directory;
 
-    public SingleChatAdapter(Context context, Cursor cursor, int InOID, String dir) {
+    public SingleChatAdapter(Context context, Cursor cursor, int InOID) {
         super(context, cursor, true);
         Log.d(TAG, "start SingleChatAdapter");
         this.OID = InOID;
-        this.directory = dir;
+//        this.directory = dir;
         Log.d(TAG, "end SingleChatAdapter");
     }
 
@@ -429,14 +429,15 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImageStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton IButtonOwn = (ImageButton) view.findViewById(R.id.ImageImageButton);
 
-                String tmpimgOwn;
+/*                String tmpimgOwn;
                 if (directory.endsWith(File.separator)) {
                     tmpimgOwn = Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 } else {
                     tmpimgOwn = File.separator + Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                }
+                }*/
 
-                final String imgfileOwn = directory + tmpimgOwn;
+//                final String imgfileOwn = directory + tmpimgOwn;
+                final String imgfileOwn = cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 IButtonOwn.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -480,14 +481,15 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImageStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton IButtonForeign = (ImageButton) view.findViewById(R.id.ImageImageButton);
 
-                String tmpimgForeign;
+/*                String tmpimgForeign;
                 if (directory.endsWith(File.separator)) {
                     tmpimgForeign = Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 } else {
                     tmpimgForeign = File.separator + Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 }
 
-                final String imgfileForeign = directory + tmpimgForeign;
+                final String imgfileForeign = directory + tmpimgForeign;*/
+                final String imgfileForeign = cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 IButtonForeign.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -531,14 +533,15 @@ public class SingleChatAdapter extends CursorAdapter {
                 VideoStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.VideoImageButton);
 
-                String tmpvidOwn;
+/*                String tmpvidOwn;
                 if (directory.endsWith(File.separator)) {
                     tmpvidOwn = Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 } else {
                     tmpvidOwn = File.separator + Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 }
 
-                final String vidfileOwn = directory + tmpvidOwn;
+                final String vidfileOwn = directory + tmpvidOwn; */
+                final String vidfileOwn = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 VButtonOwn.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -562,14 +565,15 @@ public class SingleChatAdapter extends CursorAdapter {
                 VideoStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.VideoImageButton);
 
-                String tmpvidForeign;
+/*                String tmpvidForeign;
                 if (directory.endsWith(File.separator)) {
                     tmpvidForeign = Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 } else {
                     tmpvidForeign = File.separator + Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 }
 
-                final String vidfileForeign = directory + tmpvidForeign;
+                final String vidfileForeign = directory + tmpvidForeign;*/
+                final String vidfileForeign = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 VButtonForeign.setOnClickListener(new View.OnClickListener() {
 
                     @Override

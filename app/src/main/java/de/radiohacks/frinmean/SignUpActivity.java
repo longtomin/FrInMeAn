@@ -44,6 +44,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -64,7 +65,7 @@ public class SignUpActivity extends Activity {
     private String password;
     private String email;
     private String server;
-    private String directory;
+    //    private String directory;
     private boolean https;
     private int port;
     private String CommunicationURL;
@@ -78,7 +79,17 @@ public class SignUpActivity extends Activity {
 
         getPreferenceInfo();
 
-        if (directory.equalsIgnoreCase("NULL")) {
+        String basedir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR;
+        File baseFile = new File(basedir);
+        if (!baseFile.exists()) {
+            if (!baseFile.mkdirs()) {
+                Log.e(TAG, "Base Directory creation failed");
+            }
+        }
+        if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(baseFile.toString()));
+        }
+/*        if (directory.equalsIgnoreCase("NULL")) {
             if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
                 Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(Environment.getExternalStorageDirectory().toString()));
             }
@@ -86,7 +97,7 @@ public class SignUpActivity extends Activity {
             if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
                 Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(directory));
             }
-        }
+        } */
 
         buildServerURL();
         if (!server.equalsIgnoreCase("NULL")) {
@@ -174,7 +185,7 @@ public class SignUpActivity extends Activity {
         }
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
-        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+//        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
 
