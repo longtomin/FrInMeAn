@@ -30,62 +30,66 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:padding="5dp">
+    android:layout_gravity="left"
+    android:gravity="left"
+    android:orientation="horizontal"
+    android:padding="5dp"
+    android:weightSum="3">
 
     <RelativeLayout
-        android:id="@+id/ImageMessageContainer"
-        android:layout_width="210dp"
+        android:id="@+id/ForImageMessageContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@+id/user_img"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentStart="false"
+        android:layout_weight="3"
         android:background="@drawable/bubble_yellow">
 
         <TextView
-            android:id="@+id/ImageOwningUserName"
+            android:id="@+id/ForImageOwningUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/ImageSendTimeStamp"
-            android:layout_alignLeft="@+id/ImageImageButton"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
+            android:layout_alignBaseline="@+id/ForImageSendTimeStamp"
+            android:layout_alignLeft="@+id/ForImageImageButton"
+            android:paddingLeft="5sp"
+            android:paddingRight="5sp"
             android:textSize="12dp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/ImageSendTimeStamp"
+            android:id="@+id/ForImageSendTimeStamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/ImageOwningUserName"
-            android:layout_toRightOf="@+id/ImageOwningUserName"
+            android:layout_toEndOf="@id/ForImageOwningUserName"
+            android:layout_toRightOf="@id/ForImageOwningUserName"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:textSize="10dp"
             android:textStyle="italic" />
 
         <ImageButton
-            android:id="@+id/ImageImageButton"
+            android:id="@+id/ForImageImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="false"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/ImageOwningUserName"
+            android:layout_below="@id/ForImageOwningUserName"
             android:layout_span="2"
-            android:maxHeight="200dp"
-            android:maxWidth="200dp"
-            android:minHeight="100dp"
-            android:minWidth="100dp"
+            android:background="?android:selectableItemBackground"
             android:paddingLeft="5dp"
             android:paddingRight="5dp" />
 
         <TextView
-            android:id="@+id/ImageReadTimeStamp"
+            android:id="@+id/ForImageReadTimeStamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/ImageImageButton"
+            android:layout_below="@id/ForImageImageButton"
             android:layout_span="2"
             android:inputType="none"
             android:paddingLeft="5dp"
@@ -95,13 +99,14 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/ForUSerStatusContainer"
+        android:layout_width="70dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/ImageMessageContainer">
-
+        android:layout_toEndOf="@id/ForImageMessageContainer"
+        android:layout_weight="1">
 
         <ImageView
-            android:id="@+id/user_img"
+            android:id="@+id/ForImageUserIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
@@ -109,10 +114,11 @@
             android:minHeight="50dp"
             android:minWidth="50dp"
             android:nestedScrollingEnabled="false"
-            android:src="@drawable/iconuser" />
+            android:src="@drawable/iconuser"
+            tools:ignore="ContentDescription" />
 
         <TextView
-            android:id="@+id/ImageStatus"
+            android:id="@+id/ForImageStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="false"
@@ -120,7 +126,7 @@
             android:layout_alignParentRight="false"
             android:layout_alignParentTop="false"
             android:layout_alignWithParentIfMissing="false"
-            android:layout_below="@+id/user_img"
+            android:layout_below="@id/ForImageUserIcon"
             android:layout_centerHorizontal="true"
             android:layout_span="2"
             android:inputType="none"

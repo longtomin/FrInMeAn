@@ -32,7 +32,7 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/chatImage"
+        android:id="@+id/ChatItemChatImage"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentLeft="true"
@@ -41,23 +41,35 @@
         android:background="#ffcccccc" />
 
     <TextView
-        android:id="@+id/chatName"
+        android:id="@+id/ChatItemChatName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/chatImage"
-        android:layout_toRightOf="@+id/chatImage"
+        android:layout_alignTop="@+id/ChatItemChatImage"
+        android:layout_toRightOf="@+id/ChatItemChatImage"
         android:maxLines="1"
         android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/owningUserName"
+        android:id="@+id/ChatItemowningUserName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/chatName"
+        android:layout_below="@id/ChatItemChatName"
         android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/chatImage"
+        android:layout_toRightOf="@+id/ChatItemChatImage"
         android:maxLines="1"
         android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/ChatItemUnreadMessages"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentRight="true"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="5dp"
+        android:maxLines="1"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>

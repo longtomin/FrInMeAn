@@ -31,48 +31,56 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:emojicon="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:padding="5dp">
+    android:layout_gravity="left"
+    android:gravity="left"
+    android:orientation="horizontal"
+    android:padding="5dp"
+    android:weightSum="3">
 
     <RelativeLayout
-        android:id="@+id/TextMessageContainer"
-        android:layout_width="250dp"
+        android:id="@+id/ForTextMessageContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@id/user_img"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentStart="false"
+        android:layout_weight="3"
         android:background="@drawable/bubble_yellow">
 
         <TextView
-            android:id="@+id/TextOwningUserName"
+            android:id="@+id/ForTextOwningUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/TextSendTimeStamp"
-            android:layout_alignLeft="@+id/TextTextMessage"
+            android:layout_alignBottom="@+id/ForTextSendTimeStamp"
+            android:layout_alignStart="@+id/ForTextTextMessage"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:textSize="12dp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/TextSendTimeStamp"
+            android:id="@+id/ForTextSendTimeStamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/TextOwningUserName"
-            android:layout_toRightOf="@+id/TextOwningUserName"
+            android:layout_toEndOf="@+id/ForTextOwningUserName"
+            android:layout_toRightOf="@+id/ForTextOwningUserName"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:textSize="10dp"
+            android:textSize="10sp"
             android:textStyle="italic" />
 
         <de.radiohacks.frinmean.emojicon.EmojiconTextView
-            android:id="@+id/TextTextMessage"
+            android:id="@+id/ForTextTextMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="false"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/TextOwningUserName"
+            android:layout_below="@id/ForTextOwningUserName"
+            android:layout_centerInParent="true"
             android:autoLink="web"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
@@ -82,11 +90,11 @@
             emojicon:emojiconSize="28sp" />
 
         <TextView
-            android:id="@+id/TextReadTimeStamp"
+            android:id="@+id/ForTextReadTimeStamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/TextTextMessage"
+            android:layout_below="@+id/ForTextTextMessage"
             android:layout_span="2"
             android:inputType="none"
             android:paddingLeft="5dp"
@@ -96,25 +104,25 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:layout_width="70dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/ImageMessageContainer">
+        android:layout_toEndOf="@+id/ForTextUserStatusContainer"
+        android:layout_weight="1">
 
         <ImageView
-            android:id="@+id/user_img"
+            android:id="@+id/ForTextUserIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="false"
-            android:layout_toEndOf="@id/TextMessageContainer"
             android:maxHeight="50dp"
             android:maxWidth="50dp"
             android:minHeight="50dp"
             android:minWidth="50dp"
             android:nestedScrollingEnabled="false"
-            android:src="@drawable/iconuser" />
+            android:src="@drawable/iconuser"
+            tools:ignore="ContentDescription" />
 
         <TextView
-            android:id="@+id/TextStatus"
+            android:id="@+id/ForTextStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="false"
@@ -122,7 +130,7 @@
             android:layout_alignParentRight="false"
             android:layout_alignParentTop="false"
             android:layout_alignWithParentIfMissing="false"
-            android:layout_below="@+id/user_img"
+            android:layout_below="@+id/ForTextUserIcon"
             android:layout_centerHorizontal="true"
             android:layout_span="2"
             android:inputType="none"

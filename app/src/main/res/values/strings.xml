@@ -55,6 +55,7 @@
     <string name="sign_up">Anmelden</string>
     <string name="fetch_chats">Lade Chats</string>
     <string name="cancel">Abbrechen</string>
+    <string name="OK">OK</string>
     <string name="no_server_given">Keine Server in den Einstellungen vorhanden!</string>
     <string name="no_user_or_password_given">Kein Benutzer oder Passwort angegeben, bitte anmelden!</string>
     <string name="user_added_to_chat">Benutzer wurde dem Chat hinzugefügt.</string>
@@ -94,6 +95,7 @@
     <!-- <string name="hello_world">Hello world!</string> -->
     <string name="title_activity_single_chat">SingleChatActivity</string>
     <string name="title_activity_image_view">ImageViewActivity</string>
+    <string name="title_restore_dialog">Nachrichten vom Server wiederherstellen?</string>
     <string name="timeinformation">Zeit-Informationen</string>
     <string name="notread">Heruntergeladen : Noch nicht heruntergeladen</string>
     <string name="notshow">Angezeigt : Noch nicht angezeigt</string>

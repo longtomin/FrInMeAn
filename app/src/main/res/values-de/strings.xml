@@ -86,4 +86,6 @@
     <string name="show">Angezeigt : </string>
     <string name="read">Heruntergeladen : </string>
     <string name="send">Gesendet : </string>
+    <string name="OK">OK</string>
+    <string name="title_restore_dialog">Nachrichten vom Server wiederherstellen?</string>
 </resources>

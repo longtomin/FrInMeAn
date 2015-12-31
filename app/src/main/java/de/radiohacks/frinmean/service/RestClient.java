@@ -36,12 +36,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.FrinmeanApplication;
+import de.radiohacks.frinmean.myssl.NoSSLv3SocketFactory;
 
 /**
  * Created by thomas on 24.08.14.
@@ -240,6 +244,13 @@ public class RestClient {
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, tmf.getTrustManagers(), null);
 
+
+            SSLSocketFactory NoSSLv3Factory = new NoSSLv3SocketFactory(context.getSocketFactory());
+
+            HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
+
+
+
             if (!params.isEmpty()) {
                 combinedParams += "?";
 
@@ -271,35 +282,31 @@ public class RestClient {
             }*/
             URL u = new URL(url + combinedParams);
             urlcon = (HttpsURLConnection) u.openConnection();
-            urlcon.setSSLSocketFactory(context.getSocketFactory());
-/*            urlcon.setHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    HostnameVerifier hv =
-                            HttpsURLConnection.getDefaultHostnameVerifier();
-                    //return hv.verify("frinme.org", session);
-                    return true;
-                }
-            }); */
-            urlcon.setInstanceFollowRedirects(false);
-            urlcon.setRequestMethod(type);
-            if (type.equalsIgnoreCase("POST")) {
-                urlcon.setDoOutput(true);
-            } else if (type.equalsIgnoreCase("PUT")) {
-                urlcon.setRequestMethod("PUT");
-                OutputStreamWriter out = new OutputStreamWriter(
-                        urlcon.getOutputStream());
-                out.write(putContent);
-                out.close();
-            }
-            urlcon.setDoInput(true);
-            urlcon.setConnectTimeout(60 * 1000);
-            urlcon.setReadTimeout(60 * 1000);
             if (!headers.isEmpty()) {
                 for (HashMap.Entry<String, String> entry : headers.entrySet()) {
                     urlcon.setRequestProperty(entry.getKey(), entry.getValue());
                 }
             }
+            //urlcon.setSSLSocketFactory(context.getSocketFactory());
+            urlcon.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    HostnameVerifier hv =
+                            HttpsURLConnection.getDefaultHostnameVerifier();
+                    return hv.verify("frinme.org", session);
+                }
+            });
+            urlcon.setInstanceFollowRedirects(false);
+            urlcon.setRequestMethod(type);
+            if (type.equalsIgnoreCase("POST") || type.equalsIgnoreCase("PUT")) {
+                urlcon.setRequestMethod(type);
+                OutputStreamWriter out = new OutputStreamWriter(
+                        urlcon.getOutputStream());
+                out.write(putContent);
+                out.close();
+            }
+            urlcon.setConnectTimeout(60 * 1000);
+            urlcon.setReadTimeout(60 * 1000);
             responseCode = urlcon.getResponseCode();
             message = urlcon.getResponseMessage();
             InputStream instream = urlcon.getInputStream();
@@ -504,15 +511,14 @@ public class RestClient {
             URL u = new URL(this.url + combinedParams);
             urlcon = (HttpsURLConnection) u.openConnection();
             urlcon.setSSLSocketFactory(context.getSocketFactory());
-/*            urlcon.setHostnameVerifier(new HostnameVerifier() {
+            urlcon.setHostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession session) {
                     HostnameVerifier hv =
                             HttpsURLConnection.getDefaultHostnameVerifier();
-                    //return hv.verify("frinme.org", session);
-                    return true;
+                    return hv.verify("frinme.org", session);
                 }
-            }); */
+            });
 
             urlcon.setDoInput(true);
             urlcon.setDoOutput(true);
@@ -717,15 +723,14 @@ public class RestClient {
             URL u = new URL(url + combinedParams);
             urlcon = (HttpsURLConnection) u.openConnection();
             urlcon.setSSLSocketFactory(context.getSocketFactory());
-/*            urlcon.setHostnameVerifier(new HostnameVerifier() {
+            urlcon.setHostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession session) {
                     HostnameVerifier hv =
                             HttpsURLConnection.getDefaultHostnameVerifier();
-                    //return hv.verify("frinme.org", session);
-                    return true;
+                    return hv.verify("frinme.org", session);
                 }
-            }); */
+            });
 
             urlcon.setInstanceFollowRedirects(false);
             urlcon.setRequestMethod(type);

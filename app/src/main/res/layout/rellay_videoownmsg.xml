@@ -30,18 +30,24 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="right"
-    android:padding="5dp">
+    android:gravity="right"
+    android:orientation="horizontal"
+    android:padding="5dp"
+    android:weightSum="3">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/OwnVideoUserStatusContainer"
+        android:layout_width="70dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/ImageMessageContainer">
+        android:layout_toEndOf="@+id/OwnImageMessageContainer"
+        android:layout_weight="1">
 
         <ImageView
-            android:id="@+id/user_img"
+            android:id="@+id/OwnVideoUserIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
@@ -49,10 +55,11 @@
             android:minHeight="50dp"
             android:minWidth="50dp"
             android:nestedScrollingEnabled="false"
-            android:src="@drawable/iconuser" />
+            android:src="@drawable/iconuser"
+            tools:ignore="ContentDescription" />
 
         <TextView
-            android:id="@+id/VideoStatus"
+            android:id="@+id/OwnVideoStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="false"
@@ -60,7 +67,7 @@
             android:layout_alignParentRight="false"
             android:layout_alignParentTop="false"
             android:layout_alignWithParentIfMissing="false"
-            android:layout_below="@+id/user_img"
+            android:layout_below="@+id/OwnVideoUserIcon"
             android:layout_centerHorizontal="true"
             android:layout_span="2"
             android:inputType="none"
@@ -71,56 +78,68 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/VideoMessageContainer"
-        android:layout_width="210dp"
+        android:id="@+id/OwnVideoMessageContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/user_img"
+        android:layout_toEndOf="@id/OwnVideoUserStatusContainer"
+        android:layout_weight="3"
         android:background="@drawable/bubble_green">
 
         <TextView
-            android:id="@+id/VideoOwningUserName"
+            android:id="@+id/OwnVideoOwningUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignStart="@id/VideoImageButton"
+            android:layout_alignStart="@+id/OwnVideoImageButton"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:textSize="12dp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/VideoSendTimeStamp"
+            android:id="@+id/OwnVideoSendTimeStamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/VideoOwningUserName"
-            android:layout_toRightOf="@+id/VideoOwningUserName"
+            android:layout_toEndOf="@+id/OwnVideoOwningUserName"
+            android:layout_toRightOf="@+id/OwnVideoOwningUserName"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:textSize="10dp"
             android:textStyle="italic" />
 
         <ImageButton
-            android:id="@+id/VideoImageButton"
+            android:id="@+id/OwnVideoImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="false"
             android:layout_alignParentLeft="false"
             android:layout_alignParentRight="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/VideoSendTimeStamp"
+            android:layout_below="@+id/OwnVideoSendTimeStamp"
             android:layout_centerInParent="true"
-            android:maxHeight="200dp"
-            android:maxWidth="200dp"
-            android:minHeight="100dp"
-            android:minWidth="100dp"
+            android:background="?android:selectableItemBackground"
             android:paddingLeft="5dp"
             android:paddingRight="5dp" />
 
         <TextView
-            android:id="@+id/VideoReadTimeStamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/OwnVideoImageButton"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/OwnVideoImageButton"
+            android:layout_span="1"
+            android:inputType="none"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="VIDEO"
+            android:textSize="12dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/OwnVideoReadTimeStamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/VideoImageButton"
+            android:layout_below="@id/OwnVideoImageButton"
             android:inputType="none"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"

@@ -33,6 +33,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,6 +41,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
@@ -81,13 +83,13 @@ public class SingleChatAdapter extends CursorAdapter {
     private static final int VIDEOMSG_FOREIGN = 11;
 
     private int OID = 0;
-//    private String directory;
+    private ContentResolver mContentResolver;
 
     public SingleChatAdapter(Context context, Cursor cursor, int InOID) {
         super(context, cursor, true);
         Log.d(TAG, "start SingleChatAdapter");
         this.OID = InOID;
-//        this.directory = dir;
+        this.mContentResolver = context.getContentResolver();
         Log.d(TAG, "end SingleChatAdapter");
     }
 
@@ -389,54 +391,56 @@ public class SingleChatAdapter extends CursorAdapter {
         long rstamp = cur.getLong(Constants.ID_MESSAGES_ReadTimeStamp);
         Date rDate = new java.util.Date(rstamp * 1000);
         String OName = cur.getString(Constants.ID_MESSAGES_OwningUserName);
-        int NumTotal = cur.getInt(Constants.ID_MESSAGES_NumberAll);
-        int NumRead = cur.getInt(Constants.ID_MESSAGES_NumberRead);
-        int NumShow = cur.getInt(Constants.ID_MESSAGES_NumberShow);
+
+        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
+        Cursor cto = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
+                Constants.T_MESSAGES_TIME_BADBID + " = ?", new String[]{String.valueOf(cur.getInt(Constants.ID_MESSAGES_BADBID))}, null);
+        int NumTotal = cto.getCount();
+        Cursor crd = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
+                Constants.T_MESSAGES_TIME_BADBID + " = ? and " + Constants.T_MESSAGES_TIME_ReadTimestamp + " != ?", new String[]{String.valueOf(cur.getInt(Constants.ID_MESSAGES_BADBID)), "0"}, null);
+        int NumRead = crd.getCount();
+        Cursor csh = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
+                Constants.T_MESSAGES_TIME_BADBID + " = ? and " + Constants.T_MESSAGES_TIME_ShowTimestamp + " != ?", new String[]{String.valueOf(cur.getInt(Constants.ID_MESSAGES_BADBID)), "0"}, null);
+        int NumShow = csh.getCount();
+        cto.close();
+        crd.close();
+        csh.close();
 
         switch (findMsgType(msgType, mine)) {
             case TEXTMSG_OWN:
-                TextView TxtOwningUserNameOwn = (TextView) view.findViewById(R.id.TextOwningUserName);
+                TextView TxtOwningUserNameOwn = (TextView) view.findViewById(R.id.OwnTextOwningUserName);
                 TxtOwningUserNameOwn.setText(OName);
-                TextView TxtSendTimeStampOwn = (TextView) view.findViewById(R.id.TextSendTimeStamp);
+                TextView TxtSendTimeStampOwn = (TextView) view.findViewById(R.id.OwnTextSendTimeStamp);
                 TxtSendTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
-                TextView TxtReadTimeStampOwn = (TextView) view.findViewById(R.id.TextReadTimeStamp);
+                TextView TxtReadTimeStampOwn = (TextView) view.findViewById(R.id.OwnTextReadTimeStamp);
                 TxtReadTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
-                TextView TextMessageOwn = (TextView) view.findViewById(R.id.TextTextMessage);
+                TextView TextMessageOwn = (TextView) view.findViewById(R.id.OwnTextTextMessage);
                 TextMessageOwn.setText(cur.getString(Constants.ID_MESSAGES_TextMsgValue));
-                TextView TextStatusOwn = (TextView) view.findViewById(R.id.TextStatus);
+                TextView TextStatusOwn = (TextView) view.findViewById(R.id.OwnTextStatus);
                 TextStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 break;
             case TEXTMSG_FOREIGN:
-                TextView TxtOwningUserNameForeign = (TextView) view.findViewById(R.id.TextOwningUserName);
+                TextView TxtOwningUserNameForeign = (TextView) view.findViewById(R.id.ForTextOwningUserName);
                 TxtOwningUserNameForeign.setText(OName);
-                TextView TxtSendTimeStampForeign = (TextView) view.findViewById(R.id.TextSendTimeStamp);
+                TextView TxtSendTimeStampForeign = (TextView) view.findViewById(R.id.ForTextSendTimeStamp);
                 TxtSendTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
-                TextView TxtReadTimeStampForeign = (TextView) view.findViewById(R.id.TextReadTimeStamp);
+                TextView TxtReadTimeStampForeign = (TextView) view.findViewById(R.id.ForTextReadTimeStamp);
                 TxtReadTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
-                TextView TextMessageForeign = (TextView) view.findViewById(R.id.TextTextMessage);
+                TextView TextMessageForeign = (TextView) view.findViewById(R.id.ForTextTextMessage);
                 TextMessageForeign.setText(cur.getString(Constants.ID_MESSAGES_TextMsgValue));
-                TextView TextStatusForeign = (TextView) view.findViewById(R.id.TextStatus);
+                TextView TextStatusForeign = (TextView) view.findViewById(R.id.ForTextStatus);
                 TextStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 break;
             case IMAGEMSG_OWN:
-                TextView ImgOwningUserNameOwn = (TextView) view.findViewById(R.id.ImageOwningUserName);
+                TextView ImgOwningUserNameOwn = (TextView) view.findViewById(R.id.OwnImageOwningUserName);
                 ImgOwningUserNameOwn.setText(OName);
-                TextView ImgSendTimeStampOwn = (TextView) view.findViewById(R.id.ImageSendTimeStamp);
+                TextView ImgSendTimeStampOwn = (TextView) view.findViewById(R.id.OwnImageSendTimeStamp);
                 ImgSendTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
-                TextView ImgReadTimeStampOwn = (TextView) view.findViewById(R.id.ImageReadTimeStamp);
+                TextView ImgReadTimeStampOwn = (TextView) view.findViewById(R.id.OwnImageReadTimeStamp);
                 ImgReadTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
-                TextView ImageStatusOwn = (TextView) view.findViewById(R.id.ImageStatus);
+                TextView ImageStatusOwn = (TextView) view.findViewById(R.id.OwnImageStatus);
                 ImageStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
-                ImageButton IButtonOwn = (ImageButton) view.findViewById(R.id.ImageImageButton);
-
-/*                String tmpimgOwn;
-                if (directory.endsWith(File.separator)) {
-                    tmpimgOwn = Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                } else {
-                    tmpimgOwn = File.separator + Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                }*/
-
-//                final String imgfileOwn = directory + tmpimgOwn;
+                ImageButton IButtonOwn = (ImageButton) view.findViewById(R.id.OwnImageImageButton);
                 final String imgfileOwn = cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 IButtonOwn.setOnClickListener(new View.OnClickListener() {
 
@@ -465,30 +469,23 @@ public class SingleChatAdapter extends CursorAdapter {
                     Bitmap bmp = BitmapFactory.decodeFile(fname, options);
 
                     IButtonOwn.setImageBitmap(bmp);
+                    IButtonOwn.setMinimumWidth(options.outWidth);
+                    IButtonOwn.setMinimumHeight(options.outHeight);
                     IButtonOwn.setMaxWidth(options.outWidth);
                     IButtonOwn.setMaxHeight(options.outHeight);
 
                 }
                 break;
             case IMAGEMSG_FOREIGN:
-                TextView ImgOwningUserNameForeign = (TextView) view.findViewById(R.id.ImageOwningUserName);
+                TextView ImgOwningUserNameForeign = (TextView) view.findViewById(R.id.ForImageOwningUserName);
                 ImgOwningUserNameForeign.setText(OName);
-                TextView ImgSendTimeStampForeign = (TextView) view.findViewById(R.id.ImageSendTimeStamp);
+                TextView ImgSendTimeStampForeign = (TextView) view.findViewById(R.id.ForImageSendTimeStamp);
                 ImgSendTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
-                TextView ImgReadTimeStampForeign = (TextView) view.findViewById(R.id.ImageReadTimeStamp);
+                TextView ImgReadTimeStampForeign = (TextView) view.findViewById(R.id.ForImageReadTimeStamp);
                 ImgReadTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
-                TextView ImageStatusForeign = (TextView) view.findViewById(R.id.ImageStatus);
+                TextView ImageStatusForeign = (TextView) view.findViewById(R.id.ForImageStatus);
                 ImageStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
-                ImageButton IButtonForeign = (ImageButton) view.findViewById(R.id.ImageImageButton);
-
-/*                String tmpimgForeign;
-                if (directory.endsWith(File.separator)) {
-                    tmpimgForeign = Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                } else {
-                    tmpimgForeign = File.separator + Constants.IMAGEDIR + File.separator + cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                }
-
-                final String imgfileForeign = directory + tmpimgForeign;*/
+                ImageButton IButtonForeign = (ImageButton) view.findViewById(R.id.ForImageImageButton);
                 final String imgfileForeign = cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
                 IButtonForeign.setOnClickListener(new View.OnClickListener() {
 
@@ -523,71 +520,117 @@ public class SingleChatAdapter extends CursorAdapter {
                 }
                 break;
             case VIDEOMSG_OWN:
-                TextView VidOwningUserNameOwn = (TextView) view.findViewById(R.id.VideoOwningUserName);
+
+                TextView VidOwningUserNameOwn = (TextView) view.findViewById(R.id.OwnVideoOwningUserName);
                 VidOwningUserNameOwn.setText(OName);
-                TextView VidSendTimeStampOwn = (TextView) view.findViewById(R.id.VideoSendTimeStamp);
+                TextView VidSendTimeStampOwn = (TextView) view.findViewById(R.id.OwnVideoSendTimeStamp);
                 VidSendTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
-                TextView VidReadTimeStampOwn = (TextView) view.findViewById(R.id.VideoReadTimeStamp);
+                TextView VidReadTimeStampOwn = (TextView) view.findViewById(R.id.OwnVideoReadTimeStamp);
                 VidReadTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
-                TextView VideoStatusOwn = (TextView) view.findViewById(R.id.VideoStatus);
+                TextView VideoStatusOwn = (TextView) view.findViewById(R.id.OwnVideoStatus);
                 VideoStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
-                ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.VideoImageButton);
-
-/*                String tmpvidOwn;
-                if (directory.endsWith(File.separator)) {
-                    tmpvidOwn = Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                } else {
-                    tmpvidOwn = File.separator + Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                }
-
-                final String vidfileOwn = directory + tmpvidOwn; */
+                ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.OwnVideoImageButton);
                 final String vidfileOwn = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                VButtonOwn.setOnClickListener(new View.OnClickListener() {
 
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent();
-                        intent.setAction(android.content.Intent.ACTION_VIEW);
-                        File file = new File(vidfileOwn);
-                        intent.setDataAndType(Uri.fromFile(file), "video/*");
-                        mContext.startActivity(intent);
-                    }
-                });
+
+                File vfileOwn = new File(vidfileOwn);
+                if (vfileOwn.exists()) {
+                    Bitmap thumbnailOwn = scaleBitmap(getVideoFrame(vidfileOwn), 600);
+                    VButtonOwn.setImageBitmap(thumbnailOwn);
+                    VButtonOwn.setMaxWidth(thumbnailOwn.getWidth());
+                    VButtonOwn.setMaxHeight(thumbnailOwn.getHeight());
+
+                    VButtonOwn.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent();
+                            intent.setAction(android.content.Intent.ACTION_VIEW);
+                            File file = new File(vidfileOwn);
+                            intent.setDataAndType(Uri.fromFile(file), "video/*");
+                            mContext.startActivity(intent);
+                        }
+                    });
+                }
                 break;
             case VIDEOMSG_FOREIGN:
-                TextView VidOwningUserNameForeign = (TextView) view.findViewById(R.id.VideoOwningUserName);
+                TextView VidOwningUserNameForeign = (TextView) view.findViewById(R.id.ForVideoOwningUserName);
                 VidOwningUserNameForeign.setText(OName);
-                TextView VidSendTimeStampForeign = (TextView) view.findViewById(R.id.VideoSendTimeStamp);
+                TextView VidSendTimeStampForeign = (TextView) view.findViewById(R.id.ForVideoSendTimeStamp);
                 VidSendTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(sDate));
-                TextView VidReadTimeStampForeign = (TextView) view.findViewById(R.id.VideoReadTimeStamp);
+                TextView VidReadTimeStampForeign = (TextView) view.findViewById(R.id.ForVideoReadTimeStamp);
                 VidReadTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
-                TextView VideoStatusForeign = (TextView) view.findViewById(R.id.VideoStatus);
+                TextView VideoStatusForeign = (TextView) view.findViewById(R.id.ForVideoStatus);
                 VideoStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
-                ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.VideoImageButton);
-
-/*                String tmpvidForeign;
-                if (directory.endsWith(File.separator)) {
-                    tmpvidForeign = Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                } else {
-                    tmpvidForeign = File.separator + Constants.VIDEODIR + File.separator + cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                }
-
-                final String vidfileForeign = directory + tmpvidForeign;*/
+                ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.ForVideoImageButton);
                 final String vidfileForeign = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                VButtonForeign.setOnClickListener(new View.OnClickListener() {
+                File vfileForeign = new File(vidfileForeign);
+                if (vfileForeign.exists()) {
+                    Bitmap thumbnailForeign = scaleBitmap(getVideoFrame(vidfileForeign), 600);
+                    VButtonForeign.setImageBitmap(thumbnailForeign);
+                    VButtonForeign.setMaxWidth(thumbnailForeign.getWidth());
+                    VButtonForeign.setMaxHeight(thumbnailForeign.getHeight());
 
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent();
-                        intent.setAction(android.content.Intent.ACTION_VIEW);
-                        File file = new File(vidfileForeign);
-                        intent.setDataAndType(Uri.fromFile(file), "video/*");
-                        mContext.startActivity(intent);
-                    }
-                });
+                    VButtonForeign.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent();
+                            intent.setAction(android.content.Intent.ACTION_VIEW);
+                            File file = new File(vidfileForeign);
+                            intent.setDataAndType(Uri.fromFile(file), "video/*");
+                            mContext.startActivity(intent);
+                        }
+                    });
+                }
                 break;
         }
         Log.d(TAG, "end bindView ");
     }
 
+    private Bitmap getVideoFrame(String file) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(file);
+            return retriever.getFrameAtTime(2000);
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+        } catch (RuntimeException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                retriever.release();
+            } catch (RuntimeException ex) {
+            }
+        }
+        return null;
+    }
+
+    private Bitmap scaleBitmap(Bitmap bm, int newSize) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+
+        Log.v("Pictures", "Width and height are " + width + "--" + height);
+
+        if (width > height) {
+            // landscape
+            int ratio = width / newSize;
+            width = newSize;
+            height = height / ratio;
+        } else if (height > width) {
+            // portrait
+            int ratio = height / newSize;
+            height = newSize;
+            width = width / ratio;
+        } else {
+            // square
+            height = newSize;
+            width = newSize;
+        }
+
+        Log.v("Pictures", "after scaling Width and height are " + width + "--" + height);
+
+        bm = Bitmap.createScaledBitmap(bm, width, height, true);
+        return bm;
+    }
 }

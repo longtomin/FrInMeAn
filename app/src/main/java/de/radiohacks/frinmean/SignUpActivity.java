@@ -249,6 +249,7 @@ public class SignUpActivity extends Activity {
                         ed.putString(Constants.PrefUsername, username);
                         ed.putString(Constants.PrefPassword, password);
                         ed.putInt(Constants.PrefUserID, result.getUID());
+                        ed.putString(Constants.PrefUserAlreadExists, "YES");
                         ed.commit();
                         Toast.makeText(getApplicationContext(), R.string.signup_user_already_exists_saved, Toast.LENGTH_LONG).show();
                     } else {

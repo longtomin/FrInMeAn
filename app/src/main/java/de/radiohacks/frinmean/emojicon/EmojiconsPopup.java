@@ -16,13 +16,18 @@
 
 package de.radiohacks.frinmean.emojicon;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -30,6 +35,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.PopupWindow;
 
@@ -37,6 +43,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.radiohacks.frinmean.R;
+import de.radiohacks.frinmean.emojicon.EmojiconGridView.OnEmojiconClickedListener;
 
 
 /**
@@ -44,7 +51,7 @@ import de.radiohacks.frinmean.R;
  */
 
 public class EmojiconsPopup extends PopupWindow implements ViewPager.OnPageChangeListener, EmojiconRecents {
-    EmojiconGridView.OnEmojiconClickedListener onEmojiconClickedListener;
+    OnEmojiconClickedListener onEmojiconClickedListener;
     OnEmojiconBackspaceClickedListener onEmojiconBackspaceClickedListener;
     OnSoftKeyboardOpenCloseListener onSoftKeyboardOpenCloseListener;
     View rootView;
@@ -73,6 +80,7 @@ public class EmojiconsPopup extends PopupWindow implements ViewPager.OnPageChang
         setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         //default size
         setSize((int) mContext.getResources().getDimension(R.dimen.keyboard_height), LayoutParams.MATCH_PARENT);
+        this.setBackgroundDrawable(new ColorDrawable());
     }
 
     /**
@@ -85,7 +93,7 @@ public class EmojiconsPopup extends PopupWindow implements ViewPager.OnPageChang
     /**
      * Set the listener for the event when any of the emojicon is clicked
      */
-    public void setOnEmojiconClickedListener(EmojiconGridView.OnEmojiconClickedListener listener) {
+    public void setOnEmojiconClickedListener(OnEmojiconClickedListener listener) {
         this.onEmojiconClickedListener = listener;
     }
 
@@ -136,6 +144,15 @@ public class EmojiconsPopup extends PopupWindow implements ViewPager.OnPageChang
                 .getInstance(mContext).saveRecents();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public int calculateScreenHeightForLollipop() {
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.y;
+    }
+
     /**
      * Call this function to resize the emoji popup according to your soft keyboard size
      */
@@ -145,9 +162,12 @@ public class EmojiconsPopup extends PopupWindow implements ViewPager.OnPageChang
             public void onGlobalLayout() {
                 Rect r = new Rect();
                 rootView.getWindowVisibleDisplayFrame(r);
-
-                int screenHeight = rootView.getRootView()
-                        .getHeight();
+                int screenHeight;
+                if (Build.VERSION.SDK_INT >= 5.0) {
+                    screenHeight = calculateScreenHeightForLollipop();
+                } else {
+                    screenHeight = rootView.getRootView().getHeight();
+                }
                 int heightDifference = screenHeight
                         - (r.bottom - r.top);
                 int resourceId = mContext.getResources()
@@ -160,7 +180,7 @@ public class EmojiconsPopup extends PopupWindow implements ViewPager.OnPageChang
                 if (heightDifference > 100) {
                     keyBoardHeight = heightDifference;
                     setSize(LayoutParams.MATCH_PARENT, keyBoardHeight);
-                    if (isOpened == false) {
+                    if (!isOpened) {
                         if (onSoftKeyboardOpenCloseListener != null)
                             onSoftKeyboardOpenCloseListener.onKeyboardOpen(keyBoardHeight);
                     }

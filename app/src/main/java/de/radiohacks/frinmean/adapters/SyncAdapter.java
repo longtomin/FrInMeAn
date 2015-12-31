@@ -56,6 +56,8 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -398,7 +400,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                         checkfilepath = imgdir + File.separator + ofim.getIM();
 
                                         if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                            valuesins.put(T_MESSAGES_ImageMsgValue, ofim.getIM());
+                                            valuesins.put(T_MESSAGES_ImageMsgValue, checkfilepath);
                                             ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                                             ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
                                             client.release();
@@ -415,7 +417,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         } else {
                             String checkfilepath = imgdir + File.separator + outmeta.getIM();
                             if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                valuesins.put(T_MESSAGES_ImageMsgValue, outmeta.getIM());
+                                valuesins.put(T_MESSAGES_ImageMsgValue, checkfilepath);
                                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                                 ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
                                 client.release();
@@ -661,12 +663,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         return ret;
     }
 
-/*    private void moveFileToDestination(String origFile, String subdir, String serverfilename) {
+    private void moveFileToDestination(String origFile, String subdir, String serverfilename) {
         Log.d(TAG, "start moveFileToDestination");
         File source = new File(origFile);
 
         // Where to store it.
-        String destFile = directory;
+        String destFile = basedir;
         // Add SubDir for Images, videos or files
         if (destFile.endsWith(File.separator)) {
             destFile += subdir;
@@ -687,7 +689,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             e.printStackTrace();
         }
         Log.d(TAG, "end moveFileToDestination");
-    }*/
+    }
 
     /*
     Update local Database with values returned from the server after the upload
@@ -750,13 +752,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_IMAGE)) {
                 if (isWifi) {
-/*                    String imgfile = directory;
-                    if (imgfile.endsWith(File.separator)) {
-                        imgfile += Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                    } else {
-                        imgfile += File.separator + Constants.IMAGEDIR + File.separator + c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                    } */
-//                    OSImM outimg = rf.sendImageMessage(username, password, imgfile);
+                    String imgfile = c.getString(Constants.ID_MESSAGES_ImageMsgValue);
                     OSImM outimg = rf.sendImageMessage(username, password, c.getString(Constants.ID_MESSAGES_ImageMsgValue));
                     if (outimg != null) {
                         if (outimg.getET() == null || outimg.getET().isEmpty()) {
@@ -765,7 +761,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 if (outins.getET() == null || outins.getET().isEmpty()) {
                                     updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outimg.getIID(), TYP_IMAGE, outimg.getIF());
                                     inserIntoTimeTable(outins.getMID(), userid);
-                                    //moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getIF());
+                                    moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getIF());
                                 }
                             }
                         }
@@ -776,13 +772,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             } */ else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
                 if (isWifi) {
-/*                    String vidfile = directory;
-                    if (vidfile.endsWith(File.separator)) {
-                        vidfile += Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                    } else {
-                        vidfile += File.separator + Constants.VIDEODIR + File.separator + c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                    }*/
-//                    OSViM outvid = rf.sendVideoMessage(username, password, vidfile);
+                    String vidfile = c.getString(Constants.ID_MESSAGES_VideoMsgValue);
                     OSViM outvid = rf.sendVideoMessage(username, password, c.getString(Constants.ID_MESSAGES_VideoMsgValue));
                     if (outvid != null) {
                         if (outvid.getET() == null || outvid.getET().isEmpty()) {
@@ -791,7 +781,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 if (outins.getET() == null || outins.getET().isEmpty()) {
                                     updateUploadedNessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outvid.getVID(), TYP_VIDEO, outvid.getVF());
                                     inserIntoTimeTable(outins.getMID(), userid);
-                                    //moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVF());
+                                    moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVF());
                                 }
                             }
                         }

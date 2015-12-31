@@ -94,6 +94,7 @@ import de.radiohacks.frinmean.modelshort.OFMFC;
 import de.radiohacks.frinmean.modelshort.OIMIC;
 import de.radiohacks.frinmean.modelshort.OLiUs;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
+import de.radiohacks.frinmean.providers.MediaConverter;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.ErrorHelper;
 import de.radiohacks.frinmean.service.MeBaService;
@@ -390,7 +391,7 @@ public class SingleChatActivity extends ActionBarActivity implements
                 if ("content".equalsIgnoreCase(selectedimage.getScheme())) {
                     filePath = getDataColumn(this, selectedimage, null, null);
                     String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
-                    mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                    mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
                 }
 
                 assert mediaType != null;
@@ -401,6 +402,12 @@ public class SingleChatActivity extends ActionBarActivity implements
                     startService(picintent);
 
                 } else if (mediaType.startsWith("video")) {
+                    MediaConverter m = new MediaConverter();
+                    try {
+                        m.EncodeVideoToMp4();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     picintent.setAction(Constants.ACTION_SENDVIDEOMESSAGE);
                     picintent.putExtra(Constants.VIDEOLOCATION, filePath);
                     startService(picintent);
@@ -677,8 +684,9 @@ public class SingleChatActivity extends ActionBarActivity implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        long time = System.currentTimeMillis() / 1000L - (60 * 60 * 24 * 60);
-        String select = "((" + Constants.T_MESSAGES_ChatID + " = " + String.valueOf(ChatID) + ") AND (" + Constants.T_MESSAGES_SendTimestamp + ">" + String.valueOf(time) + "))";
+        //long time = System.currentTimeMillis() / 1000L - (60 * 60 * 24 * 60);
+        //String select = "((" + Constants.T_MESSAGES_ChatID + " = " + String.valueOf(ChatID) + ") AND (" + Constants.T_MESSAGES_SendTimestamp + ">" + String.valueOf(time) + "))";
+        String select = Constants.T_MESSAGES_ChatID + " = " + String.valueOf(ChatID);
         String sort = Constants.T_MESSAGES_SendTimestamp + " ASC";
 
         return new CursorLoader(SingleChatActivity.this, FrinmeanContentProvider.MESSAGES_CONTENT_URI,
@@ -855,6 +863,7 @@ public class SingleChatActivity extends ActionBarActivity implements
         }
         return filename;
     }
+
 
     public class SingleChatReceiver extends BroadcastReceiver {
 

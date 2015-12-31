@@ -630,6 +630,7 @@ public class MeBaService extends IntentService {
         }
         c.close();
         client.release();
+        getContentResolver().notifyChange(FrinmeanContentProvider.CHAT_CONTENT_URI, null);
         Log.d(TAG, "end handleActionSetShowTimestamp");
     }
 

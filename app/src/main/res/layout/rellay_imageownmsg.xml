@@ -30,18 +30,23 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="right"
-    android:padding="5dp">
+    android:gravity="right"
+    android:orientation="horizontal"
+    android:padding="5dp"
+    android:weightSum="3">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/OwnUSerStatusContainer"
+        android:layout_width="70dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/ImageMessageContainer">
+        android:layout_weight="1">
 
         <ImageView
-            android:id="@+id/user_img"
+            android:id="@+id/OwnImageUserImg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
@@ -49,10 +54,11 @@
             android:minHeight="50dp"
             android:minWidth="50dp"
             android:nestedScrollingEnabled="false"
-            android:src="@drawable/iconuser" />
+            android:src="@drawable/iconuser"
+            tools:ignore="ContentDescription" />
 
         <TextView
-            android:id="@+id/ImageStatus"
+            android:id="@+id/OwnImageStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="false"
@@ -60,7 +66,7 @@
             android:layout_alignParentRight="false"
             android:layout_alignParentTop="false"
             android:layout_alignWithParentIfMissing="false"
-            android:layout_below="@+id/user_img"
+            android:layout_below="@id/OwnImageUserImg"
             android:layout_centerHorizontal="true"
             android:layout_span="2"
             android:inputType="none"
@@ -71,56 +77,54 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/ImageMessageContainer"
-        android:layout_width="210dp"
+        android:id="@+id/OwnImageMessageContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/user_img"
+        android:layout_toEndOf="@id/OwnUSerStatusContainer"
+        android:layout_weight="3"
         android:background="@drawable/bubble_green">
 
         <TextView
-            android:id="@+id/ImageOwningUserName"
+            android:id="@+id/OwnImageOwningUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignStart="@id/ImageImageButton"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:textSize="12dp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/ImageSendTimeStamp"
+            android:id="@+id/OwnImageSendTimeStamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/ImageOwningUserName"
-            android:layout_toRightOf="@+id/ImageOwningUserName"
+            android:layout_toEndOf="@id/OwnImageOwningUserName"
+            android:layout_toRightOf="@id/OwnImageOwningUserName"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:textSize="10dp"
             android:textStyle="italic" />
 
         <ImageButton
-            android:id="@+id/ImageImageButton"
+            android:id="@+id/OwnImageImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="false"
             android:layout_alignParentLeft="false"
             android:layout_alignParentRight="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/ImageSendTimeStamp"
+            android:layout_below="@id/OwnImageSendTimeStamp"
             android:layout_centerInParent="true"
-            android:maxHeight="200dp"
-            android:maxWidth="200dp"
-            android:minHeight="100dp"
-            android:minWidth="100dp"
+            android:background="?android:selectableItemBackground"
+            android:nestedScrollingEnabled="false"
             android:paddingLeft="5dp"
             android:paddingRight="5dp" />
 
         <TextView
-            android:id="@+id/ImageReadTimeStamp"
+            android:id="@+id/OwnImageReadTimeStamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/ImageImageButton"
+            android:layout_below="@id/OwnImageImageButton"
             android:inputType="none"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"

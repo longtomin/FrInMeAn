@@ -30,6 +30,8 @@
 package de.radiohacks.frinmean.adapters;
 
 import android.annotation.SuppressLint;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
@@ -41,14 +43,19 @@ import android.widget.TextView;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.R;
+import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
+
+import static de.radiohacks.frinmean.Constants.MESSAGES_DB_Columns;
 
 
 public class ChatAdapter extends CursorAdapter {
 
     private static final String TAG = ChatAdapter.class.getSimpleName();
+    private ContentResolver mContentResolver;
 
     public ChatAdapter(Context context, Cursor cursor) {
         super(context, cursor, true);
+        this.mContentResolver = context.getContentResolver();
         Log.d(TAG, "start & End ChatAdapter");
     }
 
@@ -61,11 +68,23 @@ public class ChatAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView text = (TextView) view.findViewById(R.id.chatName);
+
+        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+        Cursor csh = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns,
+                Constants.T_MESSAGES_ChatID + " = ? and " + Constants.T_MESSAGES_ShowTimestamp + " = ?", new String[]{String.valueOf(cursor.getInt(Constants.ID_CHAT_BADBID)), "0"}, null);
+        int NumShow = csh.getCount();
+        csh.close();
+
+        if (NumShow > 0) {
+            TextView text2 = (TextView) view.findViewById(R.id.ChatItemUnreadMessages);
+            text2.setText(String.valueOf(NumShow));
+        }
+
+        TextView text = (TextView) view.findViewById(R.id.ChatItemChatName);
         String tmp = cursor.getString(Constants.ID_CHAT_ChatName);
         text.setText(tmp);
 
-        TextView text1 = (TextView) view.findViewById(R.id.owningUserName);
+        TextView text1 = (TextView) view.findViewById(R.id.ChatItemowningUserName);
         text1.setText(cursor.getString(Constants.ID_CHAT_OwningUserName));
     }
 }

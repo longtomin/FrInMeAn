@@ -30,6 +30,8 @@
 package de.radiohacks.frinmean;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -44,6 +46,7 @@ import java.io.File;
 
 import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
+import de.radiohacks.frinmean.service.MeBaService;
 
 
 public class StartActivity extends Activity {
@@ -53,7 +56,8 @@ public class StartActivity extends Activity {
     private int userid;
     private String username;
     private String password;
-    //    private String directory;
+    private String askedrestore;
+    private String userAlreadyExists;
     private int syncFreq;
     private String server = "NULL";
 
@@ -125,21 +129,74 @@ public class StartActivity extends Activity {
         this.server = sharedPrefs.getString(Constants.PrefServername, "NULL");
         boolean https = sharedPrefs.getBoolean(Constants.PrefHTTPSCommunication, true);
         if (https) {
-            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "443"));
+            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "-1"));
         } else {
-            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "80"));
+            this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "-1"));
         }
         this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
         this.syncFreq = Integer.parseInt(sharedPrefs.getString(Constants.PrefSyncfrequency, "-1"));
-//        this.directory = sharedPrefs.getString("prefDirectory", "NULL");
+        this.askedrestore = sharedPrefs.getString(Constants.PrefAskedRestore, "NULL");
+        this.userAlreadyExists = sharedPrefs.getString(Constants.PrefUserAlreadExists, "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        getPreferenceInfo();
+        if (this.askedrestore.equalsIgnoreCase("NULL")) {
+            if (!this.server.equalsIgnoreCase("NULL") &&
+                    this.port != -1 &&
+                    !this.username.equalsIgnoreCase("NULL") &&
+                    !this.password.equalsIgnoreCase("NULL") &&
+                    !this.userAlreadyExists.equalsIgnoreCase("NULL")) {
+
+                final int tmpuserid = this.userid;
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.title_restore_dialog);
+                builder.setPositiveButton(this.getText(R.string.OK), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        Intent restoreintent = new Intent(StartActivity.this, MeBaService.class);
+                        restoreintent.setAction(Constants.ACTION_REFRESH);
+                        restoreintent.putExtra(Constants.TIMESTAMP, 1L);
+                        startService(restoreintent);
+
+                        //Start the Chat-Activity
+                        Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
+                        startchat.putExtra(Constants.USERID, tmpuserid);
+                        startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FULL);
+                        startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
+                        startchat.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(startchat);
+                        StartActivity.this.finish();
+                    }
+                }).setNegativeButton(this.getText(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        //Start the Chat-Activity
+                        Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
+                        startchat.putExtra(Constants.USERID, tmpuserid);
+                        startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FULL);
+                        startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
+                        startchat.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(startchat);
+                        StartActivity.this.finish();
+                    }
+                });
+                AlertDialog dlg = builder.create();
+                dlg.show();
+
+                // Set the Preference that we habe already asked for the Restore
+                SharedPreferences shP = PreferenceManager
+                        .getDefaultSharedPreferences(StartActivity.this);
+                SharedPreferences.Editor ed = shP.edit();
+                ed.putString(Constants.PrefAskedRestore, "YES");
+                ed.commit();
+            }
+        }
     }
 
     @Override

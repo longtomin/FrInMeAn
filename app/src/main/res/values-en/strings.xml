@@ -85,4 +85,6 @@
     <string name="read">Downloaded : </string>
     <string name="show">Shown : </string>
     <string name="send">Sent : </string>
+    <string name="OK">OK</string>
+    <string name="title_restore_dialog">Restore Messages from the Server?</string>
 </resources>

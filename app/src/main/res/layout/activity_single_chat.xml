@@ -140,6 +140,7 @@
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@id/buttonSend"
         android:layout_toRightOf="@id/emoji_btn"
+        android:imeOptions="flagNoExtractUi"
         android:inputType="textMultiLine"
         android:textColor="#000"
         android:textSize="20sp"
