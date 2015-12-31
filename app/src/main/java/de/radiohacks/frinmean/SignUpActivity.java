@@ -65,7 +65,7 @@ public class SignUpActivity extends Activity {
     private String password;
     private String email;
     private String server;
-    //    private String directory;
+    private String contextroot;
     private boolean https;
     private int port;
     private String CommunicationURL;
@@ -185,7 +185,7 @@ public class SignUpActivity extends Activity {
         }
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
         this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
-//        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+        this.contextroot = sharedPrefs.getString(Constants.PrefContextRoot, "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
 
@@ -196,7 +196,7 @@ public class SignUpActivity extends Activity {
         } else {
             this.CommunicationURL += "http://";
         }
-        this.CommunicationURL += server + ":" + port + "/frinmeba/";
+        this.CommunicationURL += server + ":" + port + "/" + contextroot + "/";
     }
 
     protected String hashPassword(String in) {

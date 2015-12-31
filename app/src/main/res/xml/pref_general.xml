@@ -37,6 +37,15 @@
         android:key="prefContentCommunication"
         android:title="@string/pref_title_content_communication" />
 
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_contextroot"
+        android:inputType="textCapWords"
+        android:key="prefContextRoot"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_contextroot" />
+
     <!--    <Preference
             android:key="prefDirectory"
             android:title="@string/DirecotryChooser" />

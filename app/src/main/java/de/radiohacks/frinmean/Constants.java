@@ -387,6 +387,7 @@ public class Constants {
     public static final String PrefServerport = "prefServerport";
     public static final String PrefServername = "prefServername";
     public static final String PrefHTTPSCommunication = "prefHTTPSCommunication";
+    public static final String PrefContextRoot = "prefContextRoot";
     public static final String PrefUsername = "prefUsername";
     public static final String PrefPassword = "prefPassword";
     public static final String PrefAskedRestore = "prefAskedRestore";

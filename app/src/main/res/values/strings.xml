@@ -102,5 +102,7 @@
     <string name="read">Heruntergeladen : </string>
     <string name="show">Angezeigt : </string>
     <string name="pref_title_HTTP_communication">Sicherheit</string>
+    <string name="pref_title_contextroot">Context Root URL</string>
+    <string name="pref_default_contextroot">frinmeba</string>
     <string name="send">Gesendet :</string>
 </resources>

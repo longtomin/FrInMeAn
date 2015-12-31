@@ -75,6 +75,7 @@ public class RestFunctions {
     private boolean https;
     private String CommunicationURL;
     private int port;
+    private String contextroot;
     private String imgdir;
     private String viddir;
     private String fildir;
@@ -131,7 +132,7 @@ public class RestFunctions {
         } else {
             this.port = Integer.parseInt(sharedPrefs.getString(Constants.PrefServerport, "80"));
         }
-//        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
+        this.contextroot = sharedPrefs.getString(Constants.PrefContextRoot, "NULL");
         Log.d(TAG, "end getPferefenceInfo");
     }
 
@@ -142,7 +143,7 @@ public class RestFunctions {
         } else {
             this.CommunicationURL += "http://";
         }
-        this.CommunicationURL += server + ":" + port + "/frinmeba/";
+        this.CommunicationURL += server + ":" + port + "/" + contextroot + "/";
     }
 
     protected boolean checkServer() {
