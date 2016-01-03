@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.adapters.SyncAdapter;
@@ -617,18 +618,27 @@ public class MeBaService extends IntentService {
         ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
         Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ShowTimestamp + " = ? AND " + T_MESSAGES_ChatID + " = ?", new String[]{"0", String.valueOf(ChatID)}, null);
 
+        ArrayList<Integer> ids = new ArrayList<>(1);
         while (c.moveToNext()) {
-            OSShT outsst = rf.setshowtimestamp(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
-            if (outsst != null) {
-                if (outsst.getET() == null || outsst.getET().isEmpty()) {
+            int val = c.getInt(Constants.ID_MESSAGES_BADBID);
+            if (!ids.contains(val)) {
+                ids.add(val);
+            }
+        }
+        c.close();
+
+        OSShT outsst = rf.setshowtimestamp(username, password, ids);
+        if (outsst != null) {
+            if (outsst.getET() == null || outsst.getET().isEmpty()) {
+                for (int i = 0; i < outsst.getShT().size(); i++) {
                     ContentValues valuesins = new ContentValues();
-                    valuesins.put(Constants.T_MESSAGES_BADBID, outsst.getMID());
-                    valuesins.put(Constants.T_MESSAGES_ShowTimestamp, outsst.getShT());
+                    valuesins.put(Constants.T_MESSAGES_BADBID, outsst.getShT().get(i).getMID());
+                    valuesins.put(Constants.T_MESSAGES_ShowTimestamp, outsst.getShT().get(i).getT());
                     ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
                 }
             }
         }
-        c.close();
+
         client.release();
         getContentResolver().notifyChange(FrinmeanContentProvider.CHAT_CONTENT_URI, null);
         Log.d(TAG, "end handleActionSetShowTimestamp");

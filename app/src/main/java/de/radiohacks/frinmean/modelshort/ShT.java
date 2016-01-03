@@ -37,119 +37,61 @@
 package de.radiohacks.frinmean.modelshort;
 
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- *
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- *
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="UN" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="PW" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="MID" type="{http://www.w3.org/2001/XMLSchema}int" maxOccurs="unbounded"/>
+ *         &lt;element name="MID" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="T" type="{http://www.w3.org/2001/XMLSchema}long"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
 
-@Root(name = "ISShT", strict = false)
-public class ISShT {
+@Root(name = "ShT", strict = false)
+public class ShT {
 
-    @Element(name = "UN", required = true)
-    protected String un;
-    @Element(name = "PW", required = true)
-    protected String pw;
-    @ElementList(required = false, name = "MID", type = Integer.class, inline = true)
-    protected List<Integer> mid;
-
-    /**
-     * Gets the value of the un property.
-     *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
-     */
-    public String getUN() {
-        return un;
-    }
-
-    /**
-     * Sets the value of the un property.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
-     */
-    public void setUN(String value) {
-        this.un = value;
-    }
-
-    /**
-     * Gets the value of the pw property.
-     *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
-     */
-    public String getPW() {
-        return pw;
-    }
-
-    /**
-     * Sets the value of the pw property.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
-     */
-    public void setPW(String value) {
-        this.pw = value;
-    }
+    @Element(name = "MID")
+    protected int mid;
+    @Element(name = "T")
+    protected long t;
 
     /**
      * Gets the value of the mid property.
-     *
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the mid property.
-     *
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getMID().add(newItem);
-     * </pre>
-     *
-     *
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Integer }
-     *
-     *
      */
-    public List<Integer> getMID() {
-        if (mid == null) {
-            mid = new ArrayList<Integer>();
-        }
-        return this.mid;
+    public int getMID() {
+        return mid;
+    }
+
+    /**
+     * Sets the value of the mid property.
+     */
+    public void setMID(int value) {
+        this.mid = value;
+    }
+
+    /**
+     * Gets the value of the t property.
+     */
+    public long getT() {
+        return t;
+    }
+
+    /**
+     * Sets the value of the t property.
+     */
+    public void setT(long value) {
+        this.t = value;
     }
 
 }

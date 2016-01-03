@@ -250,7 +250,6 @@ public class RestClient {
             HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
 
 
-
             if (!params.isEmpty()) {
                 combinedParams += "?";
 

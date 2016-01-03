@@ -582,7 +582,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start gettextmessage");
+        Log.d(TAG, "end gettextmessage");
         return out;
     }
 
@@ -635,7 +635,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start insertmessageintochat");
+        Log.d(TAG, "end insertmessageintochat");
         return out;
     }
 
@@ -673,7 +673,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start deletemessagefromchat");
+        Log.d(TAG, "end deletemessagefromchat");
         return out;
     }
 
@@ -713,7 +713,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start getmessagefromchat");
+        Log.d(TAG, "end getmessagefromchat");
         return out;
     }
 
@@ -1047,8 +1047,8 @@ public class RestFunctions {
 	@Consumes(MediaType.APPLICATION_XML)
 	@Path("/setshowtimestamp") */
 
-    public OSShT setshowtimestamp(String inuser, String inpassword, int msgid) {
-        Log.d(TAG, "start setshowtimestamp with user=" + inuser + " password=" + inpassword + "MessageID=" + String.valueOf(msgid));
+    public OSShT setshowtimestamp(String inuser, String inpassword, ArrayList<Integer> msgids) {
+        Log.d(TAG, "start setshowtimestamp with user=" + inuser + " password=" + inpassword + "Nimber of Messages=" + String.valueOf(msgids.size()));
         OSShT out = null;
         if (checkServer()) {
             RestClient rc;
@@ -1057,7 +1057,9 @@ public class RestFunctions {
                 ISShT in = new ISShT();
                 in.setUN(convertB64(inuser));
                 in.setPW(convertB64(inpassword));
-                in.setMID(msgid);
+                for (int i = 0; i < msgids.size(); i++) {
+                    in.getMID().add(msgids.get(i));
+                }
 
                 Serializer serializer = new Persister();
                 StringWriter InString = new StringWriter();
@@ -1066,9 +1068,6 @@ public class RestFunctions {
                 rc.setPutContent(String.valueOf(InString));
                 rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
 
-//                rc.AddParam(Constants.QPusername, convertB64(inuser));
-//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
-//                rc.AddParam(Constants.QPmessageid, Integer.toString(msgid));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("POST");
@@ -1076,16 +1075,14 @@ public class RestFunctions {
                     ret = rc.ExecuteHTTPXML("POST");
                 }
                 if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
-//                    Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
-
                     out = serializer.read(OSShT.class, reader, false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start setshowtimestamp");
+        Log.d(TAG, "end setshowtimestamp");
         return out;
     }
 
@@ -1126,7 +1123,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start getmessageinformation");
+        Log.d(TAG, "end getmessageinformation");
         return out;
     }
 
@@ -1175,7 +1172,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start acknowledgemessagedownload");
+        Log.d(TAG, "end acknowledgemessagedownload");
         return out;
     }
 
@@ -1225,7 +1222,7 @@ public class RestFunctions {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "start acknowledgemessagedownload");
+        Log.d(TAG, "end acknowledgemessagedownload");
         return out;
     }
 }
