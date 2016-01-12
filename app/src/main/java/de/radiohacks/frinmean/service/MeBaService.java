@@ -1047,10 +1047,8 @@ public class MeBaService extends IntentService {
                                                 OGImM ofim = rf.fetchImageMessage(username, password, out.getU().get(i).getICID(), Constants.TYP_ICON);
                                                 if (ofim != null) {
                                                     if (ofim.getET() == null || ofim.getET().isEmpty()) {
-                                                        if (acknowledgeMessage(Constants.TYP_IMAGE, icndir + ofim.getIM(), out.getU().get(i).getICID())) {
-                                                            icnid = out.getU().get(i).getICID();
-                                                            icnvalue = icndir + ofim.getIM();
-                                                        }
+                                                        icnvalue = icndir + File.separator + ofim.getIM();
+                                                        icnid = out.getU().get(i).getICID();
                                                     }
                                                 }
                                             }

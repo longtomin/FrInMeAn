@@ -381,9 +381,9 @@ public class Constants {
     public static final int ID_USER_ID = 0;
     public static final int ID_USER_BADBID = 1;
     public static final int ID_USER_PhoneUsername = 2;
-    public static final int ID_USER_Username = 3;
+    public static final int ID_USER_Username = 5;
     public static final int ID_USER_Email = 4;
-    public static final int ID_USER_AuthenticationTime = 5;
+    public static final int ID_USER_AuthenticationTime = 3;
     public static final int ID_USER_IconID = 6;
     public static final int ID_USER_IconValue = 7;
 
