@@ -96,7 +96,6 @@ import static de.radiohacks.frinmean.Constants.MESSAGES_DB_Columns;
 import static de.radiohacks.frinmean.Constants.MESSAGES_TIME_DB_Columns;
 import static de.radiohacks.frinmean.Constants.TYP_CONTACT;
 import static de.radiohacks.frinmean.Constants.TYP_FILE;
-import static de.radiohacks.frinmean.Constants.TYP_ICON;
 import static de.radiohacks.frinmean.Constants.TYP_IMAGE;
 import static de.radiohacks.frinmean.Constants.TYP_LOCATION;
 import static de.radiohacks.frinmean.Constants.TYP_TEXT;
@@ -340,7 +339,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             valuesins.put(T_CHAT_OwningUserID, c.getOU().getOUID());
             valuesins.put(T_CHAT_OwningUserName, c.getOU().getOUN());
             if (c.getICID() > 0) {
-                String filepath = downloadimage(c.getICID(), Constants.TYP_ICON);
+                String filepath = downloadimage(c.getICID(), 0, Constants.TYP_ICON);
                 if (filepath != null && !filepath.isEmpty()) {
                     valuesins.put(Constants.T_CHAT_IconID, c.getICID());
                     valuesins.put(Constants.T_CHAT_IconValue, filepath);
@@ -356,22 +355,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, "end saveChatsToLDB");
     }
 
-    private String downloadimage(int inID, String ImageType) {
+    private String downloadimage(int inImgID, int inMsgID, String ImageType) {
 
         String ret = null;
-        OGImMMD outmeta = rf.getImageMessageMetaData(username, password, inID);
+        OGImMMD outmeta = rf.getImageMessageMetaData(username, password, inImgID);
 
         if (outmeta != null) {
             if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
-                if (!checkfileexists(outmeta.getIM(), TYP_ICON, outmeta.getIS(), outmeta.getIMD5())) {
+                if (!checkfileexists(outmeta.getIM(), ImageType, outmeta.getIS(), outmeta.getIMD5())) {
                     if (isWifi) {
-                        OGImM ofim = rf.fetchImageMessage(username, password, inID, ImageType);
+                        OGImM ofim = rf.fetchImageMessage(username, password, inImgID, ImageType);
                         if (ofim != null) {
                             if (ofim.getET() == null || ofim.getET().isEmpty()) {
                                 String checkfilepath;
                                 if (ImageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
                                     checkfilepath = imgdir + File.separator + ofim.getIM();
-                                    if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, inID)) {
+                                    if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, inMsgID)) {
                                         ret = checkfilepath;
                                     }
                                 } else if (ImageType.equalsIgnoreCase(Constants.TYP_ICON)) {
@@ -384,7 +383,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     String checkfilepath;
                     if (ImageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
                         checkfilepath = imgdir + File.separator + outmeta.getIM();
-                        if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, inID)) {
+                        if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, inMsgID)) {
                             ret = checkfilepath;
                         }
                     } else if (ImageType.equalsIgnoreCase(Constants.TYP_ICON)) {
@@ -438,7 +437,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } else if (m.getMT().equalsIgnoreCase(TYP_IMAGE)) {
                 valuesins.put(T_MESSAGES_ImageMsgID, m.getIMID());
 
-                String imgfile = downloadimage(m.getIMID(), Constants.TYP_IMAGE);
+                String imgfile = downloadimage(m.getIMID(), m.getMID(), Constants.TYP_IMAGE);
 
                 valuesins.put(T_MESSAGES_ImageMsgValue, imgfile);
                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
