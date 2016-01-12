@@ -36,18 +36,23 @@
         android:title=""
         yourapp:showAsAction="always" />
     <item
+        android:id="@+id/action_setchaticon"
+        android:orderInCategory="200"
+        android:title="@string/action_setchaticon"
+        yourapp:showAsAction="never" />
+    <item
         android:id="@+id/option_adduser"
-        android:orderInCategory="600"
+        android:orderInCategory="300"
         android:title="@string/option_adduser"
         yourapp:showAsAction="never" />
     <item
         android:id="@+id/option_removeuser"
-        android:orderInCategory="700"
+        android:orderInCategory="400"
         android:title="@string/option_removeuser"
         yourapp:showAsAction="never" />
     <item
         android:id="@+id/option_deletechat"
-        android:orderInCategory="800"
+        android:orderInCategory="500"
         android:title="@string/option_deletechat"
         yourapp:showAsAction="never" />
 </menu>

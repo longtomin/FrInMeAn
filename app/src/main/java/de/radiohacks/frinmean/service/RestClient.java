@@ -504,6 +504,10 @@ public class RestClient {
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, tmf.getTrustManagers(), null);
 
+            SSLSocketFactory NoSSLv3Factory = new NoSSLv3SocketFactory(context.getSocketFactory());
+
+            HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
+
             File file = new File(filepath);
             FileInputStream fileInputStream = new FileInputStream(file);
 
@@ -701,6 +705,10 @@ public class RestClient {
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, tmf.getTrustManagers(), null);
 
+            SSLSocketFactory NoSSLv3Factory = new NoSSLv3SocketFactory(context.getSocketFactory());
+
+            HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
+
             if (!params.isEmpty()) {
                 combinedParams += "?";
 
@@ -721,7 +729,12 @@ public class RestClient {
             }
             URL u = new URL(url + combinedParams);
             urlcon = (HttpsURLConnection) u.openConnection();
-            urlcon.setSSLSocketFactory(context.getSocketFactory());
+            if (!headers.isEmpty()) {
+                for (HashMap.Entry<String, String> entry : headers.entrySet()) {
+                    urlcon.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+            // urlcon.setSSLSocketFactory(context.getSocketFactory());
             urlcon.setHostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession session) {
@@ -733,17 +746,17 @@ public class RestClient {
 
             urlcon.setInstanceFollowRedirects(false);
             urlcon.setRequestMethod(type);
-            if (type.equalsIgnoreCase("POST")) {
-                urlcon.setDoOutput(true);
+            if (type.equalsIgnoreCase("POST") || type.equalsIgnoreCase("PUT")) {
+                urlcon.setRequestMethod(type);
+                OutputStreamWriter out = new OutputStreamWriter(
+                        urlcon.getOutputStream());
+                out.write(putContent);
+                out.close();
             }
-            urlcon.setDoInput(true);
+//            urlcon.setDoInput(true);
             urlcon.setConnectTimeout(60 * 1000);
             urlcon.setReadTimeout(60 * 1000);
-            if (!headers.isEmpty()) {
-                for (HashMap.Entry<String, String> entry : headers.entrySet()) {
-                    urlcon.setRequestProperty(entry.getKey(), entry.getValue());
-                }
-            }
+
             responseCode = urlcon.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 message = urlcon.getResponseMessage();

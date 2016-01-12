@@ -40,14 +40,18 @@
     <string name="action_sendlocation">Standort senden</string>
     <string name="action_sendfile">Datei senden</string>
     <string name="action_sendcontact">Kontakt senden</string>
+    <string name="action_setusericon">Setze Benutzer Icon</string>
+    <string name="action_setchaticon">Setze Chat Icon</string>
     <string name="option_adduser">Benutzer hinzufügen</string>
     <string name="option_removeuser">Benutzer entfernen</string>
     <string name="option_leave_chat">Chat verlassen</string>
     <string name="option_deletechat">Chat löschen</string>
     <string name="option_createchat">Chat erzeugen</string>
     <string name="option_refresh">Neu laden</string>
+    <string name="option_syncuser">Sync Benutzer</string>
     <string name="title_activity_chat">Chats</string>
     <string name="no_chats">Keine Chats vorhanden</string>
+    <string name="no_users">Keine Benutzer vorhanden</string>
     <string name="username">Benutzername </string>
     <string name="password">Passwort</string>
     <string name="password_again">Passwort erneut</string>
@@ -92,9 +96,10 @@
     <string name="ERROR_NO_ACTIVE_CHATS">Keine aktiven Chats vorhanden!</string>
     <string name="ERROR_FILE_NOT_FOUND">Datei existiert auf dem Server nicht!</string>
     <string name="title_activity_sign_up">SignUpActivity</string>
-    <!-- <string name="hello_world">Hello world!</string> -->
     <string name="title_activity_single_chat">SingleChatActivity</string>
     <string name="title_activity_image_view">ImageViewActivity</string>
+    <string name="title_tab_chat">Aktive Chats</string>
+    <string name="title_tab_user">Bekannte Benutzer</string>
     <string name="title_restore_dialog">Nachrichten vom Server wiederherstellen?</string>
     <string name="timeinformation">Zeit-Informationen</string>
     <string name="notread">Heruntergeladen : Noch nicht heruntergeladen</string>
@@ -105,4 +110,6 @@
     <string name="pref_title_contextroot">Context Root URL</string>
     <string name="pref_default_contextroot">frinmeba</string>
     <string name="send">Gesendet :</string>
+    <string name="title_activity_chat_user"><![CDATA[Chats & Benutzer]]></string>
+    <string name="pref_title_content_communication">Bilder/Video im WLAN</string>
 </resources>

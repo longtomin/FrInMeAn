@@ -33,13 +33,20 @@ import android.annotation.SuppressLint;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.File;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.R;
@@ -52,11 +59,36 @@ public class ChatAdapter extends CursorAdapter {
 
     private static final String TAG = ChatAdapter.class.getSimpleName();
     private ContentResolver mContentResolver;
+    private Context mContext;
 
     public ChatAdapter(Context context, Cursor cursor) {
         super(context, cursor, true);
+        this.mContext = context;
         this.mContentResolver = context.getContentResolver();
         Log.d(TAG, "start & End ChatAdapter");
+    }
+
+    private static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 
     @SuppressLint("InflateParams")
@@ -86,5 +118,42 @@ public class ChatAdapter extends CursorAdapter {
 
         TextView text1 = (TextView) view.findViewById(R.id.ChatItemowningUserName);
         text1.setText(cursor.getString(Constants.ID_CHAT_OwningUserName));
+
+        final String ChatImageFile = cursor.getString(Constants.ID_CHAT_IconValue);
+        if ((ChatImageFile != null) && (!ChatImageFile.isEmpty())) {
+            ImageView ChatItem = (ImageView) view.findViewById(R.id.ChatItemChatImage);
+            ChatItem.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setAction(android.content.Intent.ACTION_VIEW);
+                    File file = new File(ChatImageFile);
+                    intent.setDataAndType(Uri.fromFile(file), "image/*");
+                    mContext.startActivity(intent);
+                }
+            });
+
+
+            File ifileOwn = new File(ChatImageFile);
+            if (ifileOwn.exists()) {
+                String fname = ifileOwn.getAbsolutePath();
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(fname, options);
+
+                options.inSampleSize = calculateInSampleSize(options, 50, 50);
+
+                // Decode bitmap with inSampleSize set
+                options.inJustDecodeBounds = false;
+                Bitmap bmp = BitmapFactory.decodeFile(fname, options);
+
+                ChatItem.setImageBitmap(bmp);
+                ChatItem.setMinimumWidth(options.outWidth);
+                ChatItem.setMinimumHeight(options.outHeight);
+                ChatItem.setMaxWidth(options.outWidth);
+                ChatItem.setMaxHeight(options.outHeight);
+            }
+        }
     }
 }

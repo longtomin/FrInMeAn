@@ -47,10 +47,10 @@ public class LocalDBHandler extends SQLiteOpenHelper {
             + Constants.T_MESSAGES_LocationMsgID + " INTEGER, "
             + Constants.T_MESSAGES_LocationMsgValue + " VARCHAR(50), "
             + Constants.T_MESSAGES_ContactMsgID + " INTEGER, "
-            + Constants.T_MESSAGES_ContactMsgValue + " VARCHAR(250), "
-            + Constants.T_MESSAGES_NumberAll + " INTEGER, "
+            + Constants.T_MESSAGES_ContactMsgValue + " VARCHAR(250));";
+            /*+ Constants.T_MESSAGES_NumberAll + " INTEGER, "
             + Constants.T_MESSAGES_NumberRead + " INTEGER, "
-            + Constants.T_MESSAGES_NumberShow + " INTEGER);";
+            + Constants.T_MESSAGES_NumberShow + " INTEGER);"; */
 
     private static final String TABLE_CHAT_CREATE
             = "CREATE TABLE " + Constants.CHAT_TABLE_NAME
@@ -58,15 +58,20 @@ public class LocalDBHandler extends SQLiteOpenHelper {
             + Constants.T_CHAT_BADBID + " INTEGER, "
             + Constants.T_CHAT_OwningUserID + " INTEGER, "
             + Constants.T_CHAT_OwningUserName + " VARCHAR(45), "
-            + Constants.T_CHAT_ChatName + " VARCHAR(50));";
+            + Constants.T_CHAT_ChatName + " VARCHAR(50), "
+            + Constants.T_CHAT_IconID + " INTEGER, "
+            + Constants.T_CHAT_IconValue + " VARCHAR(256));";
 
     private static final String TABLE_USER_CREATE
             = "CREATE TABLE " + Constants.USER_TABLE_NAME
             + " (" + Constants.T_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + Constants.T_USER_BADBID + " INTEGER, "
+            + Constants.T_USER_PhoneUsername + " VARCHAR(100), "
             + Constants.T_USER_Username + " VARCHAR(45), "
             + Constants.T_USER_Email + " VARCHAR(100), "
-            + Constants.T_USER_AuthenticationTime + " INTEGER);";
+            + Constants.T_USER_AuthenticationTime + " INTEGER, "
+            + Constants.T_User_IconID + " INTEGER, "
+            + Constants.T_User_IconValue + " VARCHAR(256));";
 
     private static final String TABLE_MESSAGE_TIME_CREATE
             = "CREATE TABLE " + Constants.MESSAGE_TIME_TABLE_NAME

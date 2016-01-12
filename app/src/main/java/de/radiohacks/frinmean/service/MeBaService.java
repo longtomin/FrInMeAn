@@ -2,6 +2,7 @@ package de.radiohacks.frinmean.service;
 
 import android.app.IntentService;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.google.common.hash.HashCode;
@@ -31,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.adapters.SyncAdapter;
@@ -50,8 +53,10 @@ import de.radiohacks.frinmean.modelshort.OGTeM;
 import de.radiohacks.frinmean.modelshort.OGViM;
 import de.radiohacks.frinmean.modelshort.OGViMMD;
 import de.radiohacks.frinmean.modelshort.OIMIC;
+import de.radiohacks.frinmean.modelshort.OIUIc;
 import de.radiohacks.frinmean.modelshort.OLiCh;
 import de.radiohacks.frinmean.modelshort.OLiUs;
+import de.radiohacks.frinmean.modelshort.OSIcM;
 import de.radiohacks.frinmean.modelshort.OSShT;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 
@@ -79,9 +84,6 @@ import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_LocationMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_MessageTyp;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_NumberAll;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_NumberRead;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_NumberShow;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserName;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ReadTimestamp;
@@ -107,6 +109,7 @@ public class MeBaService extends IntentService {
     private String imgdir;
     private String viddir;
     private String fildir;
+    private String icndir;
     private boolean contentall;
     private boolean isWifi;
     private BroadcastNotifier mBroadcaster = null;
@@ -129,17 +132,24 @@ public class MeBaService extends IntentService {
             }
         }
         viddir = basedir + File.separator + Constants.VIDEODIR + File.separator;
-        File vidFile = new File(imgdir);
+        File vidFile = new File(viddir);
         if (!vidFile.exists()) {
             if (!vidFile.mkdir()) {
                 Log.e(TAG, "Video Directory creation failed");
             }
         }
         fildir = basedir + File.separator + Constants.FILESDIR + File.separator;
-        File filFile = new File(imgdir);
+        File filFile = new File(fildir);
         if (!filFile.exists()) {
             if (!filFile.mkdir()) {
                 Log.e(TAG, "File Directory creation failed");
+            }
+        }
+        icndir = basedir + File.separator + Constants.ICONDIR + File.separator;
+        File icnFile = new File(icndir);
+        if (!icnFile.exists()) {
+            if (!icnFile.mkdir()) {
+                Log.e(TAG, "Icon Directory creation failed");
             }
         }
     }
@@ -267,6 +277,15 @@ public class MeBaService extends IntentService {
             } else if (Constants.ACTION_REFRESH.equalsIgnoreCase(action)) {
                 final long time = intent.getLongExtra(Constants.TIMESTAMP, -1);
                 handleActionRefresh(time);
+            } else if (Constants.ACTION_SYNCUSER.equalsIgnoreCase(action)) {
+                handleActionSyncUser();
+            } else if (Constants.ACTION_SENDUSERICON.equalsIgnoreCase(action)) {
+                final String message = intent.getStringExtra(Constants.IMAGELOCATION);
+                handleSendUserIcon(message);
+            } else if (Constants.ACTION_SENDCHATICON.equalsIgnoreCase(action)) {
+                final String message = intent.getStringExtra(Constants.IMAGELOCATION);
+                final int chatid = intent.getIntExtra(Constants.CHATID, -1);
+                handleSendChatIcon(message, chatid);
             }
         }
         Log.d(TAG, "start onHandleIntent");
@@ -401,9 +420,6 @@ public class MeBaService extends IntentService {
                             valuesinsmsg.put(T_MESSAGES_SendTimestamp, m.getSdT());
                             valuesinsmsg.put(T_MESSAGES_ReadTimestamp, m.getRdT());
                             valuesinsmsg.put(T_MESSAGES_ShowTimestamp, m.getShT());
-                            valuesinsmsg.put(T_MESSAGES_NumberAll, m.getNT());
-                            valuesinsmsg.put(T_MESSAGES_NumberShow, m.getNS());
-                            valuesinsmsg.put(T_MESSAGES_NumberRead, m.getNR());
 
                             if (m.getMT().equalsIgnoreCase(TYP_TEXT)) {
                                 valuesinsmsg.put(T_MESSAGES_TextMsgID, m.getTMID());
@@ -427,7 +443,7 @@ public class MeBaService extends IntentService {
 
                                         if (!checkfileexists(outmeta.getIM(), TYP_IMAGE, outmeta.getIS(), outmeta.getIMD5())) {
                                             if (isWifi) {
-                                                OGImM ofim = rf.fetchImageMessage(username, password, m.getIMID());
+                                                OGImM ofim = rf.fetchImageMessage(username, password, m.getIMID(), m.getMT());
                                                 if (ofim != null) {
                                                     if (ofim.getET() == null || ofim.getET().isEmpty()) {
                                                         String checkfilepath;
@@ -618,29 +634,31 @@ public class MeBaService extends IntentService {
         ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
         Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_ShowTimestamp + " = ? AND " + T_MESSAGES_ChatID + " = ?", new String[]{"0", String.valueOf(ChatID)}, null);
 
-        ArrayList<Integer> ids = new ArrayList<>(1);
-        while (c.moveToNext()) {
-            int val = c.getInt(Constants.ID_MESSAGES_BADBID);
-            if (!ids.contains(val)) {
-                ids.add(val);
-            }
-        }
-        c.close();
-
-        OSShT outsst = rf.setshowtimestamp(username, password, ids);
-        if (outsst != null) {
-            if (outsst.getET() == null || outsst.getET().isEmpty()) {
-                for (int i = 0; i < outsst.getShT().size(); i++) {
-                    ContentValues valuesins = new ContentValues();
-                    valuesins.put(Constants.T_MESSAGES_BADBID, outsst.getShT().get(i).getMID());
-                    valuesins.put(Constants.T_MESSAGES_ShowTimestamp, outsst.getShT().get(i).getT());
-                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
+        if (c.getCount() > 0) {
+            ArrayList<Integer> ids = new ArrayList<>(1);
+            while (c.moveToNext()) {
+                int val = c.getInt(Constants.ID_MESSAGES_BADBID);
+                if (!ids.contains(val)) {
+                    ids.add(val);
                 }
             }
-        }
+            c.close();
 
-        client.release();
-        getContentResolver().notifyChange(FrinmeanContentProvider.CHAT_CONTENT_URI, null);
+            OSShT outsst = rf.setshowtimestamp(username, password, ids);
+            if (outsst != null) {
+                if (outsst.getET() == null || outsst.getET().isEmpty()) {
+                    for (int i = 0; i < outsst.getShT().size(); i++) {
+                        ContentValues valuesins = new ContentValues();
+                        valuesins.put(Constants.T_MESSAGES_BADBID, outsst.getShT().get(i).getMID());
+                        valuesins.put(Constants.T_MESSAGES_ShowTimestamp, outsst.getShT().get(i).getT());
+                        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
+                    }
+                }
+            }
+
+            client.release();
+            getContentResolver().notifyChange(FrinmeanContentProvider.CHAT_CONTENT_URI, null);
+        }
         Log.d(TAG, "end handleActionSetShowTimestamp");
     }
 
@@ -879,9 +897,9 @@ public class MeBaService extends IntentService {
 
         ContentValues valuesins = new ContentValues();
         valuesins.put(Constants.T_MESSAGES_BADBID, 0);
-        valuesins.put(Constants.T_MESSAGES_NumberAll, 0);
-        valuesins.put(Constants.T_MESSAGES_NumberRead, 0);
-        valuesins.put(Constants.T_MESSAGES_NumberShow, 0);
+//        valuesins.put(Constants.T_MESSAGES_NumberAll, 0);
+//        valuesins.put(Constants.T_MESSAGES_NumberRead, 0);
+//        valuesins.put(Constants.T_MESSAGES_NumberShow, 0);
         valuesins.put(Constants.T_MESSAGES_OwningUserID, UserID);
         valuesins.put(Constants.T_MESSAGES_OwningUserName, username);
         valuesins.put(Constants.T_MESSAGES_ChatID, ChatID);
@@ -926,9 +944,9 @@ public class MeBaService extends IntentService {
 
         ContentValues valuesins = new ContentValues();
         valuesins.put(Constants.T_MESSAGES_BADBID, MsgID);
-        valuesins.put(Constants.T_MESSAGES_NumberAll, 0);
-        valuesins.put(Constants.T_MESSAGES_NumberRead, 0);
-        valuesins.put(Constants.T_MESSAGES_NumberShow, 0);
+//        valuesins.put(Constants.T_MESSAGES_NumberAll, 0);
+//        valuesins.put(Constants.T_MESSAGES_NumberRead, 0);
+//        valuesins.put(Constants.T_MESSAGES_NumberShow, 0);
         valuesins.put(Constants.T_MESSAGES_OwningUserID, UserID);
         valuesins.put(Constants.T_MESSAGES_OwningUserName, username);
         valuesins.put(Constants.T_MESSAGES_ChatID, ChatID);
@@ -962,5 +980,123 @@ public class MeBaService extends IntentService {
         SyncUtils.TriggerRefresh();
 
         Log.d(TAG, "end insertFwdMsgIntoDB");
+    }
+
+    private void insertUserIntoDB(int uid, String uname, String puname, String email, long auth, int iconid, String iconvalue) {
+        Log.d(TAG, "start insertUserIntoDB");
+
+        ContentValues valuesins = new ContentValues();
+        valuesins.put(Constants.T_USER_BADBID, uid);
+        valuesins.put(Constants.T_USER_Username, uname);
+        valuesins.put(Constants.T_USER_PhoneUsername, puname);
+        valuesins.put(Constants.T_USER_Email, email);
+        valuesins.put(Constants.T_USER_AuthenticationTime, auth);
+        valuesins.put(Constants.T_User_IconID, iconid);
+        valuesins.put(Constants.T_User_IconValue, iconvalue);
+
+        ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.USER_CONTENT_URI);
+        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.USER_CONTENT_URI, valuesins);
+        client.release();
+
+        Log.d(TAG, "end insertUserIntoDB");
+    }
+
+    private void handleActionSyncUser() {
+        Log.d(TAG, "start hanleActionSyncUser");
+
+        OLiUs out = rf.listuser(username, password, "");
+        if (out != null) {
+            if (out.getET() == null || out.getET().isEmpty()) {
+
+                HashMap<String, String> nameemail = new HashMap<>(1);
+                final String[] PROJECTION = new String[]{
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID,
+                        ContactsContract.Contacts.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Email.DATA};
+
+                ContentResolver cr = getContentResolver();
+                Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, PROJECTION, null, null, null);
+                if (cursor != null) {
+                    try {
+                        final int contactIdIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.CONTACT_ID);
+                        final int displayNameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                        final int emailIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA);
+                        String displayName, address;
+                        while (cursor.moveToNext()) {
+                            displayName = cursor.getString(displayNameIndex);
+                            address = cursor.getString(emailIndex).toLowerCase();
+                            nameemail.put(address, displayName);
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                }
+                if (nameemail.size() > 0) {
+                    for (int i = 0; i < out.getU().size(); i++) {
+                        if (nameemail.containsKey(out.getU().get(i).getE().toLowerCase().trim())) {
+                            int icnid = 0;
+                            String icnvalue = null;
+                            if (out.getU().get(i).getICID() > 0) {
+                                OGImMMD outmeta = rf.getImageMessageMetaData(username, password, out.getU().get(i).getICID());
+
+                                if (outmeta != null) {
+                                    if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
+
+                                        if (!checkfileexists(outmeta.getIM(), TYP_IMAGE, outmeta.getIS(), outmeta.getIMD5())) {
+                                            if (isWifi) {
+                                                OGImM ofim = rf.fetchImageMessage(username, password, out.getU().get(i).getICID(), Constants.TYP_ICON);
+                                                if (ofim != null) {
+                                                    if (ofim.getET() == null || ofim.getET().isEmpty()) {
+                                                        if (acknowledgeMessage(Constants.TYP_IMAGE, icndir + ofim.getIM(), out.getU().get(i).getICID())) {
+                                                            icnid = out.getU().get(i).getICID();
+                                                            icnvalue = icndir + ofim.getIM();
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            insertUserIntoDB(out.getU().get(i).getUID(), out.getU().get(i).getUN(), nameemail.get(out.getU().get(i).getE()), out.getU().get(i).getE(), out.getU().get(i).getLA(), icnid, icnvalue);
+                        }
+                    }
+                }
+            }
+        }
+        Log.d(TAG, "end hanleActionSyncUser");
+    }
+
+    private void handleSendUserIcon(String message) {
+        Log.d(TAG, "start handleSendUserIcon");
+
+        OSIcM outsendicon = rf.sendIconMessage(username, password, message);
+        if (outsendicon != null) {
+            if (outsendicon.getET() == null || outsendicon.getET().isEmpty()) {
+                OIUIc outinsusericon = rf.insertusericon(username, password, outsendicon.getIcID());
+                if (outinsusericon != null) {
+                    if (outinsusericon.getET() == null || outinsusericon.getET().isEmpty()) {
+                        // Update Database with new Icon
+                    }
+                }
+
+            }
+        }
+
+        Log.d(TAG, "end handleSendUserIcon");
+    }
+
+    private void handleSendChatIcon(String message, int chatid) {
+        Log.d(TAG, "start handleSendUserIcon");
+
+        if (chatid != -1) {
+            OSIcM outsendicon = rf.sendIconMessage(username, password, message);
+            if (outsendicon != null) {
+                if (outsendicon.getET() == null || outsendicon.getET().isEmpty()) {
+                    rf.insertchaticon(username, password, outsendicon.getIcID(), chatid);
+                }
+            }
+            Log.d(TAG, "end handleSendUserIcon");
+        }
     }
 }

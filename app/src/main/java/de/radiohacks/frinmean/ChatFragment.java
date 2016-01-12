@@ -29,7 +29,6 @@
 
 package de.radiohacks.frinmean;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.app.LoaderManager;
@@ -79,21 +78,21 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle extras = getActivity().getIntent().getExtras();
-        mode = extras.getString(Constants.CHAT_ACTIVITY_MODE);
-        userid = extras.getInt(Constants.USERID, -1);
+        Bundle args = getArguments();
+        mode = args.getString(Constants.CHAT_ACTIVITY_MODE);
+        userid = args.getInt(Constants.USERID, -1);
 
         if (mode.equalsIgnoreCase(Constants.CHAT_ACTIVITY_FULL)) {
             setHasOptionsMenu(true);
-            int syncFreq = extras.getInt(Constants.PrefSyncfrequency, -1);
+            int syncFreq = args.getInt(Constants.PrefSyncfrequency, -1);
             if (syncFreq != -1) {
                 SyncUtils.StartSyncFreq(syncFreq);
             }
         } else {
             setHasOptionsMenu(false);
             // Needed to show not the Chat where the Message is send from
-            sendChatID = extras.getInt(Constants.SENDCHATID, -1);
-            MessageID = extras.getInt(Constants.SENDMSGID, -1);
+            sendChatID = args.getInt(Constants.SENDCHATID, -1);
+            MessageID = args.getInt(Constants.SENDMSGID, -1);
         }
 
 //        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -108,20 +107,6 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
             Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(baseFile.toString()));
         }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        // Create account, if needed
-        // SyncUtils.CreateSyncAccount(activity);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mAdapter.notifyDataSetChanged();
     }
 
     @Override

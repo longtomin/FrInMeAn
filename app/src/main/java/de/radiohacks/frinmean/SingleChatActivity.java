@@ -103,9 +103,8 @@ public class SingleChatActivity extends ActionBarActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = SingleChatActivity.class.getSimpleName();
-    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-    private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
-    private static final int SELECT_IMAGE_ACTIVITY_REQUEST_CODE = 300;
+    private static final int CAPTURE_CONTENT = 100;
+    private static final int REQUEST_USER_THUMBNAIL = 200;
     private static final int MESSAGE_LOADER_ID = 1000;
 
     private SingleChatReceiver mSingleChatReceiver = new SingleChatReceiver();
@@ -115,6 +114,7 @@ public class SingleChatActivity extends ActionBarActivity implements
     private int ChatID;
     private int OwningUserID;
     private EmojiconEditText Message;
+    private String icndir;
 
     private static String getDataColumn(Context context, Uri uri, String selection,
                                         String[] selectionArgs) {
@@ -156,6 +156,13 @@ public class SingleChatActivity extends ActionBarActivity implements
         if (!baseFile.exists()) {
             if (!baseFile.mkdirs()) {
                 Log.e(TAG, "Base Directory creation failed");
+            }
+        }
+        icndir = basedir + File.separator + Constants.ICONDIR + File.separator;
+        File icnFile = new File(icndir);
+        if (!icnFile.exists()) {
+            if (!icnFile.mkdir()) {
+                Log.e(TAG, "Icon Directory creation failed");
             }
         }
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
@@ -223,9 +230,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         iSetShowTime.setAction(Constants.ACTION_SETSHOWTIMESTAMP);
         iSetShowTime.putExtra(Constants.CHATID, ChatID);
-
         startService(iSetShowTime);
-
 
         final View rootView = findViewById(R.id.root_view);
         final ImageView emojiButton = (ImageView) findViewById(R.id.emoji_btn);
@@ -376,41 +381,68 @@ public class SingleChatActivity extends ActionBarActivity implements
         Log.d(TAG, "start onActivityResult");
 
         if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_USER_THUMBNAIL) {
+                if (data != null) {
+                    if (data.getExtras() != null) {
+                        Bundle extras = data.getExtras();
+                        Bitmap ownpic = extras.getParcelable("data");
 
-            //Start MeBaService
-            Intent picintent = new Intent(this, MeBaService.class);
-
-            picintent.putExtra(Constants.CHATID, ChatID);
-            picintent.putExtra(Constants.USERID, userid);
-
-            if (data != null) {
-                Uri selectedimage = data.getData();
-
-                String mediaType = null;
-                String filePath = null;
-                if ("content".equalsIgnoreCase(selectedimage.getScheme())) {
-                    filePath = getDataColumn(this, selectedimage, null, null);
-                    String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
-                    mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
-                }
-
-                assert mediaType != null;
-                if (mediaType.startsWith("image")) {
-                    String newfile = compressImage(filePath);
-                    picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
-                    picintent.putExtra(Constants.IMAGELOCATION, newfile);
-                    startService(picintent);
-
-                } else if (mediaType.startsWith("video")) {
-                    MediaConverter m = new MediaConverter();
-                    try {
-                        m.EncodeVideoToMp4();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        File owniconfile = new File(icndir, "Chat" + String.valueOf(ChatID) + ".png");
+                        FileOutputStream fOut = null;
+                        try {
+                            fOut = new FileOutputStream(owniconfile);
+                            ownpic.compress(Bitmap.CompressFormat.PNG, 85, fOut);
+                            fOut.flush();
+                            fOut.close();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Intent picintent = new Intent(this, MeBaService.class);
+                        picintent.setAction(Constants.ACTION_SENDCHATICON);
+                        picintent.putExtra(Constants.IMAGELOCATION, owniconfile.getAbsolutePath());
+                        picintent.putExtra(Constants.CHATID, ChatID);
+                        startService(picintent);
                     }
-                    picintent.setAction(Constants.ACTION_SENDVIDEOMESSAGE);
-                    picintent.putExtra(Constants.VIDEOLOCATION, filePath);
-                    startService(picintent);
+                }
+            } else if (requestCode == CAPTURE_CONTENT) {
+
+                //Start MeBaService
+                Intent picintent = new Intent(this, MeBaService.class);
+
+                picintent.putExtra(Constants.CHATID, ChatID);
+                picintent.putExtra(Constants.USERID, userid);
+
+                if (data != null) {
+                    Uri selectedimage = data.getData();
+
+                    String mediaType = null;
+                    String filePath = null;
+                    if ("content".equalsIgnoreCase(selectedimage.getScheme())) {
+                        filePath = getDataColumn(this, selectedimage, null, null);
+                        String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
+                        mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
+                    }
+
+                    assert mediaType != null;
+                    if (mediaType.startsWith("image")) {
+                        String newfile = compressImage(filePath);
+                        picintent.setAction(Constants.ACTION_SENDIMAGEMESSAGE);
+                        picintent.putExtra(Constants.IMAGELOCATION, newfile);
+                        startService(picintent);
+
+                    } else if (mediaType.startsWith("video")) {
+                        MediaConverter m = new MediaConverter();
+                        try {
+                            m.EncodeVideoToMp4();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        picintent.setAction(Constants.ACTION_SENDVIDEOMESSAGE);
+                        picintent.putExtra(Constants.VIDEOLOCATION, filePath);
+                        startService(picintent);
+                    }
                 }
             }
         } else if (resultCode == RESULT_CANCELED) {
@@ -426,7 +458,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+            startActivityForResult(takePictureIntent, CAPTURE_CONTENT);
         }
         Log.d(TAG, "end SendCameraPicture");
     }
@@ -436,7 +468,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
         photoPickerIntent.setType("video/*, images/*");
-        startActivityForResult(photoPickerIntent, SELECT_IMAGE_ACTIVITY_REQUEST_CODE);
+        startActivityForResult(photoPickerIntent, CAPTURE_CONTENT);
 
         Log.d(TAG, "end SendGalleryPicture");
     }
@@ -446,7 +478,7 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
         if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takeVideoIntent, CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE);
+            startActivityForResult(takeVideoIntent, CAPTURE_CONTENT);
         }
         Log.d(TAG, "start SendCameraVideo");
     }
@@ -676,6 +708,11 @@ public class SingleChatActivity extends ActionBarActivity implements
                 openDeleteChat(this.ChatID);
                 return true;
             case R.id.option_removeuser:
+                return true;
+            case R.id.action_setchaticon:
+                final Intent chooserIntent = new Intent(this, SelectIconActivity.class);
+                chooserIntent.putExtra(Constants.THUMBNAIL_TYPE, Constants.THUMBNAIL_USER);
+                startActivityForResult(chooserIntent, REQUEST_USER_THUMBNAIL);
                 return true;
         }
         Log.d(TAG, "end onOptionsItemSelected");

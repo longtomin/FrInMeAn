@@ -48,11 +48,11 @@
 
     <!--    <Preference
             android:key="prefDirectory"
-            android:title="@string/DirecotryChooser" />
+            android:title="@string/DirecotryChooser" /> -->
 
-        <Preference
-            android:key="prefOwnImage"
-            android:title="@string/SelectOwnImage" /> -->
+    <!--        <Preference
+                android:key="prefOwnImage"
+                android:title="@string/SelectOwnImage" /> -->
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->

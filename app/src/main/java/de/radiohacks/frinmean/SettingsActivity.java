@@ -31,7 +31,6 @@ package de.radiohacks.frinmean;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,7 +43,6 @@ import android.util.Log;
 import java.io.File;
 
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
-import de.radiohacks.frinmean.service.MeBaService;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -66,8 +64,6 @@ public class SettingsActivity extends PreferenceActivity {
      */
     private static final String TAG = SettingsActivity.class.getSimpleName();
     private static final boolean ALWAYS_SIMPLE_PREFS = true;
-    private static final int REQUEST_DIRECTORY = 0;
-    private static final int REQUEST_USER_THUMBNAIL = 1;
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -292,19 +288,6 @@ public class SettingsActivity extends PreferenceActivity {
 
                 startActivityForResult(i, REQUEST_DIRECTORY);*/
 
-        /*Preference ownPicture = (Preference) findPreference("prefOwnImage");
-        ownPicture.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                final Intent chooserIntent = new Intent(
-                        SettingsActivity.this,
-                        ThumbnailActivity.class);
-                chooserIntent.putExtra(Constants.THUMBNAIL_TYPE,Constants.THUMBNAIL_USER);
-                startActivityForResult(chooserIntent, REQUEST_USER_THUMBNAIL);
-                return true;
-            }
-        });*/
-
 
         // Add 'notifications' preferences, and a corresponding header.
         PreferenceCategory fakeHeader = new PreferenceCategory(this);
@@ -338,63 +321,16 @@ public class SettingsActivity extends PreferenceActivity {
         return isXLargeTablet(this) && !isSimplePreferences(this);
     }
 
-/*    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_DIRECTORY && resultCode == Activity.RESULT_OK) {
-
-            Uri file_uri = data.getData();
-            String real_path = file_uri.getPath();
-
-            if (real_path != null && !real_path.isEmpty()) {
-                SharedPreferences sharedPrefs = PreferenceManager
-                        .getDefaultSharedPreferences(this);
-                SharedPreferences.Editor editor = sharedPrefs.edit();
-                editor.putString(Constants.PrefDirectory, real_path);
-                editor.commit();
-
-                // Jetzt erstellen wir die Unterverzeichnisse
 
 
-                //File basedir = new File(Environment.getExternalStorageDirectory() + s);
-                File basedir = new File(real_path);
-                if (basedir.exists() && basedir.isDirectory()) {
-                    File imagedir = new File(real_path + File.separator + Constants.IMAGEDIR);
-                    if (!imagedir.exists() || !imagedir.isDirectory()) {
-                        imagedir.mkdir();
-                    }
-                    File imagepreviewdir = new File(real_path + File.separator + Constants.IMAGEPREVIEWDIR);
-                    if (!imagepreviewdir.exists() || !imagepreviewdir.isDirectory()) {
-                        imagepreviewdir.mkdir();
-                    }
-                    File imagechatdir = new File(real_path + File.separator + Constants.CHATIAMGEDIR);
-                    if (!imagechatdir.exists() || !imagechatdir.isDirectory()) {
-                        imagechatdir.mkdir();
-                    }
-                    File videodir = new File(real_path + File.separator + Constants.VIDEODIR);
-                    if (!videodir.exists() || !videodir.isDirectory()) {
-                        videodir.mkdir();
-                    }
-                    File filesdir = new File(real_path + File.separator + Constants.FILESDIR);
-                    if (!filesdir.exists() || !filesdir.isDirectory()) {
-                        filesdir.mkdir();
-                    }
-                }
-            }
-        } else if (requestCode == REQUEST_USER_THUMBNAIL) {
-
-        }
-    }*/
-
-    @Override
+    /* @Override
     protected void onStop() {
 
         Intent reload = new Intent(this, MeBaService.class);
         reload.setAction(Constants.ACTION_RELOAD_SETTING);
         startService(reload);
         super.onStop();
-    }
+    } */
 
     /**
      * This fragment shows general preferences only. It is used when the

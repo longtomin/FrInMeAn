@@ -34,7 +34,9 @@ import de.radiohacks.frinmean.modelshort.IAckCD;
 import de.radiohacks.frinmean.modelshort.IAckMD;
 import de.radiohacks.frinmean.modelshort.IAdUC;
 import de.radiohacks.frinmean.modelshort.ICrCh;
+import de.radiohacks.frinmean.modelshort.IICIc;
 import de.radiohacks.frinmean.modelshort.IIMIC;
+import de.radiohacks.frinmean.modelshort.IIUIc;
 import de.radiohacks.frinmean.modelshort.ISShT;
 import de.radiohacks.frinmean.modelshort.ISTeM;
 import de.radiohacks.frinmean.modelshort.ISiUp;
@@ -53,10 +55,13 @@ import de.radiohacks.frinmean.modelshort.OGMI;
 import de.radiohacks.frinmean.modelshort.OGTeM;
 import de.radiohacks.frinmean.modelshort.OGViM;
 import de.radiohacks.frinmean.modelshort.OGViMMD;
+import de.radiohacks.frinmean.modelshort.OICIc;
 import de.radiohacks.frinmean.modelshort.OIMIC;
+import de.radiohacks.frinmean.modelshort.OIUIc;
 import de.radiohacks.frinmean.modelshort.OLiCh;
 import de.radiohacks.frinmean.modelshort.OLiUs;
 import de.radiohacks.frinmean.modelshort.OReUC;
+import de.radiohacks.frinmean.modelshort.OSIcM;
 import de.radiohacks.frinmean.modelshort.OSImM;
 import de.radiohacks.frinmean.modelshort.OSShT;
 import de.radiohacks.frinmean.modelshort.OSTeM;
@@ -79,6 +84,7 @@ public class RestFunctions {
     private String imgdir;
     private String viddir;
     private String fildir;
+    private String icndir;
 
     public RestFunctions() {
         conManager = (ConnectivityManager) FrinmeanApplication.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -104,6 +110,13 @@ public class RestFunctions {
         if (!filFile.exists()) {
             if (!filFile.mkdirs()) {
                 Log.e(TAG, "File Directory creation failed");
+            }
+        }
+        icndir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR + File.separator + Constants.ICONDIR + File.separator;
+        File icnFile = new File(icndir);
+        if (!icnFile.exists()) {
+            if (!icnFile.mkdirs()) {
+                Log.e(TAG, "Icon Directory creation failed");
             }
         }
     }
@@ -851,7 +864,7 @@ public class RestFunctions {
                                   @PathParam(Constants.QPpassword) String Password,
                                   @PathParam(Constants.QPimageid) int imageid); */
 
-    public OGImM fetchImageMessage(String inuser, String inpassword, int ImgMsgID) {
+    public OGImM fetchImageMessage(String inuser, String inpassword, int ImgMsgID, String ImageType) {
         Log.d(TAG, "start fetchImageMessage with user=" + inuser + " password=" + inpassword + "ImageMessageID=" + String.valueOf(ImgMsgID));
         OGImM out = new OGImM();
 
@@ -875,7 +888,13 @@ public class RestFunctions {
                 rc = new RestClient(CommunicationURL + "image/download/" + combinedParams, https, port);
 
                 rc.AddHeader("Accept", "image/jpeg");
-                rc.setSaveDirectory(imgdir);
+                if (ImageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+                    rc.setSaveDirectory(imgdir);
+                } else if (ImageType.equalsIgnoreCase(Constants.TYP_ICON)) {
+                    rc.setSaveDirectory(icndir);
+                } else {
+                    rc.setSaveDirectory(imgdir);
+                }
                 String savedFilename = null;
                 if (https) {
                     savedFilename = rc.ExecuteHTTPSContent("GET");
@@ -1223,6 +1242,148 @@ public class RestFunctions {
             }
         }
         Log.d(TAG, "end acknowledgemessagedownload");
+        return out;
+    }
+
+    /* @POST
+    @Path("/uploadicon")
+    @Produces(MediaType.APPLICATION_XML)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public OSIcM uploadIcon(
+            @QueryParam(Constants.QPusername) String User,
+            @QueryParam(Constants.QPpassword) String Password,
+            @QueryParam(Constants.QPacknowledge) String Acknowledge,
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
+
+    public OSIcM sendIconMessage(String inuser, String inpassword, String Message) {
+        Log.d(TAG, "start sendIconMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
+        OSIcM out = null;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "image/uploadicon", https, port);
+            try {
+                HashCode md5 = Files.hash(new File(Message),
+                        Hashing.md5());
+                String boundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
+                rc.setBoundary(boundary);
+
+                FileNameMap fileNameMap = URLConnection.getFileNameMap();
+                String mime = fileNameMap.getContentTypeFor("file://" + Message);
+                String[] q = Message.split("/");
+                int idx = q.length - 1;
+
+                rc.AddParam(Constants.QPusername, convertB64(inuser));
+                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+                rc.AddParam(Constants.QPacknowledge, convertB64(md5.toString()));
+
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSPostXMLMultipart("FileName=" + q[idx], Message, "file", mime);
+                } else {
+                    ret = rc.ExecuteHTTPPostXMLMultipart("FileName=" + q[idx], Message, "file", mime);
+                }
+
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OSIcM.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "end sendImageMessage");
+        return out;
+    }
+
+    /* @PUT
+    @Produces(MediaType.APPLICATION_XML)
+    @Consumes(MediaType.APPLICATION_XML)
+    @Path("/insertusericon")
+    public OIUIc insertusericon(IIUIc in); */
+
+    public OIUIc insertusericon(String inuser, String inpassword, int iniconid) {
+        Log.d(TAG, "start insertusericon with user=" + inuser + " password=" + inpassword + "IconID=" + String.valueOf(iniconid));
+        OIUIc out = null;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "user/insertusericon", https, port);
+            try {
+                IIUIc in = new IIUIc();
+                in.setIcID(iniconid);
+                in.setUN(convertB64(inuser));
+                in.setPW(convertB64(inpassword));
+
+                Serializer serializer = new Persister();
+                StringWriter InString = new StringWriter();
+
+                serializer.write(in, InString);
+                rc.setPutContent(String.valueOf(InString));
+                rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
+
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("PUT");
+                } else {
+                    ret = rc.ExecuteHTTPXML("PUT");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OIUIc.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "end insertusericon");
+        return out;
+    }
+
+    /* @PUT
+    @Produces(MediaType.APPLICATION_XML)
+    @Consumes(MediaType.APPLICATION_XML)
+    @Path("/insertchaticon")
+    public OICIc insertchaticon(IICIc in); */
+
+    public OICIc insertchaticon(String inuser, String inpassword, int iniconid, int inchatid) {
+        Log.d(TAG, "start insertchaticon with user=" + inuser + " password=" + inpassword + " IconID=" + String.valueOf(iniconid) + " ChatID=" + String.valueOf(inchatid));
+        OICIc out = null;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "user/insertchaticon", https, port);
+            try {
+                IICIc in = new IICIc();
+                in.setIcID(iniconid);
+                in.setCID(inchatid);
+                in.setUN(convertB64(inuser));
+                in.setPW(convertB64(inpassword));
+
+                Serializer serializer = new Persister();
+                StringWriter InString = new StringWriter();
+
+                serializer.write(in, InString);
+                rc.setPutContent(String.valueOf(InString));
+                rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
+
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("PUT");
+                } else {
+                    ret = rc.ExecuteHTTPXML("PUT");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OICIc.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "end insertusericon");
         return out;
     }
 }

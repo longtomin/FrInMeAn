@@ -95,9 +95,9 @@ public class FrinmeanContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_LocationMsgValue, MESSAGES_LocationMsgValue);
         sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_ContactMsgID, MESSAGES_ContactMsgID);
         sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_ContactMsgValue, MESSAGES_ContactMsgValue);
-        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_NumberAll, MESSAGES_NumberAll);
-        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_NumberRead, MESSAGES_NumberRead);
-        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_NumberShow, MESSAGES_NumberShow);
+//        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_NumberAll, MESSAGES_NumberAll);
+//        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_NumberRead, MESSAGES_NumberRead);
+//        sURIMatcher.addURI(AUTHORITY, Constants.MESSAGES_TABLE_NAME + "/#/" + Constants.T_MESSAGES_NumberShow, MESSAGES_NumberShow);
     }
 
     static {
@@ -228,7 +228,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                     queryBuilder.appendWhere(Constants.T_MESSAGES_ContactMsgValue + "="
                             + uri.getLastPathSegment());
                     break;
-                case MESSAGES_NumberAll:
+                /*case MESSAGES_NumberAll:
                     queryBuilder.appendWhere(Constants.T_MESSAGES_NumberAll + "="
                             + uri.getLastPathSegment());
                     break;
@@ -239,7 +239,7 @@ public class FrinmeanContentProvider extends ContentProvider {
                 case MESSAGES_NumberShow:
                     queryBuilder.appendWhere(Constants.T_MESSAGES_NumberShow + "="
                             + uri.getLastPathSegment());
-                    break;
+                    break; */
                 default:
                     throw new IllegalArgumentException("Unknown URI: " + uri);
             }

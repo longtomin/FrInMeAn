@@ -58,7 +58,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import de.radiohacks.frinmean.ChatActivity;
+import de.radiohacks.frinmean.ChatUserActivity;
 import de.radiohacks.frinmean.Constants;
 import de.radiohacks.frinmean.R;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
@@ -93,7 +93,7 @@ public class SingleChatAdapter extends CursorAdapter {
         Log.d(TAG, "end SingleChatAdapter");
     }
 
-    public static int calculateInSampleSize(
+    private static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
         final int height = options.outHeight;
@@ -275,7 +275,7 @@ public class SingleChatAdapter extends CursorAdapter {
                                 break;
                             case 1:
                                 // Weiterleiten
-                                Intent startchat = new Intent(context, ChatActivity.class);
+                                Intent startchat = new Intent(context, ChatUserActivity.class);
                                 startchat.putExtra(Constants.USERID, OID);
                                 startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FORWARD);
                                 startchat.putExtra(Constants.SENDCHATID, chatID);

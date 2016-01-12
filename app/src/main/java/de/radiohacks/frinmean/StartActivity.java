@@ -109,7 +109,12 @@ public class StartActivity extends Activity {
 
                 SyncUtils.CreateSyncAccount(this);
                 /* Alernative 3 keine Authentifizierung, einfach eiter zu den Chats, offline Modus möglich */
-                Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
+                /*Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
+                startchat.putExtra(Constants.USERID, this.userid);
+                startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FULL);
+                startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
+                startchat.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);*/
+                Intent startchat = new Intent(StartActivity.this, ChatUserActivity.class);
                 startchat.putExtra(Constants.USERID, this.userid);
                 startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FULL);
                 startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
@@ -165,7 +170,7 @@ public class StartActivity extends Activity {
                         startService(restoreintent);
 
                         //Start the Chat-Activity
-                        Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
+                        Intent startchat = new Intent(StartActivity.this, ChatUserActivity.class);
                         startchat.putExtra(Constants.USERID, tmpuserid);
                         startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FULL);
                         startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);
@@ -177,7 +182,7 @@ public class StartActivity extends Activity {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         //Start the Chat-Activity
-                        Intent startchat = new Intent(StartActivity.this, ChatActivity.class);
+                        Intent startchat = new Intent(StartActivity.this, ChatUserActivity.class);
                         startchat.putExtra(Constants.USERID, tmpuserid);
                         startchat.putExtra(Constants.CHAT_ACTIVITY_MODE, Constants.CHAT_ACTIVITY_FULL);
                         startchat.putExtra(Constants.PrefSyncfrequency, syncFreq);

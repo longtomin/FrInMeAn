@@ -57,6 +57,9 @@ public class Constants {
     public static final String ACTION_SETSHOWTIMESTAMP = "setshowtimestamp";
     public static final String ACTION_GETMESSAGEINFORMATION = "getmessageinformation";
     public static final String ACTION_REFRESH = "refresh";
+    public static final String ACTION_SYNCUSER = "syncuser";
+    public static final String ACTION_SENDUSERICON = "sendusericon";
+    public static final String ACTION_SENDCHATICON = "senduchaticon";
 
     /*
     App own action without correspondance in the backend
@@ -128,6 +131,7 @@ public class Constants {
     public final static String TYP_CONTACT = "CONTACT";
     public final static String TYP_FILE = "FILE";
     public final static String TYP_VIDEO = "VIDEO";
+    public final static String TYP_ICON = "ICON";
 
     /* Where should the content go to on the Server */
 //    public static final String SERVER_UPLOAD_LOCATION_FOLDER = "/opt/frinme-data/";
@@ -168,10 +172,9 @@ public class Constants {
      */
 
     public final static String IMAGEDIR = "images";
-    public final static String IMAGEPREVIEWDIR = "images/preview";
-    public final static String CHATIAMGEDIR = "images/chatimage";
     public final static String FILESDIR = "files";
     public final static String VIDEODIR = "videos";
+    public final static String ICONDIR = "icons";
     public final static String BASEDIR = "FrInMeAn";
 
     /*
@@ -258,9 +261,9 @@ public class Constants {
     public static final String T_MESSAGES_LocationMsgValue = "LocationMsgValue"; // varchar(50)
     public static final String T_MESSAGES_ContactMsgID = "ContactMsgID"; // int(10) unsgned DEFAULT NULL,
     public static final String T_MESSAGES_ContactMsgValue = "ContactMsgValue"; // varchar(250)
-    public static final String T_MESSAGES_NumberAll = "NumberAll"; // int(10) unsigned DEFAULT NULL
-    public static final String T_MESSAGES_NumberRead = "NumberRead"; // int(10) unsigned DEFAULT NULL
-    public static final String T_MESSAGES_NumberShow = "NumberShow"; // int(10) unsigned DEFAULT NULL
+//    public static final String T_MESSAGES_NumberAll = "NumberAll"; // int(10) unsigned DEFAULT NULL
+//    public static final String T_MESSAGES_NumberRead = "NumberRead"; // int(10) unsigned DEFAULT NULL
+//    public static final String T_MESSAGES_NumberShow = "NumberShow"; // int(10) unsigned DEFAULT NULL
 
 
     /*
@@ -287,33 +290,40 @@ public class Constants {
             T_MESSAGES_LocationMsgID,
             T_MESSAGES_LocationMsgValue,
             T_MESSAGES_ContactMsgID,
-            T_MESSAGES_ContactMsgValue,
-            T_MESSAGES_NumberAll,
-            T_MESSAGES_NumberRead,
-            T_MESSAGES_NumberShow};
+            T_MESSAGES_ContactMsgValue};
     public static final String T_CHAT_ID = "_id"; // int(10)
     public static final String T_CHAT_BADBID = "ID"; // int(10)
     public static final String T_CHAT_OwningUserID = "OwningUserID"; //int(10)
     public static final String T_CHAT_OwningUserName = "OwingUserName"; // varchar(45)"// int(10)
     public static final String T_CHAT_ChatName = "ChatName"; // varchar(50)
+    public static final String T_CHAT_IconID = "IconID"; // varchar(50)
+    public static final String T_CHAT_IconValue = "IconValue"; // varchar(256)
     public static final String[] CHAT_DB_Columns = {
             T_CHAT_ID,
             T_CHAT_BADBID,
             T_CHAT_OwningUserID,
             T_CHAT_OwningUserName,
-            T_CHAT_ChatName};
+            T_CHAT_ChatName,
+            T_CHAT_IconID,
+            T_CHAT_IconValue};
 
     public static final String T_USER_ID = "_id"; // int(10)
     public static final String T_USER_BADBID = "ID"; // int(10)
+    public static final String T_USER_PhoneUsername = "PhoneUsername"; //varchar(100)
     public static final String T_USER_Username = "Username"; //varchar(45)
     public static final String T_USER_AuthenticationTime = "AuthenticationTime"; // bigint(20)
     public static final String T_USER_Email = "Email"; // varchar(100)
+    public static final String T_User_IconID = "IconID"; // varchar(50)
+    public static final String T_User_IconValue = "IconValue"; // varchar(256)
     public static final String[] USER_DB_Columns = {
             T_USER_ID,
             T_USER_BADBID,
+            T_USER_PhoneUsername,
             T_USER_AuthenticationTime,
             T_USER_Email,
-            T_USER_Username};
+            T_USER_Username,
+            T_User_IconID,
+            T_User_IconValue};
 
     public static final String T_MESSAGES_TIME_ID = "_id";
     public static final String T_MESSAGES_TIME_BADBID = "ID";
@@ -365,12 +375,17 @@ public class Constants {
     public static final int ID_CHAT_OwningUserID = 2;
     public static final int ID_CHAT_OwningUserName = 3;
     public static final int ID_CHAT_ChatName = 4;
+    public static final int ID_CHAT_IconID = 5;
+    public static final int ID_CHAT_IconValue = 6;
 
     public static final int ID_USER_ID = 0;
     public static final int ID_USER_BADBID = 1;
-    public static final int ID_USER_Username = 2;
-    public static final int ID_USER_Email = 3;
-    public static final int ID_USER_AuthenticationTime = 4;
+    public static final int ID_USER_PhoneUsername = 2;
+    public static final int ID_USER_Username = 3;
+    public static final int ID_USER_Email = 4;
+    public static final int ID_USER_AuthenticationTime = 5;
+    public static final int ID_USER_IconID = 6;
+    public static final int ID_USER_IconValue = 7;
 
     public static final int ID_MESSAGES_TIME_ID = 0;
     public static final int ID_MESSAGES_TIME_BADBID = 1;
