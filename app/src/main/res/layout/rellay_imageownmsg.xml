@@ -45,8 +45,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1">
 
-        <ImageView
-            android:id="@+id/OwnImageUserImg"
+        <ImageButton
+            android:id="@+id/OwnImageUserIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
@@ -66,7 +66,7 @@
             android:layout_alignParentRight="false"
             android:layout_alignParentTop="false"
             android:layout_alignWithParentIfMissing="false"
-            android:layout_below="@id/OwnImageUserImg"
+            android:layout_below="@id/OwnImageUserIcon"
             android:layout_centerHorizontal="true"
             android:layout_span="2"
             android:inputType="none"

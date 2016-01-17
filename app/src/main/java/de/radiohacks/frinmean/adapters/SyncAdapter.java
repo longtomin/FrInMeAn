@@ -544,6 +544,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 long[] vibpattern = {500, 100, 500};
                 // Build notification
                 Notification.Builder nb = new Notification.Builder(this.getContext());
+                nb.setLights(1, 200, 100);
                 nb.setContentTitle(ChatName);
                 nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat").setSmallIcon(R.drawable.ic_stat_frinmean);
                 nb.setSound(Uri.parse(ringtone));
@@ -698,16 +699,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         String destFile = basedir;
         // Add SubDir for Images, videos or files
         if (destFile.endsWith(File.separator)) {
-            destFile += subdir;
+            destFile += subdir + File.separator + serverfilename;
         } else {
-            destFile += File.separator + subdir;
+            destFile += File.separator + subdir + File.separator + serverfilename;
         }
 
-        if (destFile.endsWith(File.separator)) {
+        /*if (destFile.endsWith(File.separator)) {
             destFile += serverfilename;
         } else {
             destFile += File.separator + serverfilename;
-        }
+        }*/
 
         File destination = new File(destFile);
         try {
@@ -843,53 +844,83 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         // ToDo beim Senden und Empfangen muss ein Eintrag für die eigene oder fremde Nachricht hinterlegt werden.
         ArrayList<Integer> inputrf = new ArrayList<Integer>(1);
+        int count = 0;
         while (cd.moveToNext()) {
             int val = cd.getInt(Constants.ID_MESSAGES_BADBID);
             if (!inputrf.contains(val)) {
                 inputrf.add(val);
-            }
-        }
+                count++;
+                if (count == 100) {
+                    OGMI outgmi = rf.getmessageinformation(username, password, inputrf);
+                    if (outgmi != null) {
+                        if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
+                            for (int i = 0; i < outgmi.getMIB().size(); i++) {
+                                int numall = outgmi.getMIB().get(i).getMI().size();
+                                int numre = 0;
+                                int numsh = 0;
+                                for (int j = 0; j < outgmi.getMIB().get(i).getMI().size(); j++) {
+                                    ContentValues valuesins = new ContentValues();
+                                    valuesins.put(T_MESSAGES_TIME_BADBID, outgmi.getMIB().get(i).getMID());
+                                    valuesins.put(T_MESSAGES_TIME_UserID, outgmi.getMIB().get(i).getMI().get(j).getUID());
+                                    valuesins.put(T_MESSAGES_TIME_ReadTimestamp, outgmi.getMIB().get(i).getMI().get(j).getRD());
+                                    valuesins.put(T_MESSAGES_TIME_SendTimestamp, outgmi.getMIB().get(i).getSD());
+                                    valuesins.put(T_MESSAGES_TIME_ShowTimestamp, outgmi.getMIB().get(i).getMI().get(j).getSH());
+                                    valuesins.put(T_MESSAGES_TIME_UserName, outgmi.getMIB().get(i).getMI().get(j).getUN());
 
-        OGMI outgmi = rf.getmessageinformation(username, password, inputrf);
-        if (outgmi != null) {
-            if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
-                for (int i = 0; i < outgmi.getMIB().size(); i++) {
-                    int numall = outgmi.getMIB().get(i).getMI().size();
-                    int numre = 0;
-                    int numsh = 0;
-                    for (int j = 0; j < outgmi.getMIB().get(i).getMI().size(); j++) {
-                        ContentValues valuesins = new ContentValues();
-                        valuesins.put(T_MESSAGES_TIME_BADBID, outgmi.getMIB().get(i).getMID());
-                        valuesins.put(T_MESSAGES_TIME_UserID, outgmi.getMIB().get(i).getMI().get(j).getUID());
-                        valuesins.put(T_MESSAGES_TIME_ReadTimestamp, outgmi.getMIB().get(i).getMI().get(j).getRD());
-                        valuesins.put(T_MESSAGES_TIME_SendTimestamp, outgmi.getMIB().get(i).getSD());
-                        valuesins.put(T_MESSAGES_TIME_ShowTimestamp, outgmi.getMIB().get(i).getMI().get(j).getSH());
-                        valuesins.put(T_MESSAGES_TIME_UserName, outgmi.getMIB().get(i).getMI().get(j).getUN());
+                                    ContentProviderClient clientupd = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
+                                    ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
+                                    clientupd.release();
 
-                        ContentProviderClient clientupd = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
-                        ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
-                        clientupd.release();
-
-                        if (outgmi.getMIB().get(i).getMI().get(j).getRD() != 0) {
-                            numre++;
-                        }
-                        if (outgmi.getMIB().get(i).getMI().get(j).getSH() != 0) {
-                            numsh++;
+                                    if (outgmi.getMIB().get(i).getMI().get(j).getRD() != 0) {
+                                        numre++;
+                                    }
+                                    if (outgmi.getMIB().get(i).getMI().get(j).getSH() != 0) {
+                                        numsh++;
+                                    }
+                                }
+                            }
                         }
                     }
-/*                    ContentValues msgval = new ContentValues();
-                    msgval.put(T_MESSAGES_NumberAll, numall);
-                    msgval.put(T_MESSAGES_NumberRead, numre);
-                    msgval.put(T_MESSAGES_NumberShow, numsh);
-                    msgval.put(T_MESSAGES_BADBID, outgmi.getMIB().get(i).getMID());
-
-                    ContentProviderClient clientupd = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                    ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, msgval);
-                    clientupd.release(); */
+                    cd.close();
+                    clientdifferent.release();
+                    count = 0;
+                    inputrf.clear();
                 }
             }
         }
-        cd.close();
-        clientdifferent.release();
+        if (inputrf.size() > 0) {
+            OGMI outgmi = rf.getmessageinformation(username, password, inputrf);
+            if (outgmi != null) {
+                if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
+                    for (int i = 0; i < outgmi.getMIB().size(); i++) {
+                        int numall = outgmi.getMIB().get(i).getMI().size();
+                        int numre = 0;
+                        int numsh = 0;
+                        for (int j = 0; j < outgmi.getMIB().get(i).getMI().size(); j++) {
+                            ContentValues valuesins = new ContentValues();
+                            valuesins.put(T_MESSAGES_TIME_BADBID, outgmi.getMIB().get(i).getMID());
+                            valuesins.put(T_MESSAGES_TIME_UserID, outgmi.getMIB().get(i).getMI().get(j).getUID());
+                            valuesins.put(T_MESSAGES_TIME_ReadTimestamp, outgmi.getMIB().get(i).getMI().get(j).getRD());
+                            valuesins.put(T_MESSAGES_TIME_SendTimestamp, outgmi.getMIB().get(i).getSD());
+                            valuesins.put(T_MESSAGES_TIME_ShowTimestamp, outgmi.getMIB().get(i).getMI().get(j).getSH());
+                            valuesins.put(T_MESSAGES_TIME_UserName, outgmi.getMIB().get(i).getMI().get(j).getUN());
+
+                            ContentProviderClient clientupd = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
+                            ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
+                            clientupd.release();
+
+                            if (outgmi.getMIB().get(i).getMI().get(j).getRD() != 0) {
+                                numre++;
+                            }
+                            if (outgmi.getMIB().get(i).getMI().get(j).getSH() != 0) {
+                                numsh++;
+                            }
+                        }
+                    }
+                }
+            }
+            cd.close();
+            clientdifferent.release();
+        }
     }
 }

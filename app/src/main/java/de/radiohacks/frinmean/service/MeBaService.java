@@ -17,11 +17,13 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
+import org.apache.commons.io.FileUtils;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
@@ -36,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import de.radiohacks.frinmean.Constants;
+import de.radiohacks.frinmean.R;
 import de.radiohacks.frinmean.adapters.SyncAdapter;
 import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.modelshort.C;
@@ -392,6 +395,46 @@ public class MeBaService extends IntentService {
         return ret;
     }
 
+    private String downloadimage(int inImgID, int inMsgID, String ImageType) {
+
+        String ret = null;
+        OGImMMD outmeta = rf.getImageMessageMetaData(username, password, inImgID);
+
+        if (outmeta != null) {
+            if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
+                if (!checkfileexists(outmeta.getIM(), ImageType, outmeta.getIS(), outmeta.getIMD5())) {
+                    if (isWifi) {
+                        OGImM ofim = rf.fetchImageMessage(username, password, inImgID, ImageType);
+                        if (ofim != null) {
+                            if (ofim.getET() == null || ofim.getET().isEmpty()) {
+                                String checkfilepath;
+                                if (ImageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+                                    checkfilepath = imgdir + File.separator + ofim.getIM();
+                                    if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, inMsgID)) {
+                                        ret = checkfilepath;
+                                    }
+                                } else if (ImageType.equalsIgnoreCase(Constants.TYP_ICON)) {
+                                    ret = icndir + File.separator + ofim.getIM();
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    String checkfilepath;
+                    if (ImageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
+                        checkfilepath = imgdir + File.separator + outmeta.getIM();
+                        if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, inMsgID)) {
+                            ret = checkfilepath;
+                        }
+                    } else if (ImageType.equalsIgnoreCase(Constants.TYP_ICON)) {
+                        ret = icndir + File.separator + outmeta.getIM();
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
     private void handleActionRefresh(long intime) {
         Log.d(TAG, "start handleActionRefresh");
 
@@ -406,6 +449,13 @@ public class MeBaService extends IntentService {
                     valuesinschat.put(T_CHAT_OwningUserID, c.getOU().getOUID());
                     valuesinschat.put(T_CHAT_OwningUserName, c.getOU().getOUN());
                     valuesinschat.put(T_CHAT_ChatName, c.getCN());
+                    if (c.getICID() > 0) {
+                        String filepath = downloadimage(c.getICID(), 0, Constants.TYP_ICON);
+                        if (filepath != null && !filepath.isEmpty()) {
+                            valuesinschat.put(Constants.T_CHAT_IconID, c.getICID());
+                            valuesinschat.put(Constants.T_CHAT_IconValue, filepath);
+                        }
+                    }
                     ((FrinmeanContentProvider) clientChat.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CHAT_CONTENT_URI, valuesinschat);
                     OFMFC outFetchMessage = rf.getmessagefromchat(username, password, c.getCID(), intime);
                     if (outFetchMessage != null && outFetchMessage.getET() == null) {
@@ -436,45 +486,19 @@ public class MeBaService extends IntentService {
                                 }
                             } else if (m.getMT().equalsIgnoreCase(TYP_IMAGE)) {
                                 valuesinsmsg.put(T_MESSAGES_ImageMsgID, m.getIMID());
-                                OGImMMD outmeta = rf.getImageMessageMetaData(username, password, m.getIMID());
 
-                                if (outmeta != null) {
-                                    if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
+                                String imgfile = downloadimage(m.getIMID(), m.getMID(), Constants.TYP_IMAGE);
 
-                                        if (!checkfileexists(outmeta.getIM(), TYP_IMAGE, outmeta.getIS(), outmeta.getIMD5())) {
-                                            if (isWifi) {
-                                                OGImM ofim = rf.fetchImageMessage(username, password, m.getIMID(), m.getMT());
-                                                if (ofim != null) {
-                                                    if (ofim.getET() == null || ofim.getET().isEmpty()) {
-                                                        String checkfilepath;
-
-                                                        checkfilepath = imgdir + ofim.getIM();
-                                                        if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                                            valuesinsmsg.put(T_MESSAGES_ImageMsgValue, checkfilepath);
+                                valuesinsmsg.put(T_MESSAGES_ImageMsgValue, imgfile);
                                                             ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                                                             ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                                             client.release();
 
                                                             Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                                                            Uri contentUri = Uri.fromFile(new File(checkfilepath));
+                                Uri contentUri = Uri.fromFile(new File(imgfile));
                                                             mediaScanIntent.setData(contentUri);
                                                             sendBroadcast(mediaScanIntent);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                            String checkfilepath;
-                                            checkfilepath = imgdir + outmeta.getIM();
-                                            if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                                valuesinsmsg.put(T_MESSAGES_ImageMsgValue, checkfilepath);
-                                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                                                client.release();
-                                            }
-                                        }
-                                    }
-                                }
+
                             } else if (m.getMT().equalsIgnoreCase(TYP_CONTACT)) {
                                 valuesinsmsg.put(T_MESSAGES_ContactMsgID, m.getCMID());
                                 ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -1065,6 +1089,29 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "end hanleActionSyncUser");
     }
 
+    private void moveFileToDestination(String origFile, String subdir, String serverfilename) {
+        Log.d(TAG, "start moveFileToDestination");
+        File source = new File(origFile);
+
+        // Where to store it.
+        String destFile = basedir;
+        // Add SubDir for Images, videos or files
+        if (destFile.endsWith(File.separator)) {
+            destFile += subdir + File.separator + serverfilename;
+        } else {
+            destFile += File.separator + subdir + File.separator + serverfilename;
+        }
+
+        File destination = new File(destFile);
+        try {
+            FileUtils.moveFile(source, destination);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        boolean X = destination.exists();
+        Log.d(TAG, "end moveFileToDestination");
+    }
+
     private void handleSendUserIcon(String message) {
         Log.d(TAG, "start handleSendUserIcon");
 
@@ -1074,7 +1121,16 @@ public class MeBaService extends IntentService {
                 OIUIc outinsusericon = rf.insertusericon(username, password, outsendicon.getIcID());
                 if (outinsusericon != null) {
                     if (outinsusericon.getET() == null || outinsusericon.getET().isEmpty()) {
-                        // Update Database with new Icon
+                        moveFileToDestination(message, Constants.ICONDIR, outsendicon.getIcF());
+                        File checkexists = new File(icndir + outsendicon.getIcF());
+                        if (checkexists.exists()) {
+                            SharedPreferences shP = PreferenceManager
+                                    .getDefaultSharedPreferences(MeBaService.this);
+                            SharedPreferences.Editor ed = shP.edit();
+                            ed.putString(Constants.prefUserIcon, checkexists.getAbsolutePath());
+                            ed.commit();
+                            Toast.makeText(getApplicationContext(), R.string.user_icon_set, Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
 

@@ -48,9 +48,6 @@ public class FrinmeanContentProvider extends ContentProvider {
     private static final int MESSAGES_LocationMsgValue = 1160;
     private static final int MESSAGES_ContactMsgID = 1170;
     private static final int MESSAGES_ContactMsgValue = 1180;
-    private static final int MESSAGES_NumberAll = 1190;
-    private static final int MESSAGES_NumberRead = 1200;
-    private static final int MESSAGES_NumberShow = 1210;
     private static final int Frinmean_chats = 2000;
     private static final int CHAT_ID = 2010;
     private static final int CHAT_BADBID = 2020;
@@ -150,7 +147,7 @@ public class FrinmeanContentProvider extends ContentProvider {
         int uriType = sURIMatcher.match(uri);
         if (uriType >= 1000 && uriType <= 1180) {
             // Check if the caller has requested a column which does not exists
-            checkColumns(projection, Constants.MESSAGES_TABLE_NAME);
+            //checkColumns(projection, Constants.MESSAGES_TABLE_NAME);
 
             queryBuilder.setTables(Constants.MESSAGES_TABLE_NAME);
             switch (uriType) {
@@ -228,18 +225,6 @@ public class FrinmeanContentProvider extends ContentProvider {
                     queryBuilder.appendWhere(Constants.T_MESSAGES_ContactMsgValue + "="
                             + uri.getLastPathSegment());
                     break;
-                /*case MESSAGES_NumberAll:
-                    queryBuilder.appendWhere(Constants.T_MESSAGES_NumberAll + "="
-                            + uri.getLastPathSegment());
-                    break;
-                case MESSAGES_NumberRead:
-                    queryBuilder.appendWhere(Constants.T_MESSAGES_NumberRead + "="
-                            + uri.getLastPathSegment());
-                    break;
-                case MESSAGES_NumberShow:
-                    queryBuilder.appendWhere(Constants.T_MESSAGES_NumberShow + "="
-                            + uri.getLastPathSegment());
-                    break; */
                 default:
                     throw new IllegalArgumentException("Unknown URI: " + uri);
             }

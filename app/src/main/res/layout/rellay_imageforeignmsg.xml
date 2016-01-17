@@ -99,13 +99,13 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/ForUSerStatusContainer"
+        android:id="@+id/ForUserStatusContainer"
         android:layout_width="70dp"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/ForImageMessageContainer"
         android:layout_weight="1">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/ForImageUserIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

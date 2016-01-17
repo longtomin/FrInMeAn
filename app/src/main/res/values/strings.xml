@@ -66,6 +66,7 @@
     <string name="signup_type_same_password_in_password_fields">Passwörter stimmen nicht überein!</string>
     <string name="signup_fill_all_fields">Es müssen alle Felder für den SignUp ausgefüllt werden!</string>
     <string name="signup_user_already_exists_saved">Der Benutzer existiert bereits, wird aber für spätere Authentizifzierung gespeichert!</string>
+    <string name="user_icon_set">Benutzer Icon gesetzt.</string>
     <string name="not_connected_to_service">Keine Verbindung zum Hintergrund Service</string>
     <string name="not_connected_to_network">Keine Internet Verbindung</string>
     <string name="DirecotryChooser">Ablageort auswählen</string>

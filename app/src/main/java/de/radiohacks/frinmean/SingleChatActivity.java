@@ -177,7 +177,7 @@ public class SingleChatActivity extends ActionBarActivity implements
         actionBar.setDisplayShowCustomEnabled(true);
 
         getLoaderManager().initLoader(MESSAGE_LOADER_ID, null, this);
-        mAdapter = new SingleChatAdapter(this, null, userid);
+        mAdapter = new SingleChatAdapter(this, null, userid, ChatID);
 
 
         ListView lv = (ListView) findViewById(R.id.singlechatlist);

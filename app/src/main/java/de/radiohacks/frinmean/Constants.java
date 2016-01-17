@@ -412,6 +412,7 @@ public class Constants {
     public static final String prefRingtone = "prefRingtone";
     public static final String prefVibrate = "prefVibrate";
     public static final String prefContentCommunication = "pref_title_content_communication";
+    public static final String prefUserIcon = "prefUsericon";
 
 
     public static final String PREF_SETUP_COMPLETE = "setup_complete";

@@ -121,7 +121,7 @@
         android:layout_toEndOf="@+id/ForVideoMessageContainer"
         android:layout_weight="1">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/ForVideoUserIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

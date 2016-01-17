@@ -109,7 +109,7 @@
         android:layout_toEndOf="@+id/ForTextUserStatusContainer"
         android:layout_weight="1">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/ForTextUserIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

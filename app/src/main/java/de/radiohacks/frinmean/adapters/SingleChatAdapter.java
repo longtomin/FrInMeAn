@@ -37,12 +37,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.Gravity;
@@ -57,6 +59,8 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import de.radiohacks.frinmean.ChatUserActivity;
 import de.radiohacks.frinmean.Constants;
@@ -64,6 +68,8 @@ import de.radiohacks.frinmean.R;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.MeBaService;
 
+import static de.radiohacks.frinmean.Constants.ID_USER_BADBID;
+import static de.radiohacks.frinmean.Constants.ID_USER_IconValue;
 import static de.radiohacks.frinmean.Constants.MESSAGES_TIME_DB_Columns;
 
 public class SingleChatAdapter extends CursorAdapter {
@@ -84,12 +90,85 @@ public class SingleChatAdapter extends CursorAdapter {
 
     private int OID = 0;
     private ContentResolver mContentResolver;
+    private HashMap<Integer, Bitmap> userImages;
 
-    public SingleChatAdapter(Context context, Cursor cursor, int InOID) {
+    public SingleChatAdapter(Context context, Cursor cursor, int InOID, int InchatID) {
         super(context, cursor, true);
         Log.d(TAG, "start SingleChatAdapter");
         this.OID = InOID;
         this.mContentResolver = context.getContentResolver();
+        this.userImages = new HashMap<>(1);
+        ContentProviderClient clientuserid = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+        Cursor cuid = clientuserid.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, new String[]{"Distinct " + Constants.T_MESSAGES_OwningUserID},
+                Constants.T_MESSAGES_ChatID + " = ?", new String[]{String.valueOf(InchatID)}, Constants.T_MESSAGES_OwningUserID);
+        String sel = "";
+        List uids = new ArrayList<String>(1);
+        int count = cuid.getCount();
+        if (cuid.getCount() > 0) {
+            cuid.moveToFirst();
+            for (int i = 0; i < count; i++) {
+                if (i == count - 1) {
+                    sel += Constants.T_USER_BADBID + " = ?";
+                } else {
+                    sel += Constants.T_USER_BADBID + " = ? OR ";
+                }
+                uids.add(String.valueOf(cuid.getInt(0)));
+                cuid.moveToNext();
+            }
+        }
+        cuid.close();
+        clientuserid.release();
+
+        String[] uids2 = (String[]) uids.toArray(new String[uids.size()]);
+        ContentProviderClient clientuserimg = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.USER_CONTENT_URI);
+        Cursor cuim = clientuserimg.getLocalContentProvider().query(FrinmeanContentProvider.USER_CONTENT_URI, Constants.USER_DB_Columns,
+                sel, uids2, null);
+
+        while (cuim.moveToNext()) {
+            String UserImgFile = cuim.getString(ID_USER_IconValue);
+            int UserId = cuim.getInt(ID_USER_BADBID);
+            if (UserImgFile != null && !UserImgFile.isEmpty()) {
+                File ifileOwn = new File(UserImgFile);
+                if (ifileOwn.exists()) {
+                    String filename = ifileOwn.getAbsolutePath();
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(UserImgFile, options);
+
+                    options.inSampleSize = calculateInSampleSize(options, 50, 50);
+
+                    // Decode bitmap with inSampleSize set
+                    options.inJustDecodeBounds = false;
+                    Bitmap bmp = BitmapFactory.decodeFile(filename, options);
+                    userImages.put(UserId, bmp);
+                }
+            } else {
+                userImages.put(UserId, BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
+            }
+        }
+        SharedPreferences sharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(mContext);
+
+        String ownusericon = sharedPrefs.getString(Constants.prefUserIcon, "NULL");
+        if (ownusericon != "NULL") {
+            File ifileOwn = new File(ownusericon);
+            if (ifileOwn.exists()) {
+                String filename = ifileOwn.getAbsolutePath();
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(ownusericon, options);
+
+                options.inSampleSize = calculateInSampleSize(options, 50, 50);
+
+                // Decode bitmap with inSampleSize set
+                options.inJustDecodeBounds = false;
+                Bitmap bmp = BitmapFactory.decodeFile(filename, options);
+                userImages.put(InOID, bmp);
+            }
+        } else {
+            userImages.put(InOID, BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
+        }
+
         Log.d(TAG, "end SingleChatAdapter");
     }
 
@@ -392,19 +471,31 @@ public class SingleChatAdapter extends CursorAdapter {
         Date rDate = new java.util.Date(rstamp * 1000);
         String OName = cur.getString(Constants.ID_MESSAGES_OwningUserName);
 
-        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
-        Cursor cto = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
+        /* String UserImgFile = null;
+        ContentProviderClient clientuser = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.USER_CONTENT_URI);
+        Cursor cui = clientuser.getLocalContentProvider().query(FrinmeanContentProvider.USER_CONTENT_URI, Constants.USER_DB_Columns,
+                Constants.T_USER_BADBID + " = ?", new String[]{String.valueOf(msgOID)}, null);
+        if (cui.getCount() > 0) {
+            cui.moveToFirst();
+            UserImgFile = cui.getString(ID_USER_IconValue);
+        }
+        cui.close();
+        clientuser.release(); */
+
+        ContentProviderClient clienttime = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
+        Cursor cto = clienttime.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
                 Constants.T_MESSAGES_TIME_BADBID + " = ?", new String[]{String.valueOf(cur.getInt(Constants.ID_MESSAGES_BADBID))}, null);
         int NumTotal = cto.getCount();
-        Cursor crd = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
+        Cursor crd = clienttime.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
                 Constants.T_MESSAGES_TIME_BADBID + " = ? and " + Constants.T_MESSAGES_TIME_ReadTimestamp + " != ?", new String[]{String.valueOf(cur.getInt(Constants.ID_MESSAGES_BADBID)), "0"}, null);
         int NumRead = crd.getCount();
-        Cursor csh = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
+        Cursor csh = clienttime.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
                 Constants.T_MESSAGES_TIME_BADBID + " = ? and " + Constants.T_MESSAGES_TIME_ShowTimestamp + " != ?", new String[]{String.valueOf(cur.getInt(Constants.ID_MESSAGES_BADBID)), "0"}, null);
         int NumShow = csh.getCount();
         cto.close();
         crd.close();
         csh.close();
+        clienttime.release();
 
         switch (findMsgType(msgType, mine)) {
             case TEXTMSG_OWN:
@@ -418,6 +509,12 @@ public class SingleChatAdapter extends CursorAdapter {
                 TextMessageOwn.setText(cur.getString(Constants.ID_MESSAGES_TextMsgValue));
                 TextView TextStatusOwn = (TextView) view.findViewById(R.id.OwnTextStatus);
                 TextStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
+                ImageButton TOusericon = (ImageButton) view.findViewById(R.id.OwnTextUserIcon);
+                if (userImages.containsKey(msgOID)) {
+                    TOusericon.setImageBitmap(userImages.get(msgOID));
+                } else {
+                    TOusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
+                }
                 break;
             case TEXTMSG_FOREIGN:
                 TextView TxtOwningUserNameForeign = (TextView) view.findViewById(R.id.ForTextOwningUserName);
@@ -430,6 +527,12 @@ public class SingleChatAdapter extends CursorAdapter {
                 TextMessageForeign.setText(cur.getString(Constants.ID_MESSAGES_TextMsgValue));
                 TextView TextStatusForeign = (TextView) view.findViewById(R.id.ForTextStatus);
                 TextStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
+                ImageButton TFusericon = (ImageButton) view.findViewById(R.id.ForTextUserIcon);
+                if (userImages.containsKey(msgOID)) {
+                    TFusericon.setImageBitmap(userImages.get(msgOID));
+                } else {
+                    TFusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
+                }
                 break;
             case IMAGEMSG_OWN:
                 TextView ImgOwningUserNameOwn = (TextView) view.findViewById(R.id.OwnImageOwningUserName);
@@ -440,40 +543,16 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImgReadTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView ImageStatusOwn = (TextView) view.findViewById(R.id.OwnImageStatus);
                 ImageStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
-                ImageButton IButtonOwn = (ImageButton) view.findViewById(R.id.OwnImageImageButton);
                 final String imgfileOwn = cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                IButtonOwn.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent();
-                        intent.setAction(android.content.Intent.ACTION_VIEW);
-                        File file = new File(imgfileOwn);
-                        intent.setDataAndType(Uri.fromFile(file), "image/*");
-                        mContext.startActivity(intent);
-                    }
-                });
-
-
-                File ifileOwn = new File(imgfileOwn);
-                if (ifileOwn.exists()) {
-                    String fname = ifileOwn.getAbsolutePath();
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(fname, options);
-
-                    options.inSampleSize = calculateInSampleSize(options, 200, 200);
-
-                    // Decode bitmap with inSampleSize set
-                    options.inJustDecodeBounds = false;
-                    Bitmap bmp = BitmapFactory.decodeFile(fname, options);
-
-                    IButtonOwn.setImageBitmap(bmp);
-                    IButtonOwn.setMinimumWidth(options.outWidth);
-                    IButtonOwn.setMinimumHeight(options.outHeight);
-                    IButtonOwn.setMaxWidth(options.outWidth);
-                    IButtonOwn.setMaxHeight(options.outHeight);
-
+                if (imgfileOwn != null && !imgfileOwn.isEmpty()) {
+                    ImageButton IButtonOwn = (ImageButton) view.findViewById(R.id.OwnImageImageButton);
+                    setImageView(IButtonOwn, imgfileOwn, 200, 200, "image/*");
+                }
+                ImageButton IOusericon = (ImageButton) view.findViewById(R.id.OwnImageUserIcon);
+                if (userImages.containsKey(msgOID)) {
+                    IOusericon.setImageBitmap(userImages.get(msgOID));
+                } else {
+                    IOusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
                 }
                 break;
             case IMAGEMSG_FOREIGN:
@@ -485,9 +564,19 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImgReadTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView ImageStatusForeign = (TextView) view.findViewById(R.id.ForImageStatus);
                 ImageStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
-                ImageButton IButtonForeign = (ImageButton) view.findViewById(R.id.ForImageImageButton);
+
                 final String imgfileForeign = cur.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                IButtonForeign.setOnClickListener(new View.OnClickListener() {
+                if (imgfileForeign != null && !imgfileForeign.isEmpty()) {
+                    ImageButton IButtonForeign = (ImageButton) view.findViewById(R.id.ForImageImageButton);
+                    setImageView(IButtonForeign, imgfileForeign, 200, 200, "image/*");
+                }
+                ImageButton IFusericon = (ImageButton) view.findViewById(R.id.ForImageUserIcon);
+                if (userImages.containsKey(msgOID)) {
+                    IFusericon.setImageBitmap(userImages.get(msgOID));
+                } else {
+                    IFusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
+                }
+/*                IButtonForeign.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
@@ -517,7 +606,7 @@ public class SingleChatAdapter extends CursorAdapter {
                     IButtonForeign.setMaxWidth(options.outWidth);
                     IButtonForeign.setMaxHeight(options.outHeight);
 
-                }
+                }*/
                 break;
             case VIDEOMSG_OWN:
 
@@ -529,11 +618,18 @@ public class SingleChatAdapter extends CursorAdapter {
                 VidReadTimeStampOwn.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView VideoStatusOwn = (TextView) view.findViewById(R.id.OwnVideoStatus);
                 VideoStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
-                ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.OwnVideoImageButton);
                 final String vidfileOwn = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-
-
-                File vfileOwn = new File(vidfileOwn);
+                if (vidfileOwn != null && !vidfileOwn.isEmpty()) {
+                    ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.OwnVideoImageButton);
+                    setImageView(VButtonOwn, vidfileOwn, 600, 600, "video/*");
+                }
+                ImageButton VOusericon = (ImageButton) view.findViewById(R.id.OwnVideoUserIcon);
+                if (userImages.containsKey(msgOID)) {
+                    VOusericon.setImageBitmap(userImages.get(msgOID));
+                } else {
+                    VOusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
+                }
+/*                File vfileOwn = new File(vidfileOwn);
                 if (vfileOwn.exists()) {
                     Bitmap thumbnailOwn = scaleBitmap(getVideoFrame(vidfileOwn), 600);
                     VButtonOwn.setImageBitmap(thumbnailOwn);
@@ -551,7 +647,7 @@ public class SingleChatAdapter extends CursorAdapter {
                             mContext.startActivity(intent);
                         }
                     });
-                }
+                }*/
                 break;
             case VIDEOMSG_FOREIGN:
                 TextView VidOwningUserNameForeign = (TextView) view.findViewById(R.id.ForVideoOwningUserName);
@@ -562,9 +658,19 @@ public class SingleChatAdapter extends CursorAdapter {
                 VidReadTimeStampForeign.setText(new SimpleDateFormat(Constants.DATETIMEFORMAT).format(rDate));
                 TextView VideoStatusForeign = (TextView) view.findViewById(R.id.ForVideoStatus);
                 VideoStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
-                ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.ForVideoImageButton);
+
                 final String vidfileForeign = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                File vfileForeign = new File(vidfileForeign);
+                if (vidfileForeign != null && !vidfileForeign.isEmpty()) {
+                    ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.ForVideoImageButton);
+                    setImageView(VButtonForeign, vidfileForeign, 600, 600, "video/*");
+                }
+                ImageButton VFusericon = (ImageButton) view.findViewById(R.id.ForVideoUserIcon);
+                if (userImages.containsKey(msgOID)) {
+                    VFusericon.setImageBitmap(userImages.get(msgOID));
+                } else {
+                    VFusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
+                }
+                /*File vfileForeign = new File(vidfileForeign);
                 if (vfileForeign.exists()) {
                     Bitmap thumbnailForeign = scaleBitmap(getVideoFrame(vidfileForeign), 600);
                     VButtonForeign.setImageBitmap(thumbnailForeign);
@@ -582,7 +688,7 @@ public class SingleChatAdapter extends CursorAdapter {
                             mContext.startActivity(intent);
                         }
                     });
-                }
+                }*/
                 break;
         }
         Log.d(TAG, "end bindView ");
@@ -632,5 +738,40 @@ public class SingleChatAdapter extends CursorAdapter {
 
         bm = Bitmap.createScaledBitmap(bm, width, height, true);
         return bm;
+    }
+
+    private void setImageView(ImageButton iv, final String fname, int width, int height, final String mediatype) {
+        iv.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setAction(android.content.Intent.ACTION_VIEW);
+                File file = new File(fname);
+                intent.setDataAndType(Uri.fromFile(file), mediatype);
+                mContext.startActivity(intent);
+            }
+        });
+
+
+        File ifileOwn = new File(fname);
+        if (ifileOwn.exists()) {
+            String filename = ifileOwn.getAbsolutePath();
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(fname, options);
+
+            options.inSampleSize = calculateInSampleSize(options, width, height);
+
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
+            Bitmap bmp = BitmapFactory.decodeFile(filename, options);
+
+            iv.setImageBitmap(bmp);
+            iv.setMinimumWidth(options.outWidth);
+            iv.setMinimumHeight(options.outHeight);
+            iv.setMaxWidth(options.outWidth);
+            iv.setMaxHeight(options.outHeight);
+        }
     }
 }

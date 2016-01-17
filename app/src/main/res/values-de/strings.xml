@@ -94,4 +94,5 @@
     <string name="no_users">Keine Benutzer vorhanden</string>
     <string name="action_setusericon">Setze Benutzer Icon</string>
     <string name="action_setchaticon">Setze Chat Icon</string>
+    <string name="user_icon_set">Benutzer Icon gesetzt</string>
 </resources>
