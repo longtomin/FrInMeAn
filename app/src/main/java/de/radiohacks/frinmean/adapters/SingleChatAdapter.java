@@ -619,17 +619,8 @@ public class SingleChatAdapter extends CursorAdapter {
                 TextView VideoStatusOwn = (TextView) view.findViewById(R.id.OwnVideoStatus);
                 VideoStatusOwn.setText(NumTotal + "/" + NumRead + "/" + NumShow);
                 final String vidfileOwn = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                if (vidfileOwn != null && !vidfileOwn.isEmpty()) {
-                    ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.OwnVideoImageButton);
-                    setImageView(VButtonOwn, vidfileOwn, 600, 600, "video/*");
-                }
-                ImageButton VOusericon = (ImageButton) view.findViewById(R.id.OwnVideoUserIcon);
-                if (userImages.containsKey(msgOID)) {
-                    VOusericon.setImageBitmap(userImages.get(msgOID));
-                } else {
-                    VOusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
-                }
-/*                File vfileOwn = new File(vidfileOwn);
+                ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.OwnVideoImageButton);
+                File vfileOwn = new File(vidfileOwn);
                 if (vfileOwn.exists()) {
                     Bitmap thumbnailOwn = scaleBitmap(getVideoFrame(vidfileOwn), 600);
                     VButtonOwn.setImageBitmap(thumbnailOwn);
@@ -647,7 +638,13 @@ public class SingleChatAdapter extends CursorAdapter {
                             mContext.startActivity(intent);
                         }
                     });
-                }*/
+                }
+                ImageButton VOusericon = (ImageButton) view.findViewById(R.id.OwnVideoUserIcon);
+                if (userImages.containsKey(msgOID)) {
+                    VOusericon.setImageBitmap(userImages.get(msgOID));
+                } else {
+                    VOusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
+                }
                 break;
             case VIDEOMSG_FOREIGN:
                 TextView VidOwningUserNameForeign = (TextView) view.findViewById(R.id.ForVideoOwningUserName);
@@ -660,17 +657,9 @@ public class SingleChatAdapter extends CursorAdapter {
                 VideoStatusForeign.setText(NumTotal + "/" + NumRead + "/" + NumShow);
 
                 final String vidfileForeign = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                if (vidfileForeign != null && !vidfileForeign.isEmpty()) {
-                    ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.ForVideoImageButton);
-                    setImageView(VButtonForeign, vidfileForeign, 600, 600, "video/*");
-                }
+                ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.ForVideoImageButton);
                 ImageButton VFusericon = (ImageButton) view.findViewById(R.id.ForVideoUserIcon);
-                if (userImages.containsKey(msgOID)) {
-                    VFusericon.setImageBitmap(userImages.get(msgOID));
-                } else {
-                    VFusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
-                }
-                /*File vfileForeign = new File(vidfileForeign);
+                File vfileForeign = new File(vidfileForeign);
                 if (vfileForeign.exists()) {
                     Bitmap thumbnailForeign = scaleBitmap(getVideoFrame(vidfileForeign), 600);
                     VButtonForeign.setImageBitmap(thumbnailForeign);
@@ -688,7 +677,12 @@ public class SingleChatAdapter extends CursorAdapter {
                             mContext.startActivity(intent);
                         }
                     });
-                }*/
+                }
+                if (userImages.containsKey(msgOID)) {
+                    VFusericon.setImageBitmap(userImages.get(msgOID));
+                } else {
+                    VFusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
+                }
                 break;
         }
         Log.d(TAG, "end bindView ");
