@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -59,10 +59,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "ISLoM", strict=false)
+@Root(name = "ISLoM", strict = false)
 public class ISLoM {
 
     @Element(name = "UN", required = true)
@@ -77,10 +75,8 @@ public class ISLoM {
     /**
      * Gets the value of the un property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getUN() {
         return un;
@@ -89,10 +85,8 @@ public class ISLoM {
     /**
      * Sets the value of the un property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUN(String value) {
         this.un = value;
@@ -101,10 +95,8 @@ public class ISLoM {
     /**
      * Gets the value of the pw property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getPW() {
         return pw;
@@ -113,10 +105,8 @@ public class ISLoM {
     /**
      * Sets the value of the pw property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPW(String value) {
         this.pw = value;
@@ -125,10 +115,8 @@ public class ISLoM {
     /**
      * Gets the value of the lat property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getLat() {
         return lat;
@@ -137,10 +125,8 @@ public class ISLoM {
     /**
      * Sets the value of the lat property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLat(String value) {
         this.lat = value;
@@ -149,10 +135,8 @@ public class ISLoM {
     /**
      * Gets the value of the lon property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getLon() {
         return lon;
@@ -161,10 +145,8 @@ public class ISLoM {
     /**
      * Sets the value of the lon property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLon(String value) {
         this.lon = value;

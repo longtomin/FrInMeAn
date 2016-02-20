@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -60,10 +60,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OGViM", strict=false)
+@Root(name = "OGViM", strict = false)
 public class OGViM {
 
     @Element(required = false, name = "VM")
@@ -76,10 +74,8 @@ public class OGViM {
     /**
      * Gets the value of the vm property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getVM() {
         return vm;
@@ -88,10 +84,8 @@ public class OGViM {
     /**
      * Sets the value of the vm property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setVM(String value) {
         this.vm = value;
@@ -100,10 +94,8 @@ public class OGViM {
     /**
      * Gets the value of the vmd5 property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getVMD5() {
         return vmd5;
@@ -112,10 +104,8 @@ public class OGViM {
     /**
      * Sets the value of the vmd5 property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setVMD5(String value) {
         this.vmd5 = value;
@@ -124,10 +114,8 @@ public class OGViM {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -136,10 +124,8 @@ public class OGViM {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

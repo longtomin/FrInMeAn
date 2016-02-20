@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -57,10 +57,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "IAuth", strict=false)
+@Root(name = "IAuth", strict = false)
 public class IAuth {
 
     @Element(name = "UN", required = true)
@@ -71,10 +69,8 @@ public class IAuth {
     /**
      * Gets the value of the un property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getUN() {
         return un;
@@ -83,10 +79,8 @@ public class IAuth {
     /**
      * Sets the value of the un property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUN(String value) {
         this.un = value;
@@ -95,10 +89,8 @@ public class IAuth {
     /**
      * Gets the value of the pw property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getPW() {
         return pw;
@@ -107,10 +99,8 @@ public class IAuth {
     /**
      * Sets the value of the pw property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPW(String value) {
         this.pw = value;

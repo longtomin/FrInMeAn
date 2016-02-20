@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -60,10 +60,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OCrCh", strict=false)
+@Root(name = "OCrCh", strict = false)
 public class OCrCh {
 
     @Element(required = false, name = "CN")
@@ -76,10 +74,8 @@ public class OCrCh {
     /**
      * Gets the value of the cn property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getCN() {
         return cn;
@@ -88,10 +84,8 @@ public class OCrCh {
     /**
      * Sets the value of the cn property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setCN(String value) {
         this.cn = value;
@@ -100,10 +94,8 @@ public class OCrCh {
     /**
      * Gets the value of the cid property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     * @return possible object is
+     * {@link Integer }
      */
     public Integer getCID() {
         return cid;
@@ -112,10 +104,8 @@ public class OCrCh {
     /**
      * Sets the value of the cid property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setCID(Integer value) {
         this.cid = value;
@@ -124,10 +114,8 @@ public class OCrCh {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -136,10 +124,8 @@ public class OCrCh {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

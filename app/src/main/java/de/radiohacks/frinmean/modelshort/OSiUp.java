@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -62,10 +62,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OSiUp", strict=false)
+@Root(name = "OSiUp", strict = false)
 public class OSiUp {
 
     @Element(required = false, name = "UN")
@@ -74,7 +72,7 @@ public class OSiUp {
     protected Integer uid;
     @Element(required = false, name = "SU")
     protected String su;
-    @Element(required = false,name = "R")
+    @Element(required = false, name = "R")
     protected String r;
     @Element(required = false, name = "ET")
     protected String et;
@@ -82,10 +80,8 @@ public class OSiUp {
     /**
      * Gets the value of the un property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getUN() {
         return un;
@@ -94,10 +90,8 @@ public class OSiUp {
     /**
      * Sets the value of the un property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUN(String value) {
         this.un = value;
@@ -106,10 +100,8 @@ public class OSiUp {
     /**
      * Gets the value of the uid property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     * @return possible object is
+     * {@link Integer }
      */
     public Integer getUID() {
         return uid;
@@ -118,10 +110,8 @@ public class OSiUp {
     /**
      * Sets the value of the uid property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setUID(Integer value) {
         this.uid = value;
@@ -130,10 +120,8 @@ public class OSiUp {
     /**
      * Gets the value of the su property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getSU() {
         return su;
@@ -142,10 +130,8 @@ public class OSiUp {
     /**
      * Sets the value of the su property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setSU(String value) {
         this.su = value;
@@ -154,10 +140,8 @@ public class OSiUp {
     /**
      * Gets the value of the r property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getR() {
         return r;
@@ -166,10 +150,8 @@ public class OSiUp {
     /**
      * Sets the value of the r property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setR(String value) {
         this.r = value;
@@ -178,10 +160,8 @@ public class OSiUp {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -190,10 +170,8 @@ public class OSiUp {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

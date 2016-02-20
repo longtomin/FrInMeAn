@@ -121,6 +121,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
+        android:background="#e1c614"
+        android:maxHeight="50dp"
+        android:maxWidth="50dp"
+        android:minHeight="50dp"
+        android:minWidth="50dp"
         android:padding="4dp"
         android:src="@drawable/smiley" />
 
@@ -130,8 +135,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:padding="4dp"
-        android:src="@drawable/ic_action_send_now" />
+        android:background="#397c39"
+        android:drawableTop="@drawable/ic_action_send_now"
+        android:maxHeight="50dp"
+        android:maxWidth="50dp"
+        android:minHeight="50dp"
+        android:minWidth="50dp"
+        android:padding="4dp" />
 
     <de.radiohacks.frinmean.emojicon.EmojiconEditText
         android:id="@+id/chatText"
@@ -142,6 +152,7 @@
         android:layout_toRightOf="@id/emoji_btn"
         android:imeOptions="flagNoExtractUi"
         android:inputType="textMultiLine"
+        android:minHeight="50dp"
         android:textColor="#000"
         android:textSize="20sp"
         emojicon:emojiconSize="28sp" />

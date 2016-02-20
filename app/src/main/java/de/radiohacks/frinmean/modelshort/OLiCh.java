@@ -46,9 +46,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -63,10 +63,8 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OLiCh", strict=false)
+@Root(name = "OLiCh", strict = false)
 public class OLiCh {
 
     @ElementList(required = false, name = "C", inline = true)
@@ -76,25 +74,23 @@ public class OLiCh {
 
     /**
      * Gets the value of the c property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the c property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getC().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link C }
-     * 
-     * 
      */
     public List<C> getC() {
         if (c == null) {
@@ -106,10 +102,8 @@ public class OLiCh {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -118,10 +112,8 @@ public class OLiCh {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

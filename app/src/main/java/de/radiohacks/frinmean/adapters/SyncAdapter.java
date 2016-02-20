@@ -43,8 +43,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -52,14 +50,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hashing;
-import com.google.common.io.Files;
-
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,20 +60,16 @@ import de.radiohacks.frinmean.SingleChatActivity;
 import de.radiohacks.frinmean.modelshort.C;
 import de.radiohacks.frinmean.modelshort.CNM;
 import de.radiohacks.frinmean.modelshort.M;
-import de.radiohacks.frinmean.modelshort.OAckCD;
-import de.radiohacks.frinmean.modelshort.OAckMD;
 import de.radiohacks.frinmean.modelshort.OCN;
 import de.radiohacks.frinmean.modelshort.OFMFC;
-import de.radiohacks.frinmean.modelshort.OGImM;
-import de.radiohacks.frinmean.modelshort.OGImMMD;
 import de.radiohacks.frinmean.modelshort.OGMI;
 import de.radiohacks.frinmean.modelshort.OGTeM;
-import de.radiohacks.frinmean.modelshort.OGViM;
-import de.radiohacks.frinmean.modelshort.OGViMMD;
 import de.radiohacks.frinmean.modelshort.OIMIC;
 import de.radiohacks.frinmean.modelshort.OSImM;
 import de.radiohacks.frinmean.modelshort.OSTeM;
+import de.radiohacks.frinmean.modelshort.OSU;
 import de.radiohacks.frinmean.modelshort.OSViM;
+import de.radiohacks.frinmean.providers.DBHelper;
 import de.radiohacks.frinmean.providers.FrinmeanContentProvider;
 import de.radiohacks.frinmean.service.CustomExceptionHandler;
 import de.radiohacks.frinmean.service.RestFunctions;
@@ -96,6 +83,7 @@ import static de.radiohacks.frinmean.Constants.MESSAGES_DB_Columns;
 import static de.radiohacks.frinmean.Constants.MESSAGES_TIME_DB_Columns;
 import static de.radiohacks.frinmean.Constants.TYP_CONTACT;
 import static de.radiohacks.frinmean.Constants.TYP_FILE;
+import static de.radiohacks.frinmean.Constants.TYP_ICON;
 import static de.radiohacks.frinmean.Constants.TYP_IMAGE;
 import static de.radiohacks.frinmean.Constants.TYP_LOCATION;
 import static de.radiohacks.frinmean.Constants.TYP_TEXT;
@@ -146,14 +134,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private boolean vibrate;
     private RestFunctions rf;
     private Context mContext;
-    private boolean networtConnected = false;
-    private boolean isWifi = false;
-    private boolean contentall = false;
     private String basedir;
     private String imgdir;
     private String viddir;
     private String fildir;
     private String icndir;
+    private DBHelper dbh;
 
     /**
      * Constructor. Obtains handle to content resolver for later use.
@@ -164,6 +150,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver = mContext.getContentResolver();
         getPreferenceInfo();
         rf = new RestFunctions();
+        dbh = new DBHelper(context);
         basedir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR;
         File baseFile = new File(basedir);
         if (!baseFile.exists()) {
@@ -246,19 +233,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
         this.ringtone = sharedPrefs.getString(Constants.prefRingtone, "DEFAULT_SOUND");
         this.vibrate = sharedPrefs.getBoolean(Constants.prefVibrate, true);
-        this.contentall = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
+//        this.contentall = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
         Log.d(TAG, "end getPferefenceInfo");
-    }
-
-    private void checkNetwork() {
-        ConnectivityManager cm =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        networtConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
-        isWifi = contentall || activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
     }
 
     /**
@@ -281,11 +257,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                               ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Beginning network synchronization");
         getPreferenceInfo();
-        checkNetwork();
-        if (networtConnected) {
+        if (dbh.checkNetwork()) {
             syncCheckNewMessages();
             uploadUnsavedMessages();
             syncGetMessageInformation();
+            syncUser();
         }
         Log.i(TAG, "Network synchronization complete");
     }
@@ -339,69 +315,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             valuesins.put(T_CHAT_OwningUserID, c.getOU().getOUID());
             valuesins.put(T_CHAT_OwningUserName, c.getOU().getOUN());
             if (c.getICID() > 0) {
-                String filepath = downloadimage(c.getICID(), 0, Constants.TYP_ICON);
+                String filepath = dbh.downloadimage(c.getICID(), 0, TYP_ICON);
                 if (filepath != null && !filepath.isEmpty()) {
                     valuesins.put(Constants.T_CHAT_IconID, c.getICID());
                     valuesins.put(Constants.T_CHAT_IconValue, filepath);
                 }
             }
             valuesins.put(T_CHAT_ChatName, c.getCN());
-            if (acknowledgeChat(c.getCN(), c.getCID())) {
+            if (dbh.acknowledgeChat(c.getCN(), c.getCID())) {
                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
                 ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CHAT_CONTENT_URI, valuesins);
                 client.release();
             }
         }
         Log.d(TAG, "end saveChatsToLDB");
-    }
-
-    private String downloadimage(int inImgID, int inMsgID, String ImageType) {
-
-        String ret = null;
-        OGImMMD outmeta = rf.getImageMessageMetaData(username, password, inImgID);
-
-        if (outmeta != null) {
-            if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
-                if (!checkfileexists(outmeta.getIM(), ImageType, outmeta.getIS(), outmeta.getIMD5())) {
-                    if (isWifi) {
-                        OGImM ofim = rf.fetchImageMessage(username, password, inImgID, ImageType);
-                        if (ofim != null) {
-                            if (ofim.getET() == null || ofim.getET().isEmpty()) {
-                                String checkfilepath;
-                                if (ImageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                                    checkfilepath = imgdir + File.separator + ofim.getIM();
-                                    if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, inMsgID)) {
-                                        ret = checkfilepath;
-                                    }
-                                } else if (ImageType.equalsIgnoreCase(Constants.TYP_ICON)) {
-                                    ret = icndir + File.separator + ofim.getIM();
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    String checkfilepath;
-                    if (ImageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-                        checkfilepath = imgdir + File.separator + outmeta.getIM();
-                        if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, inMsgID)) {
-                            ret = checkfilepath;
-                        }
-                    } else if (ImageType.equalsIgnoreCase(Constants.TYP_ICON)) {
-                        ret = icndir + File.separator + outmeta.getIM();
-                    }
-                }
-            }
-        }
-        return ret;
-    }
-
-    private void inserIntoTimeTable(int inBAID, int inUSID) {
-        ContentValues valuesins = new ContentValues();
-        valuesins.put(T_MESSAGES_TIME_BADBID, inBAID);
-        valuesins.put(T_MESSAGES_TIME_UserID, inUSID);
-        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
-        ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
-        client.release();
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -425,7 +352,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 OGTeM oftm = rf.gettextmessage(username, password, m.getTMID());
                 if (oftm != null) {
                     if (oftm.getET() == null || oftm.getET().isEmpty()) {
-                        if (acknowledgeMessage(Constants.TYP_TEXT, oftm.getTM(), m.getMID())) {
+                        if (dbh.acknowledgeMessage(Constants.TYP_TEXT, oftm.getTM(), m.getMID())) {
                             valuesins.put(T_MESSAGES_TextMsgValue, oftm.getTM());
                             ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                             ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
@@ -437,7 +364,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } else if (m.getMT().equalsIgnoreCase(TYP_IMAGE)) {
                 valuesins.put(T_MESSAGES_ImageMsgID, m.getIMID());
 
-                String imgfile = downloadimage(m.getIMID(), m.getMID(), Constants.TYP_IMAGE);
+                String imgfile = dbh.downloadimage(m.getIMID(), m.getMID(), Constants.TYP_IMAGE);
 
                 valuesins.put(T_MESSAGES_ImageMsgValue, imgfile);
                 ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -483,43 +410,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 //                }
             } else if (m.getMT().equalsIgnoreCase(TYP_VIDEO)) {
                 valuesins.put(T_MESSAGES_VideoMsgID, m.getVMID());
-                OGViMMD outmeta = rf.getVideoMessageMetaData(username, password, m.getVMID());
+                String vidfile = dbh.downloadvideo(m.getVMID(), m.getMID());
 
-                if (outmeta != null) {
-                    if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
-                        if (!checkfileexists(outmeta.getVM(), TYP_VIDEO, outmeta.getVS(), outmeta.getVMD5())) {
-                            if (isWifi) {
-                                OGViM ofvm = rf.fetchVideoMessage(username, password, m.getVMID());
-                                if (ofvm != null) {
-                                    if (ofvm.getET() == null || ofvm.getET().isEmpty()) {
-                                        String checkfilepath;
+                valuesins.put(T_MESSAGES_VideoMsgValue, vidfile);
+                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
+                client.release();
 
-                                        checkfilepath = viddir + File.separator + ofvm.getVM();
-                                        if (acknowledgeMessage(Constants.TYP_VIDEO, checkfilepath, m.getMID())) {
-                                            valuesins.put(T_MESSAGES_VideoMsgValue, ofvm.getVM());
-                                            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
-                                            client.release();
-                                            newMsg = true;
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            String checkfilepath = viddir + File.separator + outmeta.getVM();
-                            if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                valuesins.put(T_MESSAGES_VideoMsgValue, outmeta.getVM());
-                                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
-                                client.release();
-                                newMsg = true;
-                            }
-                        }
-                    }
-                }
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                Uri contentUri = Uri.fromFile(new File(vidfile));
+                mediaScanIntent.setData(contentUri);
+                mContext.sendBroadcast(mediaScanIntent);
+                newMsg = true;
+
+                // Insert MSG-ID into Time Table
+                dbh.inserIntoTimeTable(m.getMID(), userid);
             }
-            // Insert MSG-ID into Time Table
-            inserIntoTimeTable(m.getMID(), userid);
         }
 
         if (newMsg) {
@@ -566,157 +472,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             client.release();
         }
         Log.d(TAG, "end saveMessageToLDB");
-    }
-
-    private boolean acknowledgeMessage(String msgType, String message, int msgid) {
-        Log.d(TAG, "start acknowledgeMessage");
-
-        boolean ret = false;
-
-        if (msgType.equalsIgnoreCase(Constants.TYP_TEXT)) {
-            /* Hasher hasher = Hashing.md5().newHasher();
-            hasher.putBytes(message.getBytes());
-            byte[] md5 = hasher.hash().asBytes(); */
-            int hashCode = message.hashCode();
-
-            OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, String.valueOf(hashCode));
-            if (oack != null) {
-                if (oack.getET() == null || oack.getET().isEmpty()) {
-                    if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
-                        ret = true;
-                    }
-                }
-            }
-        } else if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-            HashCode md5 = null;
-            try {
-                md5 = Files.hash(new File(message),
-                        Hashing.md5());
-                assert md5 != null;
-                OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
-                if (oack != null) {
-                    if (oack.getET() == null || oack.getET().isEmpty()) {
-                        if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
-                            ret = true;
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
-            HashCode md5 = null;
-            try {
-                md5 = Files.hash(new File(message),
-                        Hashing.md5());
-                assert md5 != null;
-                OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
-                if (oack != null) {
-                    if (oack.getET() == null || oack.getET().isEmpty()) {
-                        if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
-                            ret = true;
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        Log.d(TAG, "end acknowledgeMessage");
-        return ret;
-    }
-
-    private boolean acknowledgeChat(String Chatname, int chatid) {
-        Log.d(TAG, "start acknowledgeMessage");
-
-        boolean ret = false;
-
-        int hashCode = Chatname.hashCode();
-
-        OAckCD oack = rf.acknowledgechatdownload(username, password, chatid, String.valueOf(hashCode));
-        if (oack != null) {
-            if (oack.getET() == null || oack.getET().isEmpty()) {
-                if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
-                    ret = true;
-                }
-            }
-        }
-        Log.d(TAG, "end acknowledgeMessage");
-        return ret;
-    }
-
-    private boolean checkfileexists(String fname, String msgType, long fsize, String inmd5sumd) {
-        Log.d(TAG, "start checkfileexists");
-
-        boolean ret = false;
-        File checkfile;
-        String checkfilepath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Constants.BASEDIR + File.separator;
-
-        if (msgType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
-            checkfilepath += Constants.IMAGEDIR + File.separator;
-        } else if (msgType.equalsIgnoreCase(Constants.TYP_VIDEO)) {
-            checkfilepath += Constants.VIDEODIR + File.separator;
-        } else if (msgType.equalsIgnoreCase(Constants.TYP_FILE)) {
-            checkfilepath += Constants.FILESDIR + File.separator;
-        } else if (msgType.equalsIgnoreCase(Constants.TYP_ICON)) {
-            checkfilepath += Constants.ICONDIR + File.separator;
-        }
-
-        checkfilepath += fname;
-
-        assert checkfilepath != null;
-        checkfile = new File(checkfilepath);
-
-        if (checkfile.exists()) {
-            if (checkfile.length() == fsize) {
-                // File exists an has right size
-                HashCode md5 = null;
-                try {
-                    md5 = Files.hash(new File(checkfilepath),
-                            Hashing.md5());
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                assert md5 != null;
-                if (md5.toString().equals(inmd5sumd)) {
-                    // MD5Sum is equal File already exists
-                    ret = true;
-                }
-            }
-        }
-        Log.d(TAG, "end checkfileexists");
-        return ret;
-    }
-
-    private void moveFileToDestination(String origFile, String subdir, String serverfilename) {
-        Log.d(TAG, "start moveFileToDestination");
-        File source = new File(origFile);
-
-        // Where to store it.
-        String destFile = basedir;
-        // Add SubDir for Images, videos or files
-        if (destFile.endsWith(File.separator)) {
-            destFile += subdir + File.separator + serverfilename;
-        } else {
-            destFile += File.separator + subdir + File.separator + serverfilename;
-        }
-
-        /*if (destFile.endsWith(File.separator)) {
-            destFile += serverfilename;
-        } else {
-            destFile += File.separator + serverfilename;
-        }*/
-
-        File destination = new File(destFile);
-        try {
-            FileUtils.moveFile(source, destination);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG, "end moveFileToDestination");
     }
 
     /*
@@ -773,13 +528,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         if (outins != null) {
                             if (outins.getET() == null || outins.getET().isEmpty()) {
                                 updateUploadedMessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outtxt.getTID(), TYP_TEXT, null);
-                                inserIntoTimeTable(outins.getMID(), userid);
+                                dbh.inserIntoTimeTable(outins.getMID(), userid);
                             }
                         }
                     }
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_IMAGE)) {
-                if (isWifi) {
+                if (dbh.checkWIFI()) {
                     String imgfile = c.getString(Constants.ID_MESSAGES_ImageMsgValue);
                     OSImM outimg = rf.sendImageMessage(username, password, c.getString(Constants.ID_MESSAGES_ImageMsgValue));
                     if (outimg != null) {
@@ -788,17 +543,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             if (outins != null) {
                                 if (outins.getET() == null || outins.getET().isEmpty()) {
                                     updateUploadedMessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outimg.getImID(), TYP_IMAGE, outimg.getImF());
-                                    inserIntoTimeTable(outins.getMID(), userid);
-                                    moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getImF());
+                                    dbh.inserIntoTimeTable(outins.getMID(), userid);
+                                    dbh.moveFileToDestination(imgfile, Constants.IMAGEDIR, outimg.getImF());
                                 }
                             }
                         }
                     }
                 }
-            } /*else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
+            } else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
 
-            } */ else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
-                if (isWifi) {
+            } else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
+                if (dbh.checkWIFI()) {
                     String vidfile = c.getString(Constants.ID_MESSAGES_VideoMsgValue);
                     OSViM outvid = rf.sendVideoMessage(username, password, c.getString(Constants.ID_MESSAGES_VideoMsgValue));
                     if (outvid != null) {
@@ -807,19 +562,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             if (outins != null) {
                                 if (outins.getET() == null || outins.getET().isEmpty()) {
                                     updateUploadedMessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outvid.getVID(), TYP_VIDEO, outvid.getVF());
-                                    inserIntoTimeTable(outins.getMID(), userid);
-                                    moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVF());
+                                    dbh.inserIntoTimeTable(outins.getMID(), userid);
+                                    dbh.moveFileToDestination(vidfile, Constants.VIDEODIR, outvid.getVF());
                                 }
                             }
                         }
 
                     }
                 }
-            } /* else if (msgtype.equalsIgnoreCase(TYP_FILE)) {
+            } else if (msgtype.equalsIgnoreCase(TYP_FILE)) {
 
             } else if (msgtype.equalsIgnoreCase(TYP_CONTACT)) {
 
-            } */
+            }
         }
         c.close();
         client.release();
@@ -855,9 +610,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     if (outgmi != null) {
                         if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
                             for (int i = 0; i < outgmi.getMIB().size(); i++) {
-                                int numall = outgmi.getMIB().get(i).getMI().size();
-                                int numre = 0;
-                                int numsh = 0;
+                                // int numall = outgmi.getMIB().get(i).getMI().size();
+                                // int numre = 0;
+                                // int numsh = 0;
                                 for (int j = 0; j < outgmi.getMIB().get(i).getMI().size(); j++) {
                                     ContentValues valuesins = new ContentValues();
                                     valuesins.put(T_MESSAGES_TIME_BADBID, outgmi.getMIB().get(i).getMID());
@@ -871,12 +626,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
                                     clientupd.release();
 
-                                    if (outgmi.getMIB().get(i).getMI().get(j).getRD() != 0) {
+                                    /* if (outgmi.getMIB().get(i).getMI().get(j).getRD() != 0) {
                                         numre++;
                                     }
                                     if (outgmi.getMIB().get(i).getMI().get(j).getSH() != 0) {
                                         numsh++;
-                                    }
+                                    } */
                                 }
                             }
                         }
@@ -893,9 +648,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (outgmi != null) {
                 if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
                     for (int i = 0; i < outgmi.getMIB().size(); i++) {
-                        int numall = outgmi.getMIB().get(i).getMI().size();
-                        int numre = 0;
-                        int numsh = 0;
+                        // int numall = outgmi.getMIB().get(i).getMI().size();
+                        // int numre = 0;
+                        // int numsh = 0;
                         for (int j = 0; j < outgmi.getMIB().get(i).getMI().size(); j++) {
                             ContentValues valuesins = new ContentValues();
                             valuesins.put(T_MESSAGES_TIME_BADBID, outgmi.getMIB().get(i).getMID());
@@ -909,12 +664,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
                             clientupd.release();
 
-                            if (outgmi.getMIB().get(i).getMI().get(j).getRD() != 0) {
+                            /* if (outgmi.getMIB().get(i).getMI().get(j).getRD() != 0) {
                                 numre++;
                             }
                             if (outgmi.getMIB().get(i).getMI().get(j).getSH() != 0) {
                                 numsh++;
-                            }
+                            }*/
                         }
                     }
                 }
@@ -922,5 +677,34 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             cd.close();
             clientdifferent.release();
         }
+    }
+
+    private void syncUser() {
+        Log.d(TAG, "start hanleActionSyncUser");
+
+        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.USER_CONTENT_URI);
+        Cursor cur = client.getLocalContentProvider().query(FrinmeanContentProvider.USER_CONTENT_URI, Constants.USER_DB_Columns, null, null, null);
+        ArrayList<Integer> inputuids = new ArrayList<>(1);
+        while (cur.moveToNext()) {
+            int val = cur.getInt(Constants.ID_USER_BADBID);
+            if (!inputuids.contains(val)) {
+                inputuids.add(val);
+            }
+        }
+        cur.close();
+        client.release();
+
+        if (inputuids.size() > 0) {
+            OSU out = rf.syncUser(username, password, inputuids);
+            if (out != null) {
+                if (out.getET() == null || out.getET().isEmpty()) {
+
+                    for (int i = 0; i < out.getU().size(); i++) {
+                        dbh.insertUserIntoDB(out.getU().get(i).getUID(), out.getU().get(i).getUN(), null, out.getU().get(i).getE(), out.getU().get(i).getLA(), 0, null);
+                    }
+                }
+            }
+        }
+        Log.d(TAG, "end hanleActionSyncUser");
     }
 }

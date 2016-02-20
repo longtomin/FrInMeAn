@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -68,10 +68,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "M", strict=false)
+@Root(name = "M", strict = false)
 public class M {
 
     @Element(required = false, name = "MID")
@@ -103,7 +101,6 @@ public class M {
 
     /**
      * Gets the value of the mid property.
-     * 
      */
     public int getMID() {
         return mid;
@@ -111,7 +108,6 @@ public class M {
 
     /**
      * Sets the value of the mid property.
-     * 
      */
     public void setMID(int value) {
         this.mid = value;
@@ -120,10 +116,8 @@ public class M {
     /**
      * Gets the value of the mt property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getMT() {
         return mt;
@@ -132,10 +126,8 @@ public class M {
     /**
      * Sets the value of the mt property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setMT(String value) {
         this.mt = value;
@@ -143,7 +135,6 @@ public class M {
 
     /**
      * Gets the value of the sdT property.
-     * 
      */
     public long getSdT() {
         return sdT;
@@ -151,7 +142,6 @@ public class M {
 
     /**
      * Sets the value of the sdT property.
-     * 
      */
     public void setSdT(long value) {
         this.sdT = value;
@@ -159,7 +149,6 @@ public class M {
 
     /**
      * Gets the value of the rdT property.
-     * 
      */
     public long getRdT() {
         return rdT;
@@ -167,7 +156,6 @@ public class M {
 
     /**
      * Sets the value of the rdT property.
-     * 
      */
     public void setRdT(long value) {
         this.rdT = value;
@@ -175,7 +163,6 @@ public class M {
 
     /**
      * Gets the value of the shT property.
-     * 
      */
     public long getShT() {
         return shT;
@@ -183,7 +170,6 @@ public class M {
 
     /**
      * Sets the value of the shT property.
-     * 
      */
     public void setShT(long value) {
         this.shT = value;
@@ -192,10 +178,8 @@ public class M {
     /**
      * Gets the value of the ou property.
      *
-     * @return
-     *     possible object is
-     *     {@link OU }
-     *     
+     * @return possible object is
+     * {@link OU }
      */
     public OU getOU() {
         return ou;
@@ -204,10 +188,8 @@ public class M {
     /**
      * Sets the value of the ou property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link OU }
-     *     
+     * @param value allowed object is
+     *              {@link OU }
      */
     public void setOU(OU value) {
         this.ou = value;
@@ -215,7 +197,6 @@ public class M {
 
     /**
      * Gets the value of the tmid property.
-     * 
      */
     public int getTMID() {
         return tmid;
@@ -223,7 +204,6 @@ public class M {
 
     /**
      * Sets the value of the tmid property.
-     * 
      */
     public void setTMID(int value) {
         this.tmid = value;
@@ -231,7 +211,6 @@ public class M {
 
     /**
      * Gets the value of the imid property.
-     * 
      */
     public int getIMID() {
         return imid;
@@ -239,7 +218,6 @@ public class M {
 
     /**
      * Sets the value of the imid property.
-     * 
      */
     public void setIMID(int value) {
         this.imid = value;
@@ -247,7 +225,6 @@ public class M {
 
     /**
      * Gets the value of the cmid property.
-     * 
      */
     public int getCMID() {
         return cmid;
@@ -255,7 +232,6 @@ public class M {
 
     /**
      * Sets the value of the cmid property.
-     * 
      */
     public void setCMID(int value) {
         this.cmid = value;
@@ -263,7 +239,6 @@ public class M {
 
     /**
      * Gets the value of the lmid property.
-     * 
      */
     public int getLMID() {
         return lmid;
@@ -271,7 +246,6 @@ public class M {
 
     /**
      * Sets the value of the lmid property.
-     * 
      */
     public void setLMID(int value) {
         this.lmid = value;
@@ -279,7 +253,6 @@ public class M {
 
     /**
      * Gets the value of the fmid property.
-     * 
      */
     public int getFMID() {
         return fmid;
@@ -287,7 +260,6 @@ public class M {
 
     /**
      * Sets the value of the fmid property.
-     * 
      */
     public void setFMID(int value) {
         this.fmid = value;
@@ -295,7 +267,6 @@ public class M {
 
     /**
      * Gets the value of the vmid property.
-     * 
      */
     public int getVMID() {
         return vmid;
@@ -303,7 +274,6 @@ public class M {
 
     /**
      * Sets the value of the vmid property.
-     * 
      */
     public void setVMID(int value) {
         this.vmid = value;
@@ -311,7 +281,6 @@ public class M {
 
     /**
      * Gets the value of the omid property.
-     * 
      */
     public int getOMID() {
         return omid;
@@ -319,7 +288,6 @@ public class M {
 
     /**
      * Sets the value of the omid property.
-     * 
      */
     public void setOMID(int value) {
         this.omid = value;

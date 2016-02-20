@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -61,10 +61,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OGViMMD", strict=false)
+@Root(name = "OGViMMD", strict = false)
 public class OGViMMD {
 
     @Element(required = false, name = "VM")
@@ -79,10 +77,8 @@ public class OGViMMD {
     /**
      * Gets the value of the vm property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getVM() {
         return vm;
@@ -91,10 +87,8 @@ public class OGViMMD {
     /**
      * Sets the value of the vm property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setVM(String value) {
         this.vm = value;
@@ -103,10 +97,8 @@ public class OGViMMD {
     /**
      * Gets the value of the vs property.
      *
-     * @return
-     *     possible object is
-     *     {@link Long }
-     *     
+     * @return possible object is
+     * {@link Long }
      */
     public Long getVS() {
         return vs;
@@ -115,10 +107,8 @@ public class OGViMMD {
     /**
      * Sets the value of the vs property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Long }
-     *     
+     * @param value allowed object is
+     *              {@link Long }
      */
     public void setVS(Long value) {
         this.vs = value;
@@ -127,10 +117,8 @@ public class OGViMMD {
     /**
      * Gets the value of the vmd5 property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getVMD5() {
         return vmd5;
@@ -139,10 +127,8 @@ public class OGViMMD {
     /**
      * Sets the value of the vmd5 property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setVMD5(String value) {
         this.vmd5 = value;
@@ -151,10 +137,8 @@ public class OGViMMD {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -163,10 +147,8 @@ public class OGViMMD {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

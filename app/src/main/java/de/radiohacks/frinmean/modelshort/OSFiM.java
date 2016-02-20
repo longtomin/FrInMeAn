@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -60,10 +60,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OSFiM", strict=false)
+@Root(name = "OSFiM", strict = false)
 public class OSFiM {
 
     @Element(required = false, name = "FID")
@@ -76,10 +74,8 @@ public class OSFiM {
     /**
      * Gets the value of the fid property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     * @return possible object is
+     * {@link Integer }
      */
     public Integer getFID() {
         return fid;
@@ -88,10 +84,8 @@ public class OSFiM {
     /**
      * Sets the value of the fid property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setFID(Integer value) {
         this.fid = value;
@@ -100,10 +94,8 @@ public class OSFiM {
     /**
      * Gets the value of the ff property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getFF() {
         return ff;
@@ -112,10 +104,8 @@ public class OSFiM {
     /**
      * Sets the value of the ff property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setFF(String value) {
         this.ff = value;
@@ -124,10 +114,8 @@ public class OSFiM {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -136,10 +124,8 @@ public class OSFiM {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

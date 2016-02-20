@@ -65,6 +65,7 @@ import de.radiohacks.frinmean.modelshort.OSIcM;
 import de.radiohacks.frinmean.modelshort.OSImM;
 import de.radiohacks.frinmean.modelshort.OSShT;
 import de.radiohacks.frinmean.modelshort.OSTeM;
+import de.radiohacks.frinmean.modelshort.OSU;
 import de.radiohacks.frinmean.modelshort.OSViM;
 import de.radiohacks.frinmean.modelshort.OSiUp;
 
@@ -1171,10 +1172,6 @@ public class RestFunctions {
                 rc.setPutContent(String.valueOf(InString));
                 rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
 
-//                rc.AddParam(Constants.QPusername, convertB64(inuser));
-// rc.AddParam(Constants.QPpassword, convertB64(inpassword));
-//                rc.AddParam(Constants.QPmessageid, Integer.toString(msgid));
-//                rc.AddParam(Constants.QPacknowledge, convertB64(inacknowledge));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("POST");
@@ -1182,7 +1179,6 @@ public class RestFunctions {
                     ret = rc.ExecuteHTTPXML("POST");
                 }
                 if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
-//                    Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OAckMD.class, reader, false);
@@ -1221,10 +1217,6 @@ public class RestFunctions {
                 rc.setPutContent(String.valueOf(InString));
                 rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
 
-                //rc.AddParam(Constants.QPusername, convertB64(inuser));
-                //rc.AddParam(Constants.QPpassword, convertB64(inpassword));
-                //rc.AddParam(Constants.QPchatid, Integer.toString(chatid));
-                //rc.AddParam(Constants.QPacknowledge, convertB64(inacknowledge));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("POST");
@@ -1384,6 +1376,46 @@ public class RestFunctions {
             }
         }
         Log.d(TAG, "end insertusericon");
+        return out;
+    }
+
+    /*@GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("/syncuser")
+    public OSU syncuser(@QueryParam(Constants.QPusername) String User,
+                        @QueryParam(Constants.QPpassword) String Password,
+                        @QueryParam(Constants.QPuserid) List<Integer> UserID); */
+
+    public OSU syncUser(String inuser, String inpassword, ArrayList<Integer> userids) {
+        Log.d(TAG, "start syncUser with user=" + inuser + " password=" + inpassword + "Number of Messages=" + userids.size());
+        OSU out = null;
+        if (checkServer()) {
+            RestClient rc;
+            rc = new RestClient(CommunicationURL + "user/syncuser", https, port);
+            try {
+                rc.AddParam(Constants.QPusername, convertB64(inuser));
+                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+
+                for (int i = 0; i < userids.size(); i++) {
+                    rc.AddParam(Constants.QPuserid, Integer.toString(userids.get(i)));
+                }
+                String ret;
+                if (https) {
+                    ret = rc.ExecuteHTTPSXML("GET");
+                } else {
+                    ret = rc.ExecuteHTTPXML("GET");
+                }
+                if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    Serializer serializer = new Persister();
+                    Reader reader = new StringReader(ret);
+
+                    out = serializer.read(OSU.class, reader, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "end syncUser");
         return out;
     }
 }

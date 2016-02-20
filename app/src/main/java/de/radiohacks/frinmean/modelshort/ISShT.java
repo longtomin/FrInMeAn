@@ -1,16 +1,16 @@
 /**
  * Copyright � 2015, Thomas Schreiner, thomas1.schreiner@googlemail.com
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p/>
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
+ * list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p/>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -21,7 +21,7 @@
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * <p/>
  * The views and conclusions contained in the software and documentation are those
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
@@ -46,9 +46,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -63,7 +63,7 @@ import java.util.List;
  * &lt;/complexType>
  * </pre>
  *
- * 
+ *
  */
 @Root(name = "ISShT", strict = false)
 public class ISShT {
@@ -77,11 +77,11 @@ public class ISShT {
 
     /**
      * Gets the value of the un property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUN() {
         return un;
@@ -89,11 +89,11 @@ public class ISShT {
 
     /**
      * Sets the value of the un property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUN(String value) {
         this.un = value;
@@ -101,11 +101,11 @@ public class ISShT {
 
     /**
      * Gets the value of the pw property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPW() {
         return pw;
@@ -113,11 +113,11 @@ public class ISShT {
 
     /**
      * Sets the value of the pw property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPW(String value) {
         this.pw = value;
@@ -125,25 +125,25 @@ public class ISShT {
 
     /**
      * Gets the value of the mid property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the mid property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getMID().add(newItem);
      * </pre>
      *
-     * 
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Integer }
      *
-     * 
+     *
      */
     public List<Integer> getMID() {
         if (mid == null) {

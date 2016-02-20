@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -61,17 +61,15 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OAuth", strict=false)
+@Root(name = "OAuth", strict = false)
 public class OAuth {
 
     @Element(required = false, name = "UN")
     protected String un;
     @Element(required = false, name = "UID")
     protected Integer uid;
-    @Element(required = false,name = "A")
+    @Element(required = false, name = "A")
     protected String a;
     @Element(required = false, name = "ET")
     protected String et;
@@ -79,10 +77,8 @@ public class OAuth {
     /**
      * Gets the value of the un property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getUN() {
         return un;
@@ -91,10 +87,8 @@ public class OAuth {
     /**
      * Sets the value of the un property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUN(String value) {
         this.un = value;
@@ -103,10 +97,8 @@ public class OAuth {
     /**
      * Gets the value of the uid property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     * @return possible object is
+     * {@link Integer }
      */
     public Integer getUID() {
         return uid;
@@ -115,10 +107,8 @@ public class OAuth {
     /**
      * Sets the value of the uid property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setUID(Integer value) {
         this.uid = value;
@@ -127,10 +117,8 @@ public class OAuth {
     /**
      * Gets the value of the a property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getA() {
         return a;
@@ -139,10 +127,8 @@ public class OAuth {
     /**
      * Sets the value of the a property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setA(String value) {
         this.a = value;
@@ -151,10 +137,8 @@ public class OAuth {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -163,10 +147,8 @@ public class OAuth {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

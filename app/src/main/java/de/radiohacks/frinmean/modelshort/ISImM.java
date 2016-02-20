@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -59,10 +59,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "ISImM", strict=false)
+@Root(name = "ISImM", strict = false)
 public class ISImM {
 
     @Element(name = "UN", required = true)
@@ -77,10 +75,8 @@ public class ISImM {
     /**
      * Gets the value of the un property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getUN() {
         return un;
@@ -89,10 +85,8 @@ public class ISImM {
     /**
      * Sets the value of the un property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUN(String value) {
         this.un = value;
@@ -101,10 +95,8 @@ public class ISImM {
     /**
      * Gets the value of the pw property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getPW() {
         return pw;
@@ -113,10 +105,8 @@ public class ISImM {
     /**
      * Sets the value of the pw property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPW(String value) {
         this.pw = value;
@@ -125,10 +115,8 @@ public class ISImM {
     /**
      * Gets the value of the imM property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     * {@link String }
      */
     public String getImM() {
         return imM;
@@ -137,10 +125,8 @@ public class ISImM {
     /**
      * Sets the value of the imM property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setImM(String value) {
         this.imM = value;
@@ -149,10 +135,8 @@ public class ISImM {
     /**
      * Gets the value of the imMD5 property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     * {@link String }
      */
     public String getImMD5() {
         return imMD5;
@@ -161,10 +145,8 @@ public class ISImM {
     /**
      * Sets the value of the imMD5 property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setImMD5(String value) {
         this.imMD5 = value;

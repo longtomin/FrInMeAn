@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -57,10 +57,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OU", strict=false)
+@Root(name = "OU", strict = false)
 public class OU {
 
     @Element(name = "OUN", required = true)
@@ -71,10 +69,8 @@ public class OU {
     /**
      * Gets the value of the oun property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getOUN() {
         return oun;
@@ -83,10 +79,8 @@ public class OU {
     /**
      * Sets the value of the oun property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setOUN(String value) {
         this.oun = value;
@@ -94,7 +88,6 @@ public class OU {
 
     /**
      * Gets the value of the ouid property.
-     * 
      */
     public int getOUID() {
         return ouid;
@@ -102,7 +95,6 @@ public class OU {
 
     /**
      * Sets the value of the ouid property.
-     * 
      */
     public void setOUID(int value) {
         this.ouid = value;

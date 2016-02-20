@@ -39,13 +39,13 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
 /**
- * <p>
+ * <p/>
  * Java class for anonymous complex type.
- *
- * <p>
+ * <p/>
+ * <p/>
  * The following schema fragment specifies the expected content contained within
  * this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -60,51 +60,49 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OGTeM", strict=false)
+@Root(name = "OGTeM", strict = false)
 public class OGTeM {
 
-	@Element(required = false, name = "TM")
-	protected String tm;
-	@Element(required = false, name = "ET")
-	protected String et;
+    @Element(required = false, name = "TM")
+    protected String tm;
+    @Element(required = false, name = "ET")
+    protected String et;
 
-	/**
-	 * Gets the value of the tm property.
-	 *
-	 * @return possible object is {@link String }
-	 */
-	public String getTM() {
-		return tm;
-	}
+    /**
+     * Gets the value of the tm property.
+     *
+     * @return possible object is {@link String }
+     */
+    public String getTM() {
+        return tm;
+    }
 
-	/**
-	 * Sets the value of the tm property.
-	 *
-	 * @param value allowed object is {@link String }
-	 */
-	public void setTM(String value) {
-		this.tm = value;
-	}
+    /**
+     * Sets the value of the tm property.
+     *
+     * @param value allowed object is {@link String }
+     */
+    public void setTM(String value) {
+        this.tm = value;
+    }
 
-	/**
-	 * Gets the value of the et property.
-	 *
-	 * @return possible object is {@link String }
-	 */
-	public String getET() {
-		return et;
-	}
+    /**
+     * Gets the value of the et property.
+     *
+     * @return possible object is {@link String }
+     */
+    public String getET() {
+        return et;
+    }
 
-	/**
-	 * Sets the value of the et property.
-	 *
-	 * @param value allowed object is {@link String }
-	 */
-	public void setET(String value) {
-		this.et = value;
-	}
+    /**
+     * Sets the value of the et property.
+     *
+     * @param value allowed object is {@link String }
+     */
+    public void setET(String value) {
+        this.et = value;
+    }
 
 }

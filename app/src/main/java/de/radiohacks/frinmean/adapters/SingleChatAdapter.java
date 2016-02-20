@@ -90,12 +90,14 @@ public class SingleChatAdapter extends CursorAdapter {
 
     private int OID = 0;
     private ContentResolver mContentResolver;
+    private Context mContext;
     private HashMap<Integer, Bitmap> userImages;
 
     public SingleChatAdapter(Context context, Cursor cursor, int InOID, int InchatID) {
         super(context, cursor, true);
         Log.d(TAG, "start SingleChatAdapter");
         this.OID = InOID;
+        this.mContext = context;
         this.mContentResolver = context.getContentResolver();
         this.userImages = new HashMap<>(1);
         ContentProviderClient clientuserid = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -471,17 +473,6 @@ public class SingleChatAdapter extends CursorAdapter {
         Date rDate = new java.util.Date(rstamp * 1000);
         String OName = cur.getString(Constants.ID_MESSAGES_OwningUserName);
 
-        /* String UserImgFile = null;
-        ContentProviderClient clientuser = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.USER_CONTENT_URI);
-        Cursor cui = clientuser.getLocalContentProvider().query(FrinmeanContentProvider.USER_CONTENT_URI, Constants.USER_DB_Columns,
-                Constants.T_USER_BADBID + " = ?", new String[]{String.valueOf(msgOID)}, null);
-        if (cui.getCount() > 0) {
-            cui.moveToFirst();
-            UserImgFile = cui.getString(ID_USER_IconValue);
-        }
-        cui.close();
-        clientuser.release(); */
-
         ContentProviderClient clienttime = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
         Cursor cto = clienttime.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
                 Constants.T_MESSAGES_TIME_BADBID + " = ?", new String[]{String.valueOf(cur.getInt(Constants.ID_MESSAGES_BADBID))}, null);
@@ -576,37 +567,6 @@ public class SingleChatAdapter extends CursorAdapter {
                 } else {
                     IFusericon.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.iconuser));
                 }
-/*                IButtonForeign.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent();
-                        intent.setAction(android.content.Intent.ACTION_VIEW);
-                        File file = new File(imgfileForeign);
-                        intent.setDataAndType(Uri.fromFile(file), "image/*");
-                        mContext.startActivity(intent);
-                    }
-                });
-
-
-                File ifileForeign = new File(imgfileForeign);
-                if (ifileForeign.exists()) {
-                    String fname = ifileForeign.getAbsolutePath();
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(fname, options);
-
-                    options.inSampleSize = calculateInSampleSize(options, 200, 200);
-
-                    // Decode bitmap with inSampleSize set
-                    options.inJustDecodeBounds = false;
-                    Bitmap bmp = BitmapFactory.decodeFile(fname, options);
-
-                    IButtonForeign.setImageBitmap(bmp);
-                    IButtonForeign.setMaxWidth(options.outWidth);
-                    IButtonForeign.setMaxHeight(options.outHeight);
-
-                }*/
                 break;
             case VIDEOMSG_OWN:
 
@@ -622,11 +582,16 @@ public class SingleChatAdapter extends CursorAdapter {
                 ImageButton VButtonOwn = (ImageButton) view.findViewById(R.id.OwnVideoImageButton);
                 File vfileOwn = new File(vidfileOwn);
                 if (vfileOwn.exists()) {
-                    Bitmap thumbnailOwn = scaleBitmap(getVideoFrame(vidfileOwn), 600);
+                    Bitmap Preview = getVideoFrame(vidfileOwn);
+                    Bitmap thumbnailOwn;
+                    if (Preview != null) {
+                        thumbnailOwn = scaleBitmap(Preview, 600);
+                    } else {
+                        thumbnailOwn = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_play_video);
+                    }
                     VButtonOwn.setImageBitmap(thumbnailOwn);
                     VButtonOwn.setMaxWidth(thumbnailOwn.getWidth());
                     VButtonOwn.setMaxHeight(thumbnailOwn.getHeight());
-
                     VButtonOwn.setOnClickListener(new View.OnClickListener() {
 
                         @Override
@@ -636,6 +601,25 @@ public class SingleChatAdapter extends CursorAdapter {
                             File file = new File(vidfileOwn);
                             intent.setDataAndType(Uri.fromFile(file), "video/*");
                             mContext.startActivity(intent);
+                        }
+                    });
+                } else {
+                    Bitmap download = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_action_download);
+                    VButtonOwn.setImageBitmap(download);
+                    VButtonOwn.setMaxWidth(download.getWidth());
+                    VButtonOwn.setMaxHeight(download.getHeight());
+                    final int vidid = cur.getInt(Constants.ID_MESSAGES_VideoMsgID);
+                    final int msgid = cur.getInt(Constants.ID_MESSAGES_BADBID);
+                    VButtonOwn.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Intent downloadintent = new Intent(v.getContext(), MeBaService.class);
+
+                            downloadintent.setAction(Constants.ACTION_GETVIDEOMESSAGE);
+                            downloadintent.putExtra(Constants.MESSAGEID, msgid);
+                            downloadintent.putExtra(Constants.VIDEOID, vidid);
+                            v.getContext().startService(downloadintent);
                         }
                     });
                 }
@@ -658,14 +642,19 @@ public class SingleChatAdapter extends CursorAdapter {
 
                 final String vidfileForeign = cur.getString(Constants.ID_MESSAGES_VideoMsgValue);
                 ImageButton VButtonForeign = (ImageButton) view.findViewById(R.id.ForVideoImageButton);
-                ImageButton VFusericon = (ImageButton) view.findViewById(R.id.ForVideoUserIcon);
+
                 File vfileForeign = new File(vidfileForeign);
                 if (vfileForeign.exists()) {
-                    Bitmap thumbnailForeign = scaleBitmap(getVideoFrame(vidfileForeign), 600);
+                    Bitmap Preview = getVideoFrame(vidfileForeign);
+                    Bitmap thumbnailForeign;
+                    if (Preview != null) {
+                        thumbnailForeign = scaleBitmap(Preview, 600);
+                    } else {
+                        thumbnailForeign = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_play_video);
+                    }
                     VButtonForeign.setImageBitmap(thumbnailForeign);
                     VButtonForeign.setMaxWidth(thumbnailForeign.getWidth());
                     VButtonForeign.setMaxHeight(thumbnailForeign.getHeight());
-
                     VButtonForeign.setOnClickListener(new View.OnClickListener() {
 
                         @Override
@@ -677,7 +666,27 @@ public class SingleChatAdapter extends CursorAdapter {
                             mContext.startActivity(intent);
                         }
                     });
+                } else {
+                    Bitmap download = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_action_download);
+                    VButtonForeign.setImageBitmap(download);
+                    VButtonForeign.setMaxWidth(download.getWidth());
+                    VButtonForeign.setMaxHeight(download.getHeight());
+                    final int vidid = cur.getInt(Constants.ID_MESSAGES_VideoMsgID);
+                    final int msgid = cur.getInt(Constants.ID_MESSAGES_BADBID);
+                    VButtonForeign.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Intent downloadintent = new Intent(v.getContext(), MeBaService.class);
+
+                            downloadintent.setAction(Constants.ACTION_GETVIDEOMESSAGE);
+                            downloadintent.putExtra(Constants.MESSAGEID, msgid);
+                            downloadintent.putExtra(Constants.VIDEOID, vidid);
+                            v.getContext().startService(downloadintent);
+                        }
+                    });
                 }
+                ImageButton VFusericon = (ImageButton) view.findViewById(R.id.ForVideoUserIcon);
                 if (userImages.containsKey(msgOID)) {
                     VFusericon.setImageBitmap(userImages.get(msgOID));
                 } else {
@@ -712,25 +721,25 @@ public class SingleChatAdapter extends CursorAdapter {
 
         Log.v("Pictures", "Width and height are " + width + "--" + height);
 
-        if (width > height) {
-            // landscape
-            int ratio = width / newSize;
-            width = newSize;
-            height = height / ratio;
-        } else if (height > width) {
-            // portrait
-            int ratio = height / newSize;
-            height = newSize;
-            width = width / ratio;
-        } else {
-            // square
-            height = newSize;
-            width = newSize;
+        if (width > newSize && height > newSize) {
+            if (width > height) {
+                // landscape
+                int ratio = width / newSize;
+                width = newSize;
+                height = height / ratio;
+            } else if (height > width) {
+                // portrait
+                int ratio = height / newSize;
+                height = newSize;
+                width = width / ratio;
+            } else {
+                // square
+                height = newSize;
+                width = newSize;
+            }
+            Log.v("Pictures", "after scaling Width and height are " + width + "--" + height);
+            bm = Bitmap.createScaledBitmap(bm, width, height, true);
         }
-
-        Log.v("Pictures", "after scaling Width and height are " + width + "--" + height);
-
-        bm = Bitmap.createScaledBitmap(bm, width, height, true);
         return bm;
     }
 

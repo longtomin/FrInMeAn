@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -61,10 +61,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OGImMMD", strict=false)
+@Root(name = "OGImMMD", strict = false)
 public class OGImMMD {
 
     @Element(required = false, name = "IM")
@@ -79,10 +77,8 @@ public class OGImMMD {
     /**
      * Gets the value of the im property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getIM() {
         return im;
@@ -91,10 +87,8 @@ public class OGImMMD {
     /**
      * Sets the value of the im property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setIM(String value) {
         this.im = value;
@@ -103,10 +97,8 @@ public class OGImMMD {
     /**
      * Gets the value of the is property.
      *
-     * @return
-     *     possible object is
-     *     {@link Long }
-     *     
+     * @return possible object is
+     * {@link Long }
      */
     public Long getIS() {
         return is;
@@ -115,10 +107,8 @@ public class OGImMMD {
     /**
      * Sets the value of the is property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Long }
-     *     
+     * @param value allowed object is
+     *              {@link Long }
      */
     public void setIS(Long value) {
         this.is = value;
@@ -127,10 +117,8 @@ public class OGImMMD {
     /**
      * Gets the value of the imd5 property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getIMD5() {
         return imd5;
@@ -139,10 +127,8 @@ public class OGImMMD {
     /**
      * Sets the value of the imd5 property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setIMD5(String value) {
         this.imd5 = value;
@@ -151,10 +137,8 @@ public class OGImMMD {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -163,10 +147,8 @@ public class OGImMMD {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

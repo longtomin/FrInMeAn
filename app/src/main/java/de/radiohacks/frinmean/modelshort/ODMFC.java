@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -59,10 +59,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "ODMFC", strict=false)
+@Root(name = "ODMFC", strict = false)
 public class ODMFC {
 
     @Element(required = false, name = "MID")
@@ -73,10 +71,8 @@ public class ODMFC {
     /**
      * Gets the value of the mid property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     * @return possible object is
+     * {@link Integer }
      */
     public Integer getMID() {
         return mid;
@@ -85,10 +81,8 @@ public class ODMFC {
     /**
      * Sets the value of the mid property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setMID(Integer value) {
         this.mid = value;
@@ -97,10 +91,8 @@ public class ODMFC {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -109,10 +101,8 @@ public class ODMFC {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

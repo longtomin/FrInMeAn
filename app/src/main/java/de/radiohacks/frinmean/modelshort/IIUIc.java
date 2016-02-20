@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- *
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- *
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -58,8 +58,6 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
 @Root(name = "IIUIc", strict = false)
 public class IIUIc {
@@ -74,10 +72,8 @@ public class IIUIc {
     /**
      * Gets the value of the un property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     * {@link String }
      */
     public String getUN() {
         return un;
@@ -86,10 +82,8 @@ public class IIUIc {
     /**
      * Sets the value of the un property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUN(String value) {
         this.un = value;
@@ -98,10 +92,8 @@ public class IIUIc {
     /**
      * Gets the value of the pw property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     * {@link String }
      */
     public String getPW() {
         return pw;
@@ -110,10 +102,8 @@ public class IIUIc {
     /**
      * Sets the value of the pw property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPW(String value) {
         this.pw = value;
@@ -121,7 +111,6 @@ public class IIUIc {
 
     /**
      * Gets the value of the icID property.
-     *
      */
     public int getIcID() {
         return icID;
@@ -129,7 +118,6 @@ public class IIUIc {
 
     /**
      * Sets the value of the icID property.
-     *
      */
     public void setIcID(int value) {
         this.icID = value;

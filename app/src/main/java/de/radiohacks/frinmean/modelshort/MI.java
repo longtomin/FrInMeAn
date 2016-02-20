@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -59,11 +59,9 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
 
-@Root(name = "MI", strict=false)
+@Root(name = "MI", strict = false)
 public class MI {
 
     @Element(required = false, name = "UID")
@@ -77,7 +75,6 @@ public class MI {
 
     /**
      * Gets the value of the uid property.
-     * 
      */
     public int getUID() {
         return uid;
@@ -85,7 +82,6 @@ public class MI {
 
     /**
      * Sets the value of the uid property.
-     * 
      */
     public void setUID(int value) {
         this.uid = value;
@@ -94,10 +90,8 @@ public class MI {
     /**
      * Gets the value of the un property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getUN() {
         return un;
@@ -106,10 +100,8 @@ public class MI {
     /**
      * Sets the value of the un property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUN(String value) {
         this.un = value;
@@ -117,7 +109,6 @@ public class MI {
 
     /**
      * Gets the value of the rd property.
-     * 
      */
     public long getRD() {
         return rd;
@@ -125,7 +116,6 @@ public class MI {
 
     /**
      * Sets the value of the rd property.
-     * 
      */
     public void setRD(long value) {
         this.rd = value;
@@ -133,7 +123,6 @@ public class MI {
 
     /**
      * Gets the value of the sh property.
-     * 
      */
     public long getSH() {
         return sh;
@@ -141,7 +130,6 @@ public class MI {
 
     /**
      * Sets the value of the sh property.
-     * 
      */
     public void setSH(long value) {
         this.sh = value;

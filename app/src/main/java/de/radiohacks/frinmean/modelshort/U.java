@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -60,10 +60,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "U", strict=false)
+@Root(name = "U", strict = false)
 public class U {
 
     @Element(name = "UN", required = true)
@@ -80,10 +78,8 @@ public class U {
     /**
      * Gets the value of the un property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getUN() {
         return un;
@@ -92,10 +88,8 @@ public class U {
     /**
      * Sets the value of the un property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUN(String value) {
         this.un = value;
@@ -103,7 +97,6 @@ public class U {
 
     /**
      * Gets the value of the uid property.
-     * 
      */
     public int getUID() {
         return uid;
@@ -111,7 +104,6 @@ public class U {
 
     /**
      * Sets the value of the uid property.
-     * 
      */
     public void setUID(int value) {
         this.uid = value;
@@ -120,10 +112,8 @@ public class U {
     /**
      * Gets the value of the e property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getE() {
         return e;
@@ -132,10 +122,8 @@ public class U {
     /**
      * Sets the value of the e property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setE(String value) {
         this.e = value;

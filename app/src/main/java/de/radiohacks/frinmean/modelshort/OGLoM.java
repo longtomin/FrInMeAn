@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -60,10 +60,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OGLoM", strict=false)
+@Root(name = "OGLoM", strict = false)
 public class OGLoM {
 
     @Element(required = false, name = "Lat")
@@ -76,10 +74,8 @@ public class OGLoM {
     /**
      * Gets the value of the lat property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getLat() {
         return lat;
@@ -88,10 +84,8 @@ public class OGLoM {
     /**
      * Sets the value of the lat property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLat(String value) {
         this.lat = value;
@@ -100,10 +94,8 @@ public class OGLoM {
     /**
      * Gets the value of the lon property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getLon() {
         return lon;
@@ -112,10 +104,8 @@ public class OGLoM {
     /**
      * Sets the value of the lon property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLon(String value) {
         this.lon = value;
@@ -124,10 +114,8 @@ public class OGLoM {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -136,10 +124,8 @@ public class OGLoM {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

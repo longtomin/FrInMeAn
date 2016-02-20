@@ -51,6 +51,8 @@ public class Constants {
     public static final String ACTION_SENDIMAGEMESSAGE = "sendimagemessage";
     public static final String ACTION_SENDVIDEOMESSAGE = "sendvideomessage";
     public static final String ACTION_GETTEXTMESSAGE = "gettextmessage";
+    public static final String ACTION_GETIMAGEMESSAGE = "getimagemessage";
+    public static final String ACTION_GETVIDEOMESSAGE = "getvideomessage";
     public static final String ACTION_INSERTMESSAGEINTOCHAT = "insertmessageintochat";
     public static final String ACTION_GETMESSAGEFROMCHAT = "getmessagefromchat";
     public static final String ACTION_CHECKNEWMESSAGES = "checknewmessages";
@@ -195,6 +197,10 @@ public class Constants {
     public final static String IMAGELOCATION = "imagelocation";
     public final static String VIDEOLOCATION = "videolocation";
     public final static String SEARCH = "search";
+    public static final String TEXTMESSAGEID = "textmessageid";
+    public static final String IMAGEID = "imageid";
+    public static final String VIDEOID = "videoid";
+    public static final String ACKNOWLEDGE = "acknowledge";
 
     public final static String SENDCHATID = "sendchatid";
     public final static String SENDMSGID = "sendmsgid";

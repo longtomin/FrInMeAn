@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -60,10 +60,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OSImM", strict=false)
+@Root(name = "OSImM", strict = false)
 public class OSImM {
 
     @Element(required = false, name = "ImID")
@@ -76,10 +74,8 @@ public class OSImM {
     /**
      * Gets the value of the imID property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *
+     * @return possible object is
+     * {@link Integer }
      */
     public Integer getImID() {
         return imID;
@@ -88,10 +84,8 @@ public class OSImM {
     /**
      * Sets the value of the imID property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setImID(Integer value) {
         this.imID = value;
@@ -100,10 +94,8 @@ public class OSImM {
     /**
      * Gets the value of the imF property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     * {@link String }
      */
     public String getImF() {
         return imF;
@@ -112,10 +104,8 @@ public class OSImM {
     /**
      * Sets the value of the imF property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setImF(String value) {
         this.imF = value;
@@ -124,10 +114,8 @@ public class OSImM {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -136,10 +124,8 @@ public class OSImM {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

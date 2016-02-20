@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -61,10 +61,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "OGFiMMD", strict=false)
+@Root(name = "OGFiMMD", strict = false)
 public class OGFiMMD {
 
     @Element(required = false, name = "FM")
@@ -79,10 +77,8 @@ public class OGFiMMD {
     /**
      * Gets the value of the fm property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getFM() {
         return fm;
@@ -91,10 +87,8 @@ public class OGFiMMD {
     /**
      * Sets the value of the fm property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setFM(String value) {
         this.fm = value;
@@ -103,10 +97,8 @@ public class OGFiMMD {
     /**
      * Gets the value of the fs property.
      *
-     * @return
-     *     possible object is
-     *     {@link Long }
-     *     
+     * @return possible object is
+     * {@link Long }
      */
     public Long getFS() {
         return fs;
@@ -115,10 +107,8 @@ public class OGFiMMD {
     /**
      * Sets the value of the fs property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Long }
-     *     
+     * @param value allowed object is
+     *              {@link Long }
      */
     public void setFS(Long value) {
         this.fs = value;
@@ -127,10 +117,8 @@ public class OGFiMMD {
     /**
      * Gets the value of the fmd5 property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getFMD5() {
         return fmd5;
@@ -139,10 +127,8 @@ public class OGFiMMD {
     /**
      * Sets the value of the fmd5 property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setFMD5(String value) {
         this.fmd5 = value;
@@ -151,10 +137,8 @@ public class OGFiMMD {
     /**
      * Gets the value of the et property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getET() {
         return et;
@@ -163,10 +147,8 @@ public class OGFiMMD {
     /**
      * Sets the value of the et property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setET(String value) {
         this.et = value;

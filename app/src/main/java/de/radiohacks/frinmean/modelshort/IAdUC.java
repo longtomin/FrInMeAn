@@ -42,9 +42,9 @@ import org.simpleframework.xml.Root;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -59,10 +59,8 @@ import org.simpleframework.xml.Root;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- *
- *
  */
-@Root(name = "IAdUC", strict=false)
+@Root(name = "IAdUC", strict = false)
 public class IAdUC {
 
     @Element(name = "UN", required = true)
@@ -77,10 +75,8 @@ public class IAdUC {
     /**
      * Gets the value of the un property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getUN() {
         return un;
@@ -89,10 +85,8 @@ public class IAdUC {
     /**
      * Sets the value of the un property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUN(String value) {
         this.un = value;
@@ -101,10 +95,8 @@ public class IAdUC {
     /**
      * Gets the value of the pw property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is
+     * {@link String }
      */
     public String getPW() {
         return pw;
@@ -113,10 +105,8 @@ public class IAdUC {
     /**
      * Sets the value of the pw property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPW(String value) {
         this.pw = value;
@@ -124,7 +114,6 @@ public class IAdUC {
 
     /**
      * Gets the value of the uid property.
-     * 
      */
     public int getUID() {
         return uid;
@@ -132,7 +121,6 @@ public class IAdUC {
 
     /**
      * Sets the value of the uid property.
-     * 
      */
     public void setUID(int value) {
         this.uid = value;
@@ -140,7 +128,6 @@ public class IAdUC {
 
     /**
      * Gets the value of the cid property.
-     * 
      */
     public int getCID() {
         return cid;
@@ -148,7 +135,6 @@ public class IAdUC {
 
     /**
      * Sets the value of the cid property.
-     * 
      */
     public void setCID(int value) {
         this.cid = value;
