@@ -32,9 +32,11 @@
         android:switchTextOn="@string/pref_title_https"
         android:title="@string/pref_title_communication" />
 
-    <CheckBoxPreference
+    <SwitchPreference
         android:defaultValue="false"
         android:key="prefContentCommunication"
+        android:switchTextOff="@string/pref_title_content_wifi_only"
+        android:switchTextOn="@string/pref_title_content_always"
         android:title="@string/pref_title_content_communication" />
 
     <EditTextPreference

@@ -78,6 +78,9 @@
     <string name="pref_title_password">Passwort</string>
     <string name="pref_title_HTTP_communication">Sicherheit</string>
     <string name="pref_title_content_communication">Bilder/Video im WLAN</string>
+    <string name="pref_title_timeinformation_wifi_only">WLAN</string>
+    <string name="pref_title_timeinformation_always">Immer</string>
+    <string name="pref_title_timeinformation">Sync Time Informationen</string>
     <string name="option_createchat">Chat erzeugen</string>
     <string name="option_refresh">Neu Laden</string>
     <string name="timeinformation">Zeit-Informationen</string>
@@ -95,4 +98,10 @@
     <string name="action_setusericon">Setze Benutzer Icon</string>
     <string name="action_setchaticon">Setze Chat Icon</string>
     <string name="user_icon_set">Benutzer Icon gesetzt</string>
+    <string name="pref_title_http">HTTP</string>
+    <string name="pref_title_https">HTTPS</string>
+    <string name="pref_title_content_always">Immer</string>
+    <string name="pref_title_content_wifi_only">WLAN</string>
+    <string name="title_tab_chat">Aktive Chats</string>
+    <string name="title_tab_user">Bekannte Benutzer</string>
 </resources>

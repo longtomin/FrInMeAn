@@ -473,6 +473,7 @@ public class SingleChatAdapter extends CursorAdapter {
         Date rDate = new java.util.Date(rstamp * 1000);
         String OName = cur.getString(Constants.ID_MESSAGES_OwningUserName);
 
+        int mid = cur.getInt(Constants.ID_MESSAGES_BADBID);
         ContentProviderClient clienttime = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
         Cursor cto = clienttime.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
                 Constants.T_MESSAGES_TIME_BADBID + " = ?", new String[]{String.valueOf(cur.getInt(Constants.ID_MESSAGES_BADBID))}, null);

@@ -113,4 +113,9 @@
     <string name="send">Gesendet :</string>
     <string name="title_activity_chat_user"><![CDATA[Chats & Benutzer]]></string>
     <string name="pref_title_content_communication">Bilder/Video im WLAN</string>
+    <string name="pref_title_timeinformation">Sync Time Information</string>
+    <string name="pref_title_timeinformation_always">Immer</string>
+    <string name="pref_title_timeinformation_wifi_only">WLAN</string>
+    <string name="pref_title_content_wifi_only">WLAN</string>
+    <string name="pref_title_content_always">Immer</string>
 </resources>

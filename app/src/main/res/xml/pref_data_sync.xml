@@ -41,6 +41,13 @@
         android:positiveButtonText="@null"
         android:title="@string/pref_title_sync_frequency" />
 
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="prefTimeInformationSync"
+        android:switchTextOff="@string/pref_title_timeinformation_wifi_only"
+        android:switchTextOn="@string/pref_title_timeinformation_always"
+        android:title="@string/pref_title_timeinformation" />
+
     <!-- This preference simply launches an intent when selected. Use this UI sparingly, per
          design guidelines. -->
     <Preference android:title="@string/pref_title_system_sync_settings">

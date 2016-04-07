@@ -95,4 +95,13 @@
     <string name="action_setusericon">Set User Icon</string>
     <string name="action_setchaticon">Set Chat Icon</string>
     <string name="user_icon_set">User Icon added.</string>
+    <string name="pref_title_http">HTTP</string>
+    <string name="pref_title_https"></string>
+    <string name="pref_title_timeinformation_wifi_only">WIFI</string>
+    <string name="pref_title_timeinformation_always">Akways</string>
+    <string name="pref_title_timeinformation">Sync Time Information</string>
+    <string name="pref_title_content_always">Always</string>
+    <string name="title_tab_chat">Active Chats</string>
+    <string name="title_tab_user">Known Users</string>
+    <string name="pref_title_content_wifi_only">WIFI</string>
 </resources>

@@ -128,7 +128,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final ContentResolver mContentResolver;
     private String username;
     private String password;
-    //    private String directory;
+    private boolean contentall;
+    private boolean timesync;
     private int userid;
     private String ringtone;
     private boolean vibrate;
@@ -233,7 +234,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
         this.ringtone = sharedPrefs.getString(Constants.prefRingtone, "DEFAULT_SOUND");
         this.vibrate = sharedPrefs.getBoolean(Constants.prefVibrate, true);
-//        this.contentall = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
+        this.contentall = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
+        this.timesync = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
         Log.d(TAG, "end getPferefenceInfo");
     }
 
@@ -534,7 +536,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     }
                 }
             } else if (msgtype.equalsIgnoreCase(TYP_IMAGE)) {
-                if (dbh.checkWIFI()) {
+                if ((!contentall && dbh.checkWIFI()) || (contentall && dbh.checkNetwork())) {
                     String imgfile = c.getString(Constants.ID_MESSAGES_ImageMsgValue);
                     OSImM outimg = rf.sendImageMessage(username, password, c.getString(Constants.ID_MESSAGES_ImageMsgValue));
                     if (outimg != null) {
@@ -553,7 +555,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } else if (msgtype.equalsIgnoreCase(TYP_LOCATION)) {
 
             } else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
-                if (dbh.checkWIFI()) {
+                if ((!contentall && dbh.checkWIFI()) || (contentall && dbh.checkNetwork())) {
                     String vidfile = c.getString(Constants.ID_MESSAGES_VideoMsgValue);
                     OSViM outvid = rf.sendVideoMessage(username, password, c.getString(Constants.ID_MESSAGES_VideoMsgValue));
                     if (outvid != null) {
@@ -586,45 +588,39 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      */
     private void syncGetMessageInformation() {
 
-        // ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-        // Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_CONTENT_URI, MESSAGES_DB_Columns, T_MESSAGES_BADBID + " = ?", new String[]{"0", "0"}, null);
+        if ((!timesync && dbh.checkWIFI()) || (timesync && dbh.checkNetwork())) {
+            ContentProviderClient clientdifferent = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
+            Cursor cd = clientdifferent.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
+                    Constants.T_MESSAGES_TIME_ReadTimestamp + " = ? OR " + Constants.T_MESSAGES_TIME_ShowTimestamp + " = ?", new String[]{"0", "0"}, null);
 
+            // ToDo beim Senden und Empfangen muss ein Eintrag für die eigene oder fremde Nachricht hinterlegt werden.
+            ArrayList<Integer> inputrf = new ArrayList<Integer>(1);
+            int count = 0;
+            while (cd.moveToNext()) {
+                int val = cd.getInt(Constants.ID_MESSAGES_BADBID);
+                if (!inputrf.contains(val)) {
+                    inputrf.add(val);
+                    count++;
+                    if (count == 100) {
+                        OGMI outgmi = rf.getmessageinformation(username, password, inputrf);
+                        if (outgmi != null) {
+                            if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
+                                for (int i = 0; i < outgmi.getMIB().size(); i++) {
+                                    // int numall = outgmi.getMIB().get(i).getMI().size();
+                                    // int numre = 0;
+                                    // int numsh = 0;
+                                    for (int j = 0; j < outgmi.getMIB().get(i).getMI().size(); j++) {
+                                        ContentValues valuesins = new ContentValues();
+                                        valuesins.put(T_MESSAGES_TIME_BADBID, outgmi.getMIB().get(i).getMID());
+                                        valuesins.put(T_MESSAGES_TIME_UserID, outgmi.getMIB().get(i).getMI().get(j).getUID());
+                                        valuesins.put(T_MESSAGES_TIME_ReadTimestamp, outgmi.getMIB().get(i).getMI().get(j).getRD());
+                                        valuesins.put(T_MESSAGES_TIME_SendTimestamp, outgmi.getMIB().get(i).getSD());
+                                        valuesins.put(T_MESSAGES_TIME_ShowTimestamp, outgmi.getMIB().get(i).getMI().get(j).getSH());
+                                        valuesins.put(T_MESSAGES_TIME_UserName, outgmi.getMIB().get(i).getMI().get(j).getUN());
 
-        /* This is to identify changes in the status, if a message is totally downloaded and shown nothing can change anymore */
-        // String selectdifferent = Constants.T_MESSAGES_TIME_ReadTimestamp + " = 0 OR " + Constants.T_MESSAGES_TIME_ShowTimestamp + " = 0";
-
-        ContentProviderClient clientdifferent = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
-        Cursor cd = clientdifferent.getLocalContentProvider().query(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, MESSAGES_TIME_DB_Columns,
-                Constants.T_MESSAGES_TIME_ReadTimestamp + " = ? OR " + Constants.T_MESSAGES_TIME_ShowTimestamp + " = ?", new String[]{"0", "0"}, null);
-
-        // ToDo beim Senden und Empfangen muss ein Eintrag für die eigene oder fremde Nachricht hinterlegt werden.
-        ArrayList<Integer> inputrf = new ArrayList<Integer>(1);
-        int count = 0;
-        while (cd.moveToNext()) {
-            int val = cd.getInt(Constants.ID_MESSAGES_BADBID);
-            if (!inputrf.contains(val)) {
-                inputrf.add(val);
-                count++;
-                if (count == 100) {
-                    OGMI outgmi = rf.getmessageinformation(username, password, inputrf);
-                    if (outgmi != null) {
-                        if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
-                            for (int i = 0; i < outgmi.getMIB().size(); i++) {
-                                // int numall = outgmi.getMIB().get(i).getMI().size();
-                                // int numre = 0;
-                                // int numsh = 0;
-                                for (int j = 0; j < outgmi.getMIB().get(i).getMI().size(); j++) {
-                                    ContentValues valuesins = new ContentValues();
-                                    valuesins.put(T_MESSAGES_TIME_BADBID, outgmi.getMIB().get(i).getMID());
-                                    valuesins.put(T_MESSAGES_TIME_UserID, outgmi.getMIB().get(i).getMI().get(j).getUID());
-                                    valuesins.put(T_MESSAGES_TIME_ReadTimestamp, outgmi.getMIB().get(i).getMI().get(j).getRD());
-                                    valuesins.put(T_MESSAGES_TIME_SendTimestamp, outgmi.getMIB().get(i).getSD());
-                                    valuesins.put(T_MESSAGES_TIME_ShowTimestamp, outgmi.getMIB().get(i).getMI().get(j).getSH());
-                                    valuesins.put(T_MESSAGES_TIME_UserName, outgmi.getMIB().get(i).getMI().get(j).getUN());
-
-                                    ContentProviderClient clientupd = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
-                                    ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
-                                    clientupd.release();
+                                        ContentProviderClient clientupd = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
+                                        ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
+                                        clientupd.release();
 
                                     /* if (outgmi.getMIB().get(i).getMI().get(j).getRD() != 0) {
                                         numre++;
@@ -632,37 +628,37 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     if (outgmi.getMIB().get(i).getMI().get(j).getSH() != 0) {
                                         numsh++;
                                     } */
+                                    }
                                 }
                             }
                         }
+                        // cd.close();
+                        clientdifferent.release();
+                        count = 0;
+                        inputrf.clear();
                     }
-                    cd.close();
-                    clientdifferent.release();
-                    count = 0;
-                    inputrf.clear();
                 }
             }
-        }
-        if (inputrf.size() > 0) {
-            OGMI outgmi = rf.getmessageinformation(username, password, inputrf);
-            if (outgmi != null) {
-                if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
-                    for (int i = 0; i < outgmi.getMIB().size(); i++) {
-                        // int numall = outgmi.getMIB().get(i).getMI().size();
-                        // int numre = 0;
-                        // int numsh = 0;
-                        for (int j = 0; j < outgmi.getMIB().get(i).getMI().size(); j++) {
-                            ContentValues valuesins = new ContentValues();
-                            valuesins.put(T_MESSAGES_TIME_BADBID, outgmi.getMIB().get(i).getMID());
-                            valuesins.put(T_MESSAGES_TIME_UserID, outgmi.getMIB().get(i).getMI().get(j).getUID());
-                            valuesins.put(T_MESSAGES_TIME_ReadTimestamp, outgmi.getMIB().get(i).getMI().get(j).getRD());
-                            valuesins.put(T_MESSAGES_TIME_SendTimestamp, outgmi.getMIB().get(i).getSD());
-                            valuesins.put(T_MESSAGES_TIME_ShowTimestamp, outgmi.getMIB().get(i).getMI().get(j).getSH());
-                            valuesins.put(T_MESSAGES_TIME_UserName, outgmi.getMIB().get(i).getMI().get(j).getUN());
+            if (inputrf.size() > 0) {
+                OGMI outgmi = rf.getmessageinformation(username, password, inputrf);
+                if (outgmi != null) {
+                    if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
+                        for (int i = 0; i < outgmi.getMIB().size(); i++) {
+                            // int numall = outgmi.getMIB().get(i).getMI().size();
+                            // int numre = 0;
+                            // int numsh = 0;
+                            for (int j = 0; j < outgmi.getMIB().get(i).getMI().size(); j++) {
+                                ContentValues valuesins = new ContentValues();
+                                valuesins.put(T_MESSAGES_TIME_BADBID, outgmi.getMIB().get(i).getMID());
+                                valuesins.put(T_MESSAGES_TIME_UserID, outgmi.getMIB().get(i).getMI().get(j).getUID());
+                                valuesins.put(T_MESSAGES_TIME_ReadTimestamp, outgmi.getMIB().get(i).getMI().get(j).getRD());
+                                valuesins.put(T_MESSAGES_TIME_SendTimestamp, outgmi.getMIB().get(i).getSD());
+                                valuesins.put(T_MESSAGES_TIME_ShowTimestamp, outgmi.getMIB().get(i).getMI().get(j).getSH());
+                                valuesins.put(T_MESSAGES_TIME_UserName, outgmi.getMIB().get(i).getMI().get(j).getUN());
 
-                            ContentProviderClient clientupd = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
-                            ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
-                            clientupd.release();
+                                ContentProviderClient clientupd = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI);
+                                ((FrinmeanContentProvider) clientupd.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_TIME_CONTENT_URI, valuesins);
+                                clientupd.release();
 
                             /* if (outgmi.getMIB().get(i).getMI().get(j).getRD() != 0) {
                                 numre++;
@@ -670,12 +666,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             if (outgmi.getMIB().get(i).getMI().get(j).getSH() != 0) {
                                 numsh++;
                             }*/
+                            }
                         }
                     }
                 }
+                cd.close();
+                clientdifferent.release();
             }
-            cd.close();
-            clientdifferent.release();
         }
     }
 
