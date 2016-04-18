@@ -271,7 +271,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void syncCheckNewMessages() {
         Log.d(TAG, "start syncCheckNewMessages");
 
-        OCN outcheck = rf.checknew(username, password);
+        OCN outcheck = rf.checknew();
 
         if (outcheck != null) {
             if (outcheck.getET() == null || outcheck.getET().isEmpty()) {
@@ -294,7 +294,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, "start syncGetMessageFromChat");
 
 
-        OFMFC res = rf.getmessagefromchat(username, password, cid, readtime);
+        OFMFC res = rf.getmessagefromchat(cid, readtime);
 
         if (res != null) {
             if (res.getET() == null || res.getET().isEmpty()) {
@@ -351,7 +351,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             if (m.getMT().equalsIgnoreCase(TYP_TEXT)) {
                 valuesins.put(T_MESSAGES_TextMsgID, m.getTMID());
-                OGTeM oftm = rf.gettextmessage(username, password, m.getTMID());
+                OGTeM oftm = rf.gettextmessage(m.getTMID());
                 if (oftm != null) {
                     if (oftm.getET() == null || oftm.getET().isEmpty()) {
                         if (dbh.acknowledgeMessage(Constants.TYP_TEXT, oftm.getTM(), m.getMID())) {
@@ -523,10 +523,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             String msgtype = c.getString(ID_MESSAGES_MessageType);
 
             if (msgtype.equalsIgnoreCase(TYP_TEXT)) {
-                OSTeM outtxt = rf.sendtextmessage(username, password, c.getString(ID_MESSAGES_TextMsgValue));
+                OSTeM outtxt = rf.sendtextmessage(c.getString(ID_MESSAGES_TextMsgValue));
                 if (outtxt != null) {
                     if (outtxt.getET() == null || outtxt.getET().isEmpty()) {
-                        OIMIC outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outtxt.getTID(), TYP_TEXT);
+                        OIMIC outins = rf.insertmessageintochat(c.getInt(ID_MESSAGES_ChatID), outtxt.getTID(), TYP_TEXT);
                         if (outins != null) {
                             if (outins.getET() == null || outins.getET().isEmpty()) {
                                 updateUploadedMessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outtxt.getTID(), TYP_TEXT, null);
@@ -538,10 +538,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } else if (msgtype.equalsIgnoreCase(TYP_IMAGE)) {
                 if ((!contentall && dbh.checkWIFI()) || (contentall && dbh.checkNetwork())) {
                     String imgfile = c.getString(Constants.ID_MESSAGES_ImageMsgValue);
-                    OSImM outimg = rf.sendImageMessage(username, password, c.getString(Constants.ID_MESSAGES_ImageMsgValue));
+                    OSImM outimg = rf.sendImageMessage(c.getString(Constants.ID_MESSAGES_ImageMsgValue));
                     if (outimg != null) {
                         if (outimg.getET() == null || outimg.getET().isEmpty()) {
-                            OIMIC outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outimg.getImID(), TYP_IMAGE);
+                            OIMIC outins = rf.insertmessageintochat(c.getInt(ID_MESSAGES_ChatID), outimg.getImID(), TYP_IMAGE);
                             if (outins != null) {
                                 if (outins.getET() == null || outins.getET().isEmpty()) {
                                     updateUploadedMessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outimg.getImID(), TYP_IMAGE, outimg.getImF());
@@ -557,10 +557,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } else if (msgtype.equalsIgnoreCase(TYP_VIDEO)) {
                 if ((!contentall && dbh.checkWIFI()) || (contentall && dbh.checkNetwork())) {
                     String vidfile = c.getString(Constants.ID_MESSAGES_VideoMsgValue);
-                    OSViM outvid = rf.sendVideoMessage(username, password, c.getString(Constants.ID_MESSAGES_VideoMsgValue));
+                    OSViM outvid = rf.sendVideoMessage(c.getString(Constants.ID_MESSAGES_VideoMsgValue));
                     if (outvid != null) {
                         if (outvid.getET() == null || outvid.getET().isEmpty()) {
-                            OIMIC outins = rf.insertmessageintochat(username, password, c.getInt(ID_MESSAGES_ChatID), outvid.getVID(), TYP_VIDEO);
+                            OIMIC outins = rf.insertmessageintochat(c.getInt(ID_MESSAGES_ChatID), outvid.getVID(), TYP_VIDEO);
                             if (outins != null) {
                                 if (outins.getET() == null || outins.getET().isEmpty()) {
                                     updateUploadedMessagesDatabase(c.getInt(ID_MESSAGES__id), outins.getMID(), outins.getSdT(), outins.getSdT(), outvid.getVID(), TYP_VIDEO, outvid.getVF());
@@ -602,7 +602,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     inputrf.add(val);
                     count++;
                     if (count == 100) {
-                        OGMI outgmi = rf.getmessageinformation(username, password, inputrf);
+                        OGMI outgmi = rf.getmessageinformation(inputrf);
                         if (outgmi != null) {
                             if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
                                 for (int i = 0; i < outgmi.getMIB().size(); i++) {
@@ -640,7 +640,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             }
             if (inputrf.size() > 0) {
-                OGMI outgmi = rf.getmessageinformation(username, password, inputrf);
+                OGMI outgmi = rf.getmessageinformation(inputrf);
                 if (outgmi != null) {
                     if (outgmi.getET() == null || outgmi.getET().isEmpty()) {
                         for (int i = 0; i < outgmi.getMIB().size(); i++) {
@@ -692,7 +692,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         client.release();
 
         if (inputuids.size() > 0) {
-            OSU out = rf.syncUser(username, password, inputuids);
+            OSU out = rf.syncUser(inputuids);
             if (out != null) {
                 if (out.getET() == null || out.getET().isEmpty()) {
 

@@ -511,15 +511,15 @@ public class SingleChatActivity extends ActionBarActivity implements
 
         alertDialogBuilder.setPositiveButton(R.string.action_searchuser
                 , new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
+                    public void onClick(DialogInterface dialog, int id) {
 
-                String searchStr = input.getText().toString();
-                Intent listuserIntent = new Intent(SingleChatActivity.this, MeBaService.class);
-                listuserIntent.setAction(Constants.ACTION_LISTUSER);
-                listuserIntent.putExtra(Constants.SEARCH, searchStr);
-                startService(listuserIntent);
-            }
-        });
+                        String searchStr = input.getText().toString();
+                        Intent listuserIntent = new Intent(SingleChatActivity.this, MeBaService.class);
+                        listuserIntent.setAction(Constants.ACTION_LISTUSER);
+                        listuserIntent.putExtra(Constants.SEARCH, searchStr);
+                        startService(listuserIntent);
+                    }
+                });
         alertDialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // cancel the alert box and put a Toast to the user

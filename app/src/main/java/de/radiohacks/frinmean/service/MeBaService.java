@@ -32,7 +32,6 @@ import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.modelshort.C;
 import de.radiohacks.frinmean.modelshort.M;
 import de.radiohacks.frinmean.modelshort.OAdUC;
-import de.radiohacks.frinmean.modelshort.OAuth;
 import de.radiohacks.frinmean.modelshort.OCrCh;
 import de.radiohacks.frinmean.modelshort.ODMFC;
 import de.radiohacks.frinmean.modelshort.ODeCh;
@@ -221,8 +220,8 @@ public class MeBaService extends IntentService {
                 final String ChatName = intent.getStringExtra(Constants.CHATNAME);
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 sSyncAdapter.syncGetMessageFromChat(cid, 0, ChatName);
-            } else if (Constants.ACTION_AUTHENTICATE.equalsIgnoreCase(action)) {
-                handleActionAuthenticateUser();
+            /*} else if (Constants.ACTION_AUTHENTICATE.equalsIgnoreCase(action)) {
+                handleActionAuthenticateUser();*/
             } else if (Constants.ACTION_INSERTMESSAGEINTOCHAT.equalsIgnoreCase(action)) {
                 final int cid = intent.getIntExtra(Constants.CHATID, -1);
                 final long cntmid = intent.getLongExtra(Constants.FWDCONTENTMESSAGEID, -1);
@@ -266,7 +265,7 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start handleActionRefresh");
 
         try {
-            OLiCh outListChat = rf.listchat(username, password);
+            OLiCh outListChat = rf.listchat();
             if (outListChat != null && outListChat.getET() == null) {
                 ContentProviderClient clientChat = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
                 for (int j = 0; j < outListChat.getC().size(); j++) {
@@ -284,7 +283,7 @@ public class MeBaService extends IntentService {
                         }
                     }
                     ((FrinmeanContentProvider) clientChat.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CHAT_CONTENT_URI, valuesinschat);
-                    OFMFC outFetchMessage = rf.getmessagefromchat(username, password, c.getCID(), intime);
+                    OFMFC outFetchMessage = rf.getmessagefromchat(c.getCID(), intime);
                     if (outFetchMessage != null && outFetchMessage.getET() == null) {
                         for (int k = 0; k < outFetchMessage.getM().size(); k++) {
                             M m = outFetchMessage.getM().get(k);
@@ -300,7 +299,7 @@ public class MeBaService extends IntentService {
 
                             if (m.getMT().equalsIgnoreCase(TYP_TEXT)) {
                                 valuesinsmsg.put(T_MESSAGES_TextMsgID, m.getTMID());
-                                OGTeM oftm = rf.gettextmessage(username, password, m.getTMID());
+                                OGTeM oftm = rf.gettextmessage(m.getTMID());
                                 if (oftm != null) {
                                     if (oftm.getET() == null || oftm.getET().isEmpty()) {
                                         if (dbh.acknowledgeMessage(Constants.TYP_TEXT, oftm.getTM(), m.getMID())) {
@@ -358,13 +357,13 @@ public class MeBaService extends IntentService {
 //                }
                             } else if (m.getMT().equalsIgnoreCase(TYP_VIDEO)) {
                                 valuesinsmsg.put(T_MESSAGES_VideoMsgID, m.getVMID());
-                                OGViMMD outmeta = rf.getVideoMessageMetaData(username, password, m.getVMID());
+                                OGViMMD outmeta = rf.getVideoMessageMetaData(m.getVMID());
 
                                 if (outmeta != null) {
                                     if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
                                         if (!dbh.checkfileexists(outmeta.getVM(), TYP_VIDEO, outmeta.getVS(), outmeta.getVMD5())) {
                                             if (dbh.checkWIFI()) {
-                                                OGViM ofvm = rf.fetchVideoMessage(username, password, m.getVMID());
+                                                OGViM ofvm = rf.fetchVideoMessage(m.getVMID());
                                                 if (ofvm != null) {
                                                     if (ofvm.getET() == null || ofvm.getET().isEmpty()) {
                                                         String checkfilepath = viddir + ofvm.getVM();
@@ -426,7 +425,7 @@ public class MeBaService extends IntentService {
 
         if (inDelSvr) {
             try {
-                ODeCh out = rf.deletechat(username, password, ChatID);
+                ODeCh out = rf.deletechat(ChatID);
                 Serializer serializer = new Persister();
                 StringWriter OutString = new StringWriter();
 
@@ -505,7 +504,7 @@ public class MeBaService extends IntentService {
             }
             c.close();
 
-            OSShT outsst = rf.setshowtimestamp(username, password, ids);
+            OSShT outsst = rf.setshowtimestamp(ids);
             if (outsst != null) {
                 if (outsst.getET() == null || outsst.getET().isEmpty()) {
                     for (int i = 0; i < outsst.getShT().size(); i++) {
@@ -557,7 +556,7 @@ public class MeBaService extends IntentService {
         client.release();
 
         try {
-            OIMIC out = rf.insertmessageintochat(username, password, ChatID, ContentMsgID, msgType);
+            OIMIC out = rf.insertmessageintochat(ChatID, ContentMsgID, msgType);
             dbh.insertFwdMsgIntoDB(ChatID, UserID, out.getMID(), out.getSdT(), msgType, ContentMessage, ContentMsgID);
         } catch (Exception e) {
             e.printStackTrace();
@@ -576,7 +575,7 @@ public class MeBaService extends IntentService {
             if (indelsvr) {
                 try {
                     int x = c.getInt(Constants.ID_MESSAGES_BADBID);
-                    ODMFC out = rf.deletemessagefromchat(username, password, c.getInt(Constants.ID_MESSAGES_BADBID));
+                    ODMFC out = rf.deletemessagefromchat(c.getInt(Constants.ID_MESSAGES_BADBID));
                     Serializer serializer = new Persister();
                     StringWriter OutString = new StringWriter();
 
@@ -626,7 +625,7 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start handleActionAddUserToChat");
 
         try {
-            OAdUC out = rf.addusertochat(username, password, UserID, ChatID);
+            OAdUC out = rf.addusertochat(UserID, ChatID);
             Serializer serializer = new Persister();
             StringWriter OutString = new StringWriter();
 
@@ -642,7 +641,7 @@ public class MeBaService extends IntentService {
     private void handleActionCreateChat(String ChatName) {
         Log.d(TAG, "start handleActionCreateChate");
 
-        OCrCh out = rf.createchat(username, password, ChatName);
+        OCrCh out = rf.createchat(ChatName);
 
         if (out.getET() == null || out.getET().isEmpty()) {
             if ((out.getCN().equals(ChatName)) && (out.getCID() > 0)) {
@@ -657,7 +656,7 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start handleActionListUser");
 
         try {
-            OLiUs out = rf.listuser(username, password, in);
+            OLiUs out = rf.listuser(in);
             Serializer serializer = new Persister();
             StringWriter OutString = new StringWriter();
 
@@ -670,7 +669,7 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "end handleActionListUser");
     }
 
-    private void handleActionAuthenticateUser() {
+/*    private void handleActionAuthenticateUser() {
         Log.d(TAG, "start handleActionAuthenticateUser");
 
         try {
@@ -686,12 +685,12 @@ public class MeBaService extends IntentService {
             e.printStackTrace();
         }
         Log.d(TAG, "end handleActionAuthenticateUser");
-    }
+    } */
 
     private void handleActionSyncUser() {
         Log.d(TAG, "start hanleActionSyncUser");
 
-        OLiUs out = rf.listuser(username, password, "");
+        OLiUs out = rf.listuser("");
         if (out != null) {
             if (out.getET() == null || out.getET().isEmpty()) {
 
@@ -724,14 +723,14 @@ public class MeBaService extends IntentService {
                             int icnid = 0;
                             String icnvalue = null;
                             if (out.getU().get(i).getICID() > 0) {
-                                OGImMMD outmeta = rf.getImageMessageMetaData(username, password, out.getU().get(i).getICID());
+                                OGImMMD outmeta = rf.getImageMessageMetaData(out.getU().get(i).getICID());
 
                                 if (outmeta != null) {
                                     if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
 
                                         if (!dbh.checkfileexists(outmeta.getIM(), Constants.TYP_ICON, outmeta.getIS(), outmeta.getIMD5())) {
                                             if (dbh.checkWIFI()) {
-                                                OGImM ofim = rf.fetchImageMessage(username, password, out.getU().get(i).getICID(), Constants.TYP_ICON);
+                                                OGImM ofim = rf.fetchImageMessage(out.getU().get(i).getICID(), Constants.TYP_ICON);
                                                 if (ofim != null) {
                                                     if (ofim.getET() == null || ofim.getET().isEmpty()) {
                                                         icnvalue = icndir + File.separator + ofim.getIM();
@@ -755,10 +754,10 @@ public class MeBaService extends IntentService {
     private void handleSendUserIcon(String message) {
         Log.d(TAG, "start handleSendUserIcon");
 
-        OSIcM outsendicon = rf.sendIconMessage(username, password, message);
+        OSIcM outsendicon = rf.sendIconMessage(message);
         if (outsendicon != null) {
             if (outsendicon.getET() == null || outsendicon.getET().isEmpty()) {
-                OIUIc outinsusericon = rf.insertusericon(username, password, outsendicon.getIcID());
+                OIUIc outinsusericon = rf.insertusericon(outsendicon.getIcID());
                 if (outinsusericon != null) {
                     if (outinsusericon.getET() == null || outinsusericon.getET().isEmpty()) {
                         dbh.moveFileToDestination(message, Constants.ICONDIR, outsendicon.getIcF());
@@ -783,10 +782,10 @@ public class MeBaService extends IntentService {
         Log.d(TAG, "start handleSendUserIcon");
 
         if (chatid != -1) {
-            OSIcM outsendicon = rf.sendIconMessage(username, password, message);
+            OSIcM outsendicon = rf.sendIconMessage(message);
             if (outsendicon != null) {
                 if (outsendicon.getET() == null || outsendicon.getET().isEmpty()) {
-                    rf.insertchaticon(username, password, outsendicon.getIcID(), chatid);
+                    rf.insertchaticon(outsendicon.getIcID(), chatid);
                 }
             }
             Log.d(TAG, "end handleSendUserIcon");

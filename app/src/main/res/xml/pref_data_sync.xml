@@ -42,7 +42,7 @@
         android:title="@string/pref_title_sync_frequency" />
 
     <SwitchPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="prefTimeInformationSync"
         android:switchTextOff="@string/pref_title_timeinformation_wifi_only"
         android:switchTextOn="@string/pref_title_timeinformation_always"

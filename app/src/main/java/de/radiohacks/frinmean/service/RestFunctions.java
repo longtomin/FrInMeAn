@@ -43,7 +43,6 @@ import de.radiohacks.frinmean.modelshort.ISiUp;
 import de.radiohacks.frinmean.modelshort.OAckCD;
 import de.radiohacks.frinmean.modelshort.OAckMD;
 import de.radiohacks.frinmean.modelshort.OAdUC;
-import de.radiohacks.frinmean.modelshort.OAuth;
 import de.radiohacks.frinmean.modelshort.OCN;
 import de.radiohacks.frinmean.modelshort.OCrCh;
 import de.radiohacks.frinmean.modelshort.ODMFC;
@@ -184,15 +183,15 @@ public class RestFunctions {
 			@QueryParam(Constants.QPusername) String User,
 			@QueryParam(Constants.QPpassword) String Password); */
 
-    public OAuth authenticate(String inuser, String inpassword) {
+/*    public OAuth authenticate(String inuser, String inpassword) {
         Log.d(TAG, "start authenticate with user=" + inuser + " password=" + inpassword);
         OAuth out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/authenticate", https, port);
+            rc = new RestClient(CommunicationURL + "user/authenticate");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("GET");
@@ -212,7 +211,7 @@ public class RestFunctions {
         }
         Log.d(TAG, "end authenticate");
         return out;
-    }
+    } */
 
     /* @PUT
     @Produces(MediaType.APPLICATION_XML)
@@ -225,7 +224,7 @@ public class RestFunctions {
         OSiUp out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/signup", https, port);
+            rc = new RestClient(CommunicationURL + "user/signup");
             try {
                 ISiUp in = new ISiUp();
                 in.setUN(convertB64(inuser));
@@ -268,16 +267,16 @@ public class RestFunctions {
 	@Path("/createchat")
 	public OCrCh CreateChat(ICrCh in);*/
 
-    public OCrCh createchat(String inuser, String inpassword, String inchatname) {
-        Log.d(TAG, "start createchat with user=" + inuser + " password=" + inpassword);
+    public OCrCh createchat(String inchatname) {
+        Log.d(TAG, "start createchat with chatname =" + inchatname);
         OCrCh out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/createchat", https, port);
+            rc = new RestClient(CommunicationURL + "user/createchat");
             try {
                 ICrCh in = new ICrCh();
-                in.setUN(convertB64(inuser));
-                in.setPW(convertB64(inpassword));
+//                in.setUN(convertB64(inuser));
+//                in.setPW(convertB64(inpassword));
                 in.setCN(convertB64(inchatname));
 
                 Serializer serializer = new Persister();
@@ -287,9 +286,6 @@ public class RestFunctions {
                 rc.setPutContent(String.valueOf(InString));
                 rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
 
-//                rc.AddParam(Constants.QPusername, convertB64(inuser));
-//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
-//                rc.AddParam(Constants.QPchatname, convertB64(inchatname));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("PUT");
@@ -297,7 +293,6 @@ public class RestFunctions {
                     ret = rc.ExecuteHTTPXML("PUT");
                 }
                 if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
-//                    Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OCrCh.class, reader, false);
@@ -317,15 +312,15 @@ public class RestFunctions {
 			@QueryParam(Constants.QPpassword) String Password,
 			@QueryParam(Constants.QPchatid) int ChatID); */
 
-    public ODeCh deletechat(String inuser, String inpassword, int inchatid) {
-        Log.d(TAG, "start deletechat with user=" + inuser + " password=" + inpassword);
+    public ODeCh deletechat(int inchatid) {
+        Log.d(TAG, "start deletechat with chatid=" + inchatid);
         ODeCh out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/deletechat", https, port);
+            rc = new RestClient(CommunicationURL + "user/deletechat");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
                 String ret;
                 if (https) {
@@ -353,16 +348,16 @@ public class RestFunctions {
 	@Path("/addusertochat")
 	public OAdUC AddUserToChat(IAdUC in); */
 
-    public OAdUC addusertochat(String inuser, String inpassword, int inuserid, int inchatid) {
-        Log.d(TAG, "start addusertochat with user=" + inuser + " password=" + inpassword);
+    public OAdUC addusertochat(int inuserid, int inchatid) {
+        Log.d(TAG, "start addusertochat with userid=" + inuserid + " chatid=" + inchatid);
         OAdUC out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/addusertochat", https, port);
+            rc = new RestClient(CommunicationURL + "user/addusertochat");
             try {
                 IAdUC in = new IAdUC();
-                in.setUN(convertB64(inuser));
-                in.setPW(convertB64(inpassword));
+//                in.setUN(convertB64(inuser));
+//                in.setPW(convertB64(inpassword));
                 in.setCID(inchatid);
                 in.setUID(inuserid);
 
@@ -373,10 +368,6 @@ public class RestFunctions {
                 rc.setPutContent(String.valueOf(InString));
                 rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
 
-//                rc.AddParam(Constants.QPusername, convertB64(inuser));
-//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
-//                rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
-//                rc.AddParam(Constants.QPuserid, Integer.toString(inuserid));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("PUT");
@@ -406,15 +397,15 @@ public class RestFunctions {
 			@QueryParam(Constants.QPuserid) int UserID,
 			@QueryParam(Constants.QPchatid) int ChatID); */
 
-    public OReUC removeuserfromchat(String inuser, String inpassword, int inuserid, int inchatid) {
-        Log.d(TAG, "start removeuserfromchat with user=" + inuser + " password=" + inpassword);
+    public OReUC removeuserfromchat(int inuserid, int inchatid) {
+        Log.d(TAG, "start removeuserfromchat with userid=" + inuserid + " chatid=" + inchatid);
         OReUC out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/removeuserfromchat", https, port);
+            rc = new RestClient(CommunicationURL + "user/removeuserfromchat");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
                 rc.AddParam(Constants.QPuserid, Integer.toString(inuserid));
                 String ret;
@@ -444,15 +435,15 @@ public class RestFunctions {
 			@QueryParam(Constants.QPpassword) String Password,
 			@QueryParam(Constants.QPsearch) String search); */
 
-    public OLiUs listuser(String inuser, String inpassword, String insearch) {
-        Log.d(TAG, "start listuser with user=" + inuser + " password=" + inpassword + " Search=" + insearch);
+    public OLiUs listuser(String insearch) {
+        Log.d(TAG, "start listuser with Search=" + insearch);
         OLiUs out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/listuser", https, port);
+            rc = new RestClient(CommunicationURL + "user/listuser");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPsearch, convertB64(insearch));
                 String ret;
                 if (https) {
@@ -479,16 +470,16 @@ public class RestFunctions {
 	@Path("/listchat")
 	public OLiCh ListChats(@QueryParam(Constants.QPusername) String User,
 			@QueryParam(Constants.QPpassword) String Password); */
-    public OLiCh listchat(String inuser, String inpassword) {
-        Log.d(TAG, "start listchat with user=" + inuser + " password=" + inpassword);
+    public OLiCh listchat() {
+        Log.d(TAG, "start listchat");
         OLiCh out = null;
         int retcode = 0;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/listchat", https, port);
+            rc = new RestClient(CommunicationURL + "user/listchat");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("GET");
@@ -521,16 +512,16 @@ public class RestFunctions {
 	@Path("/sendtextmessage")
 	public OSTeM sendTextMessage(ISTeM in); */
 
-    public OSTeM sendtextmessage(String inuser, String inpassword, String intextmsg) {
-        Log.d(TAG, "start sendtextmessage with user=" + inuser + " password=" + inpassword + "Message=" + intextmsg);
+    public OSTeM sendtextmessage(String intextmsg) {
+        Log.d(TAG, "start sendtextmessage with message=" + intextmsg);
         OSTeM out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/sendtextmessage", https, port);
+            rc = new RestClient(CommunicationURL + "user/sendtextmessage");
             try {
                 ISTeM in = new ISTeM();
-                in.setPW(convertB64(inpassword));
-                in.setUN(convertB64(inuser));
+//                in.setPW(convertB64(inpassword));
+//                in.setUN(convertB64(inuser));
                 in.setTM(convertB64(intextmsg));
 
                 Serializer serializer = new Persister();
@@ -540,9 +531,6 @@ public class RestFunctions {
                 rc.setPutContent(String.valueOf(InString));
                 rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
 
-//                rc.AddParam(Constants.QPusername, convertB64(inuser));
-//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
-//                rc.AddParam(Constants.QPtextmessage, convertB64(intextmsg));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("PUT");
@@ -550,7 +538,6 @@ public class RestFunctions {
                     ret = rc.ExecuteHTTPXML("PUT");
                 }
                 if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
-//                    Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OSTeM.class, reader, false);
@@ -570,15 +557,15 @@ public class RestFunctions {
 			@QueryParam(Constants.QPpassword) String Password,
 			@QueryParam(Constants.QPtextmessageid) int TextMessageID); */
 
-    public OGTeM gettextmessage(String inuser, String inpassword, int intextmsgid) {
-        Log.d(TAG, "start gettextmessage with user=" + inuser + " password=" + inpassword + "Message=" + String.valueOf(intextmsgid));
+    public OGTeM gettextmessage(int intextmsgid) {
+        Log.d(TAG, "start gettextmessage with messageid=" + String.valueOf(intextmsgid));
         OGTeM out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/gettextmessage", https, port);
+            rc = new RestClient(CommunicationURL + "user/gettextmessage");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPtextmessageid, Integer.toString(intextmsgid));
                 String ret;
                 if (https) {
@@ -606,19 +593,19 @@ public class RestFunctions {
 	@Path("/insertmessageintochat")
 	public OIMIC insertMessageIntoChat(IIMIC in); */
 
-    public OIMIC insertmessageintochat(String inuser, String inpassword, int inchatid, int inmsgid, String inmsgtype) {
-        Log.d(TAG, "start insertmessageintochat with user=" + inuser + " password=" + inpassword + "ChatID=" + String.valueOf(inchatid) + " MessageID=" + String.valueOf(inmsgid) + "MessageType=" + inmsgtype);
+    public OIMIC insertmessageintochat(int inchatid, int inmsgid, String inmsgtype) {
+        Log.d(TAG, "start insertmessageintochat with ChatID=" + String.valueOf(inchatid) + " MessageID=" + String.valueOf(inmsgid) + "MessageType=" + inmsgtype);
         OIMIC out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/insertmessageintochat", https, port);
+            rc = new RestClient(CommunicationURL + "user/insertmessageintochat");
             try {
                 IIMIC in = new IIMIC();
                 in.setCID(inchatid);
                 in.setMID(inmsgid);
                 in.setMT(convertB64(inmsgtype));
-                in.setUN(convertB64(inuser));
-                in.setPW(convertB64(inpassword));
+//                in.setUN(convertB64(inuser));
+//                in.setPW(convertB64(inpassword));
 
                 Serializer serializer = new Persister();
                 StringWriter InString = new StringWriter();
@@ -627,12 +614,6 @@ public class RestFunctions {
                 rc.setPutContent(String.valueOf(InString));
                 rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
 
-
-//                rc.AddParam(Constants.QPusername, convertB64(inuser));
-//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
-//                rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
-//                rc.AddParam(Constants.QPmessageid, Integer.toString(inmsgid));
-//                rc.AddParam(Constants.QPmessagetype, convertB64(inmsgtype));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("PUT");
@@ -640,7 +621,6 @@ public class RestFunctions {
                     ret = rc.ExecuteHTTPXML("PUT");
                 }
                 if (rc.getResponseCode() == HttpURLConnection.HTTP_OK) {
-//                    Serializer serializer = new Persister();
                     Reader reader = new StringReader(ret);
 
                     out = serializer.read(OIMIC.class, reader, false);
@@ -661,15 +641,15 @@ public class RestFunctions {
 			@QueryParam(Constants.QPpassword) String Password,
 			@QueryParam(Constants.QPmessageid) int MessageID); */
 
-    public ODMFC deletemessagefromchat(String inuser, String inpassword, int inmsgid) {
-        Log.d(TAG, "start deletemessagefromchat with user=" + inuser + " password=" + inpassword + "MessageID=" + String.valueOf(inmsgid));
+    public ODMFC deletemessagefromchat(int inmsgid) {
+        Log.d(TAG, "start deletemessagefromchat with MessageID=" + String.valueOf(inmsgid));
         ODMFC out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/deletemessagefromchat", https, port);
+            rc = new RestClient(CommunicationURL + "user/deletemessagefromchat");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(inmsgid));
                 String ret;
                 if (https) {
@@ -700,15 +680,15 @@ public class RestFunctions {
 			@QueryParam(Constants.QPchatid) int ChatID,
 			@QueryParam(Constants.QPtimestamp) int Timestamp); */
 
-    public OFMFC getmessagefromchat(String inuser, String inpassword, int inchatid, long intimestamp) {
-        Log.d(TAG, "start getmessagefromchat with user=" + inuser + " password=" + inpassword + "ChatID=" + String.valueOf(inchatid) + " Timestamp=" + String.valueOf(intimestamp));
+    public OFMFC getmessagefromchat(int inchatid, long intimestamp) {
+        Log.d(TAG, "start getmessagefromchat with ChatID=" + String.valueOf(inchatid) + " Timestamp=" + String.valueOf(intimestamp));
         OFMFC out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/getmessagefromchat", https, port);
+            rc = new RestClient(CommunicationURL + "user/getmessagefromchat");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPchatid, Integer.toString(inchatid));
                 rc.AddParam(Constants.QPtimestamp, String.valueOf(intimestamp));
                 String ret;
@@ -737,15 +717,15 @@ public class RestFunctions {
 	public OCN checkNew(@QueryParam(Constants.QPusername) String User,
 			@QueryParam(Constants.QPpassword) String Password); */
 
-    public OCN checknew(String inuser, String inpassword) {
-        Log.d(TAG, "start checknew with user=" + inuser + " password=" + inpassword);
+    public OCN checknew() {
+        Log.d(TAG, "start checknew");
         OCN out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/checknew", https, port);
+            rc = new RestClient(CommunicationURL + "user/checknew");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("GET");
@@ -776,12 +756,12 @@ public class RestFunctions {
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
 
-    public OSImM sendImageMessage(String inuser, String inpassword, String Message) {
-        Log.d(TAG, "start sendImageMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
+    public OSImM sendImageMessage(String Message) {
+        Log.d(TAG, "start sendImageMessage with Message=" + Message);
         OSImM out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "image/upload", https, port);
+            rc = new RestClient(CommunicationURL + "image/upload");
             try {
                 HashCode md5 = Files.hash(new File(Message),
                         Hashing.md5());
@@ -793,8 +773,8 @@ public class RestFunctions {
                 String[] q = Message.split("/");
                 int idx = q.length - 1;
 
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPacknowledge, convertB64(md5.toString()));
 
                 String ret;
@@ -826,18 +806,18 @@ public class RestFunctions {
                 @QueryParam(Constants.QPpassword) String Password,
                 @QueryParam("imageid") int imageid); */
 
-    public OGImMMD getImageMessageMetaData(String inuser, String inpassword, int ImgMsgID) {
-        Log.d(TAG, "start getImageMessageMetaData with user=" + inuser + " password=" + inpassword + "ImageMessageID=" + String.valueOf(ImgMsgID));
+    public OGImMMD getImageMessageMetaData(int ImgMsgID) {
+        Log.d(TAG, "start getImageMessageMetaData with ImageMessageID=" + String.valueOf(ImgMsgID));
         OGImMMD out = new OGImMMD();
 
         if (checkServer()) {
             try {
                 RestClient rc;
-                rc = new RestClient(CommunicationURL + "image/getimagemetadata", https, port);
+                rc = new RestClient(CommunicationURL + "image/getimagemetadata");
                 Integer imgid = ImgMsgID;
-                rc.AddParam("username", convertB64(inuser));
-                rc.AddParam("password", convertB64(inpassword));
-                rc.AddParam("imageid", URLEncoder.encode(imgid.toString(), Constants.CHARSET));
+                //              rc.AddParam("username", convertB64(inuser));
+                //              rc.AddParam("password", convertB64(inpassword));
+                rc.AddParam(Constants.QPimageid, URLEncoder.encode(imgid.toString(), Constants.CHARSET));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("GET");
@@ -865,28 +845,15 @@ public class RestFunctions {
                                   @PathParam(Constants.QPpassword) String Password,
                                   @PathParam(Constants.QPimageid) int imageid); */
 
-    public OGImM fetchImageMessage(String inuser, String inpassword, int ImgMsgID, String ImageType) {
-        Log.d(TAG, "start fetchImageMessage with user=" + inuser + " password=" + inpassword + "ImageMessageID=" + String.valueOf(ImgMsgID));
+    public OGImM fetchImageMessage(int ImgMsgID, String ImageType) {
+        Log.d(TAG, "start fetchImageMessage with ImageMessageID=" + String.valueOf(ImgMsgID));
         OGImM out = new OGImM();
 
         if (checkServer()) {
 
-            byte[] datauser;
             try {
-                datauser = inuser.getBytes(Constants.CHARSET);
-
-                String b64uid = Base64.encodeToString(datauser, Base64.NO_WRAP);
-                datauser = inpassword.getBytes(Constants.CHARSET);
-                String b64pw = Base64.encodeToString(datauser, Base64.NO_WRAP);
-                String combinedParams = "";
-                if (CommunicationURL.endsWith("/")) {
-                    combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(ImgMsgID), Constants.CHARSET);
-                } else {
-                    combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(ImgMsgID), Constants.CHARSET);
-                }
-
                 RestClient rc;
-                rc = new RestClient(CommunicationURL + "image/download/" + combinedParams, https, port);
+                rc = new RestClient(CommunicationURL + "image/download/" + URLEncoder.encode(String.valueOf(ImgMsgID), Constants.CHARSET));
 
                 rc.AddHeader("Accept", "image/jpeg");
                 if (ImageType.equalsIgnoreCase(Constants.TYP_IMAGE)) {
@@ -925,12 +892,12 @@ public class RestFunctions {
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
 
-    public OSViM sendVideoMessage(String inuser, String inpassword, String Message) {
-        Log.d(TAG, "start sendVideoMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
+    public OSViM sendVideoMessage(String Message) {
+        Log.d(TAG, "start sendVideoMessage with Message=" + Message);
         OSViM out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "video/upload", https, port);
+            rc = new RestClient(CommunicationURL + "video/upload");
 
             try {
                 HashCode md5 = Files.hash(new File(Message),
@@ -943,8 +910,8 @@ public class RestFunctions {
                 String[] q = Message.split("/");
                 int idx = q.length - 1;
 
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPacknowledge, convertB64(md5.toString()));
 
                 String ret = "";
@@ -976,18 +943,18 @@ public class RestFunctions {
                 @QueryParam(Constants.QPpassword) String Password,
                 @QueryParam("videoid") int videoid); */
 
-    public OGViMMD getVideoMessageMetaData(String inuser, String inpassword, int VidMsgID) {
-        Log.d(TAG, "start getVideoMessageMetaData with user=" + inuser + " password=" + inpassword + " VideoMessageID=" + String.valueOf(VidMsgID));
+    public OGViMMD getVideoMessageMetaData(int VidMsgID) {
+        Log.d(TAG, "start getVideoMessageMetaData with VideoMessageID=" + String.valueOf(VidMsgID));
         OGViMMD out = new OGViMMD();
 
         if (checkServer()) {
             try {
                 RestClient rc;
-                rc = new RestClient(CommunicationURL + "video/getvideometadata", https, port);
+                rc = new RestClient(CommunicationURL + "video/getvideometadata");
                 Integer vidid = VidMsgID;
-                rc.AddParam("username", convertB64(inuser));
-                rc.AddParam("password", convertB64(inpassword));
-                rc.AddParam("videoid", URLEncoder.encode(vidid.toString(), Constants.CHARSET));
+//                rc.AddParam("username", convertB64(inuser));
+//                rc.AddParam("password", convertB64(inpassword));
+                rc.AddParam(Constants.QPvideoid, URLEncoder.encode(vidid.toString(), Constants.CHARSET));
                 String ret;
                 if (https) {
                     ret = rc.ExecuteHTTPSXML("GET");
@@ -1015,27 +982,27 @@ public class RestFunctions {
                                   @PathParam(Constants.QPpassword) String Password,
                                   @PathParam(Constants.QPvideoid) int videoid); */
 
-    public OGViM fetchVideoMessage(String inuser, String inpassword, int VidMsgID) {
-        Log.d(TAG, "start fetchVideoMessage with user=" + inuser + " password=" + inpassword + " VideoMessageID=" + String.valueOf(VidMsgID));
+    public OGViM fetchVideoMessage(int VidMsgID) {
+        Log.d(TAG, "start fetchVideoMessage with VideoMessageID=" + String.valueOf(VidMsgID));
         OGViM out = new OGViM();
 
         if (checkServer()) {
-            byte[] datauser;
+//            byte[] datauser;
             try {
-                datauser = inuser.getBytes(Constants.CHARSET);
+//                datauser = inuser.getBytes(Constants.CHARSET);
 
-                String b64uid = Base64.encodeToString(datauser, Base64.NO_WRAP);
-                datauser = inpassword.getBytes(Constants.CHARSET);
-                String b64pw = Base64.encodeToString(datauser, Base64.NO_WRAP);
-                String combinedParams = "";
-                if (CommunicationURL.endsWith("/")) {
-                    combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), Constants.CHARSET);
-                } else {
-                    combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), Constants.CHARSET);
-                }
+//                String b64uid = Base64.encodeToString(datauser, Base64.NO_WRAP);
+//                datauser = inpassword.getBytes(Constants.CHARSET);
+//                String b64pw = Base64.encodeToString(datauser, Base64.NO_WRAP);
+//                String combinedParams = "";
+//                if (CommunicationURL.endsWith("/")) {
+//                    combinedParams += b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), Constants.CHARSET);
+//                } else {
+//                    combinedParams += "/" + b64uid + "/" + b64pw + "/" + URLEncoder.encode(String.valueOf(VidMsgID), Constants.CHARSET);
+//                }
 
                 RestClient rc;
-                rc = new RestClient(CommunicationURL + "video/download/" + combinedParams, https, port);
+                rc = new RestClient(CommunicationURL + "video/download/" + URLEncoder.encode(String.valueOf(VidMsgID), Constants.CHARSET));
 
                 rc.AddHeader("Accept", "video/mp4");
                 rc.setSaveDirectory(viddir);
@@ -1067,16 +1034,16 @@ public class RestFunctions {
 	@Consumes(MediaType.APPLICATION_XML)
 	@Path("/setshowtimestamp") */
 
-    public OSShT setshowtimestamp(String inuser, String inpassword, ArrayList<Integer> msgids) {
-        Log.d(TAG, "start setshowtimestamp with user=" + inuser + " password=" + inpassword + "Nimber of Messages=" + String.valueOf(msgids.size()));
+    public OSShT setshowtimestamp(ArrayList<Integer> msgids) {
+        Log.d(TAG, "start setshowtimestamp with Number of Messages=" + String.valueOf(msgids.size()));
         OSShT out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/setshowtimestamp", https, port);
+            rc = new RestClient(CommunicationURL + "user/setshowtimestamp");
             try {
                 ISShT in = new ISShT();
-                in.setUN(convertB64(inuser));
-                in.setPW(convertB64(inpassword));
+//                in.setUN(convertB64(inuser));
+//                in.setPW(convertB64(inpassword));
                 for (int i = 0; i < msgids.size(); i++) {
                     in.getMID().add(msgids.get(i));
                 }
@@ -1114,15 +1081,15 @@ public class RestFunctions {
 			@QueryParam(Constants.QPpassword) String Password,
 			@QueryParam(Constants.QPmessageid) List<Integer> MessageID); */
 
-    public OGMI getmessageinformation(String inuser, String inpassword, ArrayList<Integer> msgids) {
-        Log.d(TAG, "start getmessageinformation with user=" + inuser + " password=" + inpassword + "Number of Messages=" + msgids.size());
+    public OGMI getmessageinformation(ArrayList<Integer> msgids) {
+        Log.d(TAG, "start getmessageinformation with Number of Messages=" + msgids.size());
         OGMI out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/getmessageinformation", https, port);
+            rc = new RestClient(CommunicationURL + "user/getmessageinformation");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
 
                 for (int i = 0; i < msgids.size(); i++) {
                     rc.AddParam(Constants.QPmessageid, Integer.toString(msgids.get(i)));
@@ -1152,16 +1119,16 @@ public class RestFunctions {
 	@Consumes(MediaType.APPLICATION_XML)
 	@Path("/acknowledgemessagedownload") */
 
-    public OAckMD acknowledgemessagedownload(String inuser, String inpassword, int msgid, String inacknowledge) {
-        Log.d(TAG, "start acknowledgemessagedownload with user=" + inuser + " password=" + inpassword + " MessageID=" + String.valueOf(msgid) + " Acknowledge=" + inacknowledge);
+    public OAckMD acknowledgemessagedownload(int msgid, String inacknowledge) {
+        Log.d(TAG, "start acknowledgemessagedownload with MessageID=" + String.valueOf(msgid) + " Acknowledge=" + inacknowledge);
         OAckMD out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/acknowledgemessagedownload", https, port);
+            rc = new RestClient(CommunicationURL + "user/acknowledgemessagedownload");
             try {
                 IAckMD in = new IAckMD();
-                in.setUN(convertB64(inuser));
-                in.setPW(convertB64(inpassword));
+//                in.setUN(convertB64(inuser));
+//                in.setPW(convertB64(inpassword));
                 in.setACK(convertB64(inacknowledge));
                 in.setMID(msgid);
 
@@ -1197,16 +1164,16 @@ public class RestFunctions {
 	@Path("/acknowledgechatdownload")
 	public OAckCD acknowledgeChatDownload(IAckCD in); */
 
-    public OAckCD acknowledgechatdownload(String inuser, String inpassword, int chatid, String inacknowledge) {
-        Log.d(TAG, "start acknowledgechatdownload with user=" + inuser + " password=" + inpassword + " ChatID=" + String.valueOf(chatid) + " Acknowledge=" + inacknowledge);
+    public OAckCD acknowledgechatdownload(int chatid, String inacknowledge) {
+        Log.d(TAG, "start acknowledgechatdownload with ChatID=" + String.valueOf(chatid) + " Acknowledge=" + inacknowledge);
         OAckCD out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/acknowledgechatdownload", https, port);
+            rc = new RestClient(CommunicationURL + "user/acknowledgechatdownload");
             try {
                 IAckCD in = new IAckCD();
-                in.setUN(convertB64(inuser));
-                in.setPW(convertB64(inpassword));
+//                in.setUN(convertB64(inuser));
+//                in.setPW(convertB64(inpassword));
                 in.setACK(convertB64(inacknowledge));
                 in.setCID(chatid);
 
@@ -1248,12 +1215,12 @@ public class RestFunctions {
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader); */
 
-    public OSIcM sendIconMessage(String inuser, String inpassword, String Message) {
-        Log.d(TAG, "start sendIconMessage with user=" + inuser + " password=" + inpassword + "Message=" + Message);
+    public OSIcM sendIconMessage(String Message) {
+        Log.d(TAG, "start sendIconMessage with Message=" + Message);
         OSIcM out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "image/uploadicon", https, port);
+            rc = new RestClient(CommunicationURL + "image/uploadicon");
             try {
                 HashCode md5 = Files.hash(new File(Message),
                         Hashing.md5());
@@ -1265,8 +1232,8 @@ public class RestFunctions {
                 String[] q = Message.split("/");
                 int idx = q.length - 1;
 
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
                 rc.AddParam(Constants.QPacknowledge, convertB64(md5.toString()));
 
                 String ret;
@@ -1296,17 +1263,17 @@ public class RestFunctions {
     @Path("/insertusericon")
     public OIUIc insertusericon(IIUIc in); */
 
-    public OIUIc insertusericon(String inuser, String inpassword, int iniconid) {
-        Log.d(TAG, "start insertusericon with user=" + inuser + " password=" + inpassword + "IconID=" + String.valueOf(iniconid));
+    public OIUIc insertusericon(int iniconid) {
+        Log.d(TAG, "start insertusericon with IconID=" + String.valueOf(iniconid));
         OIUIc out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/insertusericon", https, port);
+            rc = new RestClient(CommunicationURL + "user/insertusericon");
             try {
                 IIUIc in = new IIUIc();
                 in.setIcID(iniconid);
-                in.setUN(convertB64(inuser));
-                in.setPW(convertB64(inpassword));
+//                in.setUN(convertB64(inuser));
+//                in.setPW(convertB64(inpassword));
 
                 Serializer serializer = new Persister();
                 StringWriter InString = new StringWriter();
@@ -1340,18 +1307,18 @@ public class RestFunctions {
     @Path("/insertchaticon")
     public OICIc insertchaticon(IICIc in); */
 
-    public OICIc insertchaticon(String inuser, String inpassword, int iniconid, int inchatid) {
-        Log.d(TAG, "start insertchaticon with user=" + inuser + " password=" + inpassword + " IconID=" + String.valueOf(iniconid) + " ChatID=" + String.valueOf(inchatid));
+    public OICIc insertchaticon(int iniconid, int inchatid) {
+        Log.d(TAG, "start insertchaticon with IconID=" + String.valueOf(iniconid) + " ChatID=" + String.valueOf(inchatid));
         OICIc out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/insertchaticon", https, port);
+            rc = new RestClient(CommunicationURL + "user/insertchaticon");
             try {
                 IICIc in = new IICIc();
                 in.setIcID(iniconid);
                 in.setCID(inchatid);
-                in.setUN(convertB64(inuser));
-                in.setPW(convertB64(inpassword));
+//                in.setUN(convertB64(inuser));
+//                in.setPW(convertB64(inpassword));
 
                 Serializer serializer = new Persister();
                 StringWriter InString = new StringWriter();
@@ -1386,15 +1353,15 @@ public class RestFunctions {
                         @QueryParam(Constants.QPpassword) String Password,
                         @QueryParam(Constants.QPuserid) List<Integer> UserID); */
 
-    public OSU syncUser(String inuser, String inpassword, ArrayList<Integer> userids) {
-        Log.d(TAG, "start syncUser with user=" + inuser + " password=" + inpassword + "Number of Messages=" + userids.size());
+    public OSU syncUser(ArrayList<Integer> userids) {
+        Log.d(TAG, "start syncUser with Number of Messages=" + userids.size());
         OSU out = null;
         if (checkServer()) {
             RestClient rc;
-            rc = new RestClient(CommunicationURL + "user/syncuser", https, port);
+            rc = new RestClient(CommunicationURL + "user/syncuser");
             try {
-                rc.AddParam(Constants.QPusername, convertB64(inuser));
-                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
+//                rc.AddParam(Constants.QPusername, convertB64(inuser));
+//                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
 
                 for (int i = 0; i < userids.size(); i++) {
                     rc.AddParam(Constants.QPuserid, Integer.toString(userids.get(i)));

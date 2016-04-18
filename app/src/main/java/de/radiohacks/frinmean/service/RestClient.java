@@ -1,5 +1,8 @@
 package de.radiohacks.frinmean.service;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -56,6 +59,7 @@ public class RestClient {
     private static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
     private static final String ENCODING_GZIP = "gzip";
     private static final String LINE_FEED = "\r\n";
+    final String basicAuth;
     //private Multimap<String, String> params = new Multimap<>();
     private ListMultimap<String, String> params = ArrayListMultimap.create();
     private HashMap<String, String> headers = new HashMap<>();
@@ -67,14 +71,19 @@ public class RestClient {
     private String filename;
     private String boundary;
     private String putContent;
-    private boolean usehttps;
-    private int port;
+    private String username;
+    private String password;
 
-    public RestClient(String urlin, boolean inhttps, int inport) {
+    public RestClient(String urlin) {
         this.url = urlin;
-        this.usehttps = inhttps;
-        this.port = inport;
         headers.put(HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
+        getPreferenceInfo();
+        if (this.password != "NULL" && this.username != "NULL") {
+            String combine = convertB64(username) + ":" + convertB64(password);
+            basicAuth = "Basic " + Base64.encodeToString(combine.getBytes(), Base64.NO_WRAP);
+        } else {
+            basicAuth = "";
+        }
     }
 
     private static String convertStreamToString(InputStream is) {
@@ -99,6 +108,25 @@ public class RestClient {
         }
         Log.d(TAG, "end convertStreamToString");
         return sb.toString();
+    }
+
+    protected void getPreferenceInfo() {
+        Log.d(TAG, "start getPreferenceInfo");
+        SharedPreferences sharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(FrinmeanApplication.getAppContext());
+
+        this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
+        this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
+    }
+
+    private String convertB64(String in) {
+        byte[] datauser = new byte[0];
+        try {
+            datauser = in.getBytes(Constants.CHARSET);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return Base64.encodeToString(datauser, Base64.NO_WRAP);
     }
 
     public void setSaveDirectory(String in) {
@@ -172,6 +200,9 @@ public class RestClient {
                 for (HashMap.Entry<String, String> entry : headers.entrySet()) {
                     urlcon.setRequestProperty(entry.getKey(), entry.getValue());
                 }
+            }
+            if (basicAuth != "") {
+                urlcon.setRequestProperty("Authorization", basicAuth);
             }
             urlcon.setInstanceFollowRedirects(false);
             urlcon.setRequestMethod(type);
@@ -296,6 +327,9 @@ public class RestClient {
                 }
             });
             urlcon.setInstanceFollowRedirects(false);
+            if (basicAuth != "") {
+                urlcon.setRequestProperty("Authorization", basicAuth);
+            }
             urlcon.setRequestMethod(type);
             if (type.equalsIgnoreCase("POST") || type.equalsIgnoreCase("PUT")) {
                 urlcon.setRequestMethod(type);
@@ -377,6 +411,9 @@ public class RestClient {
             urlcon.setDoOutput(true);
             urlcon.setUseCaches(false);
 
+            if (basicAuth != "") {
+                urlcon.setRequestProperty("Authorization", basicAuth);
+            }
             urlcon.setRequestMethod("POST");
             urlcon.setChunkedStreamingMode(1024);
             urlcon.setRequestProperty("Connection", "Keep-Alive");
@@ -527,6 +564,9 @@ public class RestClient {
             urlcon.setDoOutput(true);
             urlcon.setUseCaches(false);
 
+            if (basicAuth != "") {
+                urlcon.setRequestProperty("Authorization", basicAuth);
+            }
             urlcon.setRequestMethod("POST");
             urlcon.setChunkedStreamingMode(maxBufferSize);
             urlcon.setRequestProperty("Connection", "Keep-Alive");
@@ -616,6 +656,9 @@ public class RestClient {
             URL u = new URL(url + combinedParams);
             urlcon = (HttpURLConnection) u.openConnection();
             urlcon.setInstanceFollowRedirects(false);
+            if (basicAuth != "") {
+                urlcon.setRequestProperty("Authorization", basicAuth);
+            }
             urlcon.setRequestMethod(type);
             if (type.equalsIgnoreCase("POST")) {
                 urlcon.setDoOutput(true);
@@ -745,6 +788,9 @@ public class RestClient {
             });
 
             urlcon.setInstanceFollowRedirects(false);
+            if (basicAuth != "") {
+                urlcon.setRequestProperty("Authorization", basicAuth);
+            }
             urlcon.setRequestMethod(type);
             if (type.equalsIgnoreCase("POST") || type.equalsIgnoreCase("PUT")) {
                 urlcon.setRequestMethod(type);

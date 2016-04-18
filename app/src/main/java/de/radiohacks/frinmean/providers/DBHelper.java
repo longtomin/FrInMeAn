@@ -48,7 +48,6 @@ public class DBHelper {
     private String viddir;
     private String fildir;
     private String username;
-    private String password;
     private boolean contentall;
     private Context mContext;
 
@@ -99,11 +98,6 @@ public class DBHelper {
                 .getDefaultSharedPreferences(mContext);
 
         this.username = sharedPrefs.getString(Constants.PrefUsername, "NULL");
-        this.password = sharedPrefs.getString(Constants.PrefPassword, "NULL");
-//        this.directory = sharedPrefs.getString(Constants.PrefDirectory, "NULL");
-//        this.userid = sharedPrefs.getInt(Constants.PrefUserID, -1);
-//        this.ringtone = sharedPrefs.getString(Constants.prefRingtone, "DEFAULT_SOUND");
-//        this.vibrate = sharedPrefs.getBoolean(Constants.prefVibrate, true);
         this.contentall = sharedPrefs.getBoolean(Constants.prefContentCommunication, false);
         Log.d(TAG, "end getPferefenceInfo");
     }
@@ -130,13 +124,13 @@ public class DBHelper {
 
         String ret = null;
         RestFunctions rf = new RestFunctions();
-        OGImMMD outmeta = rf.getImageMessageMetaData(username, password, inImgID);
+        OGImMMD outmeta = rf.getImageMessageMetaData(inImgID);
 
         if (outmeta != null) {
             if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
                 if (!checkfileexists(outmeta.getIM(), ImageType, outmeta.getIS(), outmeta.getIMD5())) {
                     if (checkWIFI()) {
-                        OGImM ofim = rf.fetchImageMessage(username, password, inImgID, ImageType);
+                        OGImM ofim = rf.fetchImageMessage(inImgID, ImageType);
                         if (ofim != null) {
                             if (ofim.getET() == null || ofim.getET().isEmpty()) {
                                 String checkfilepath;
@@ -171,13 +165,13 @@ public class DBHelper {
 
         String ret = null;
         RestFunctions rf = new RestFunctions();
-        OGViMMD outmeta = rf.getVideoMessageMetaData(username, password, inVidID);
+        OGViMMD outmeta = rf.getVideoMessageMetaData(inVidID);
 
         if (outmeta != null) {
             if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
                 if (!checkfileexists(outmeta.getVM(), Constants.TYP_VIDEO, outmeta.getVS(), outmeta.getVMD5())) {
                     if (checkWIFI()) {
-                        OGViM ovim = rf.fetchVideoMessage(username, password, inVidID);
+                        OGViM ovim = rf.fetchVideoMessage(inVidID);
                         if (ovim != null) {
                             if (ovim.getET() == null || ovim.getET().isEmpty()) {
                                 String checkfilepath;
@@ -474,7 +468,7 @@ public class DBHelper {
             byte[] md5 = hasher.hash().asBytes(); */
             int hashCode = message.hashCode();
 
-            OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, String.valueOf(hashCode));
+            OAckMD oack = rf.acknowledgemessagedownload(msgid, String.valueOf(hashCode));
             if (oack != null) {
                 if (oack.getET() == null || oack.getET().isEmpty()) {
                     if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
@@ -492,7 +486,7 @@ public class DBHelper {
                 e.printStackTrace();
             }
             assert md5 != null;
-            OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+            OAckMD oack = rf.acknowledgemessagedownload(msgid, md5.toString());
             if (oack != null) {
                 if (oack.getET() == null || oack.getET().isEmpty()) {
                     if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
@@ -510,7 +504,7 @@ public class DBHelper {
                 e.printStackTrace();
             }
             assert md5 != null;
-            OAckMD oack = rf.acknowledgemessagedownload(username, password, msgid, md5.toString());
+            OAckMD oack = rf.acknowledgemessagedownload(msgid, md5.toString());
             if (oack != null) {
                 if (oack.getET() == null || oack.getET().isEmpty()) {
                     if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {
@@ -532,7 +526,7 @@ public class DBHelper {
 
         int hashCode = Chatname.hashCode();
 
-        OAckCD oack = rf.acknowledgechatdownload(username, password, chatid, String.valueOf(hashCode));
+        OAckCD oack = rf.acknowledgechatdownload(chatid, String.valueOf(hashCode));
         if (oack != null) {
             if (oack.getET() == null || oack.getET().isEmpty()) {
                 if (oack.getACK().equalsIgnoreCase(Constants.ACKNOWLEDGE_TRUE)) {

@@ -232,15 +232,15 @@ public class ChatFragment extends ListFragment implements LoaderManager.LoaderCa
 
         alertDialogBuilder.setPositiveButton(R.string.option_createchat
                 , new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
+                    public void onClick(DialogInterface dialog, int id) {
 
-                chatname = input.getText().toString();
-                Intent iCreateChat = new Intent(getActivity(), MeBaService.class);
-                iCreateChat.setAction(Constants.ACTION_CREATECHAT);
-                iCreateChat.putExtra(Constants.CHATNAME, chatname);
-                getActivity().startService(iCreateChat);
-            }
-        });
+                        chatname = input.getText().toString();
+                        Intent iCreateChat = new Intent(getActivity(), MeBaService.class);
+                        iCreateChat.setAction(Constants.ACTION_CREATECHAT);
+                        iCreateChat.putExtra(Constants.CHATNAME, chatname);
+                        getActivity().startService(iCreateChat);
+                    }
+                });
         alertDialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // cancel the alert box and put a Toast to the user
