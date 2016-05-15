@@ -75,8 +75,10 @@ public class RestClient {
     private String password;
 
     public RestClient(String urlin) {
+        System.setProperty("http.keepAlive", "false");
         this.url = urlin;
         headers.put(HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
+        headers.put("User-Agent", Constants.USER_AGENT);
         getPreferenceInfo();
         if (this.password != "NULL" && this.username != "NULL") {
             String combine = convertB64(username) + ":" + convertB64(password);
@@ -207,35 +209,33 @@ public class RestClient {
             urlcon.setInstanceFollowRedirects(false);
             urlcon.setRequestMethod(type);
             if (type.equalsIgnoreCase("POST") || type.equalsIgnoreCase("PUT")) {
-                // urlcon.setDoInput(true);
+                urlcon.setDoInput(true);
                 urlcon.setRequestMethod(type);
                 OutputStreamWriter out = new OutputStreamWriter(
                         urlcon.getOutputStream());
                 out.write(putContent);
+                out.flush();
                 out.close();
             }
 
             urlcon.setConnectTimeout(60 * 1000);
             urlcon.setReadTimeout(60 * 1000);
 
+
             responseCode = urlcon.getResponseCode();
-            message = urlcon.getResponseMessage();
-            InputStream instream = urlcon.getInputStream();
-            responseXML = convertStreamToString(instream);
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                message = urlcon.getResponseMessage();
+                InputStream instream = urlcon.getInputStream();
+                responseXML = convertStreamToString(instream);
+            }
 
 
-        } catch (MalformedURLException e) {
-            urlcon.disconnect();
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            urlcon.disconnect();
-            e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
-            urlcon.disconnect();
             e.printStackTrace();
         } catch (IOException e) {
-            urlcon.disconnect();
             e.printStackTrace();
+        } finally {
+            urlcon.disconnect();
         }
         return responseXML;
     }
@@ -275,11 +275,9 @@ public class RestClient {
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, tmf.getTrustManagers(), null);
 
-
             SSLSocketFactory NoSSLv3Factory = new NoSSLv3SocketFactory(context.getSocketFactory());
 
             HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
-
 
             if (!params.isEmpty()) {
                 combinedParams += "?";
@@ -299,17 +297,6 @@ public class RestClient {
                     }
                 }
             }
-            /*if (!params.isEmpty()) {
-                combinedParams += "?";
-                for (HashMap.Entry<String, String> entry : params.entrySet()) {
-                    String paramString = entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), Constants.CHARSET);
-                    if (combinedParams.length() > 1) {
-                        combinedParams += "&" + paramString;
-                    } else {
-                        combinedParams += paramString;
-                    }
-                }
-            }*/
             URL u = new URL(url + combinedParams);
             urlcon = (HttpsURLConnection) u.openConnection();
             if (!headers.isEmpty()) {
@@ -332,6 +319,7 @@ public class RestClient {
             }
             urlcon.setRequestMethod(type);
             if (type.equalsIgnoreCase("POST") || type.equalsIgnoreCase("PUT")) {
+                urlcon.setDoInput(true);
                 urlcon.setRequestMethod(type);
                 OutputStreamWriter out = new OutputStreamWriter(
                         urlcon.getOutputStream());
@@ -341,23 +329,18 @@ public class RestClient {
             urlcon.setConnectTimeout(60 * 1000);
             urlcon.setReadTimeout(60 * 1000);
             responseCode = urlcon.getResponseCode();
-            message = urlcon.getResponseMessage();
-            InputStream instream = urlcon.getInputStream();
-            responseXML = convertStreamToString(instream);
-        } catch (MalformedURLException e) {
-            urlcon.disconnect();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                message = urlcon.getResponseMessage();
+                InputStream instream = urlcon.getInputStream();
+                responseXML = convertStreamToString(instream);
+            }
+
+        } catch (MalformedURLException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
             urlcon.disconnect();
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
         }
         return responseXML;
     }
@@ -470,6 +453,8 @@ public class RestClient {
             Log.e("MultipartRequest", "Multipart Form Upload Error");
             e.printStackTrace();
             return "error";
+        } finally {
+            urlcon.disconnect();
         }
     }
 
@@ -623,6 +608,8 @@ public class RestClient {
             Log.e("MultipartRequest", "Multipart Form Upload Error");
             e.printStackTrace();
             return "error";
+        } finally {
+            urlcon.disconnect();
         }
     }
 
@@ -695,18 +682,12 @@ public class RestClient {
                 Log.d(TAG, "HTTP Responsecode = " + String.valueOf(responseCode));
             }
 
-        } catch (MalformedURLException e) {
-            urlcon.disconnect();
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            urlcon.disconnect();
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            urlcon.disconnect();
+        } catch (MalformedURLException | ProtocolException | UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            urlcon.disconnect();
             e.printStackTrace();
+        } finally {
+            urlcon.disconnect();
         }
         return ret;
     }
@@ -827,30 +808,12 @@ public class RestClient {
                 Log.d(TAG, "HTTP Responsecode = " + String.valueOf(responseCode));
             }
 
-        } catch (MalformedURLException e) {
-            urlcon.disconnect();
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            urlcon.disconnect();
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            urlcon.disconnect();
+        } catch (MalformedURLException | ProtocolException | UnsupportedEncodingException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            urlcon.disconnect();
             e.printStackTrace();
-        } catch (CertificateException e) {
+        } finally {
             urlcon.disconnect();
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            urlcon.disconnect();
-            e.printStackTrace();
-        } catch (KeyStoreException e) {
-            urlcon.disconnect();
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            urlcon.disconnect();
-            e.printStackTrace();
         }
         return ret;
     }

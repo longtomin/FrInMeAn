@@ -237,6 +237,9 @@ public class RestFunctions {
                 serializer.write(in, InString);
                 rc.setPutContent(String.valueOf(InString));
                 rc.AddHeader("Content-Type", MediaType.APPLICATION_XML);
+//                rc.AddHeader("Content-Type", "");
+                rc.AddHeader("Accept", MediaType.APPLICATION_XML);
+//                rc.AddHeader("Content-Type", "application/octet-stream");
 
 //                rc.AddParam(Constants.QPusername, convertB64(inuser));
 //                rc.AddParam(Constants.QPpassword, convertB64(inpassword));
