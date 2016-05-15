@@ -105,13 +105,9 @@ public class SignUpActivity extends Activity {
             Button signUpButton = (Button) findViewById(R.id.signUp);
             Button cancelButton = (Button) findViewById(R.id.cancel_signUp);
             usernameText = (EditText) findViewById(R.id.userName);
-            usernameText.setText("Thomas");
             passwordText = (EditText) findViewById(R.id.password);
-            passwordText.setText("thomas");
             passwordAgainText = (EditText) findViewById(R.id.passwordAgain);
-            passwordAgainText.setText("thomas");
             eMailText = (EditText) findViewById(R.id.email);
-            eMailText.setText("thomas@frinme.org");
 
             signUpButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View arg0) {
