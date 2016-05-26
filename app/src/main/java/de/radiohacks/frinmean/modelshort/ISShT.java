@@ -38,7 +38,7 @@ import java.util.List;
 @Root(name = "ISShT", strict = false)
 public class ISShT {
 
-    @ElementList(required = false, name = "MID", inline = true)
+    @ElementList(required = true, name = "MID", inline = true, entry = "MID")
     protected List<Integer> mid;
 
     /**

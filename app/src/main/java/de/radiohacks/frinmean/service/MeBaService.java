@@ -30,7 +30,6 @@ import de.radiohacks.frinmean.R;
 import de.radiohacks.frinmean.adapters.SyncAdapter;
 import de.radiohacks.frinmean.adapters.SyncUtils;
 import de.radiohacks.frinmean.modelshort.C;
-import de.radiohacks.frinmean.modelshort.M;
 import de.radiohacks.frinmean.modelshort.OAdUC;
 import de.radiohacks.frinmean.modelshort.OCrCh;
 import de.radiohacks.frinmean.modelshort.ODMFC;
@@ -38,9 +37,6 @@ import de.radiohacks.frinmean.modelshort.ODeCh;
 import de.radiohacks.frinmean.modelshort.OFMFC;
 import de.radiohacks.frinmean.modelshort.OGImM;
 import de.radiohacks.frinmean.modelshort.OGImMMD;
-import de.radiohacks.frinmean.modelshort.OGTeM;
-import de.radiohacks.frinmean.modelshort.OGViM;
-import de.radiohacks.frinmean.modelshort.OGViMMD;
 import de.radiohacks.frinmean.modelshort.OIMIC;
 import de.radiohacks.frinmean.modelshort.OIUIc;
 import de.radiohacks.frinmean.modelshort.OLiCh;
@@ -54,12 +50,6 @@ import static de.radiohacks.frinmean.Constants.CHAT_DB_Columns;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_ImageMsgID;
 import static de.radiohacks.frinmean.Constants.ID_MESSAGES_VideoMsgID;
 import static de.radiohacks.frinmean.Constants.MESSAGES_DB_Columns;
-import static de.radiohacks.frinmean.Constants.TYP_CONTACT;
-import static de.radiohacks.frinmean.Constants.TYP_FILE;
-import static de.radiohacks.frinmean.Constants.TYP_IMAGE;
-import static de.radiohacks.frinmean.Constants.TYP_LOCATION;
-import static de.radiohacks.frinmean.Constants.TYP_TEXT;
-import static de.radiohacks.frinmean.Constants.TYP_VIDEO;
 import static de.radiohacks.frinmean.Constants.T_CHAT_BADBID;
 import static de.radiohacks.frinmean.Constants.T_CHAT_ChatName;
 import static de.radiohacks.frinmean.Constants.T_CHAT_ID;
@@ -67,20 +57,9 @@ import static de.radiohacks.frinmean.Constants.T_CHAT_OwningUserID;
 import static de.radiohacks.frinmean.Constants.T_CHAT_OwningUserName;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_BADBID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ChatID;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_ContactMsgID;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_FileMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgID;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgValue;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_LocationMsgID;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_MessageTyp;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserID;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserName;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_ReadTimestamp;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_SendTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ShowTimestamp;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgID;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgValue;
 
@@ -285,111 +264,7 @@ public class MeBaService extends IntentService {
                     ((FrinmeanContentProvider) clientChat.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.CHAT_CONTENT_URI, valuesinschat);
                     OFMFC outFetchMessage = rf.getmessagefromchat(c.getCID(), intime);
                     if (outFetchMessage != null && outFetchMessage.getET() == null) {
-                        for (int k = 0; k < outFetchMessage.getM().size(); k++) {
-                            M m = outFetchMessage.getM().get(k);
-                            ContentValues valuesinsmsg = new ContentValues();
-                            valuesinsmsg.put(T_MESSAGES_BADBID, m.getMID());
-                            valuesinsmsg.put(T_MESSAGES_OwningUserID, m.getOU().getOUID());
-                            valuesinsmsg.put(T_MESSAGES_OwningUserName, m.getOU().getOUN());
-                            valuesinsmsg.put(T_MESSAGES_ChatID, c.getCID());
-                            valuesinsmsg.put(T_MESSAGES_MessageTyp, m.getMT());
-                            valuesinsmsg.put(T_MESSAGES_SendTimestamp, m.getSdT());
-                            valuesinsmsg.put(T_MESSAGES_ReadTimestamp, m.getRdT());
-                            valuesinsmsg.put(T_MESSAGES_ShowTimestamp, m.getShT());
-
-                            if (m.getMT().equalsIgnoreCase(TYP_TEXT)) {
-                                valuesinsmsg.put(T_MESSAGES_TextMsgID, m.getTMID());
-                                OGTeM oftm = rf.gettextmessage(m.getTMID());
-                                if (oftm != null) {
-                                    if (oftm.getET() == null || oftm.getET().isEmpty()) {
-                                        if (dbh.acknowledgeMessage(Constants.TYP_TEXT, oftm.getTM(), m.getMID())) {
-                                            valuesinsmsg.put(T_MESSAGES_TextMsgValue, oftm.getTM());
-                                            ContentProviderClient clientmsg = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                            ((FrinmeanContentProvider) clientmsg.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                                            clientmsg.release();
-                                        }
-                                    }
-                                }
-                            } else if (m.getMT().equalsIgnoreCase(TYP_IMAGE)) {
-                                valuesinsmsg.put(T_MESSAGES_ImageMsgID, m.getIMID());
-
-                                String imgfile = dbh.downloadimage(m.getIMID(), m.getMID(), Constants.TYP_IMAGE);
-
-                                valuesinsmsg.put(T_MESSAGES_ImageMsgValue, imgfile);
-                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                                client.release();
-
-                                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                                Uri contentUri = Uri.fromFile(new File(imgfile));
-                                mediaScanIntent.setData(contentUri);
-                                sendBroadcast(mediaScanIntent);
-
-                            } else if (m.getMT().equalsIgnoreCase(TYP_CONTACT)) {
-                                valuesinsmsg.put(T_MESSAGES_ContactMsgID, m.getCMID());
-                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                                client.release();
-//                OutFetchContactMessage ofcm = checkAndDownloadImageMessage(m.getImageMsgID());
-//                if (ofcm.getET() == null || ofcm.getET().isEmpty()) {
-//                    valuesinsmsg.put(Constants.T_MESSAGES_ContactMsgValue, ofcm.getImageMessage());
-//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
-//                }
-                            } else if (m.getMT().equalsIgnoreCase(TYP_FILE)) {
-                                valuesinsmsg.put(T_MESSAGES_FileMsgID, m.getFMID());
-                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                                client.release();
-//                OutFetchFileMessage offm = checkAndDownloadImageMessage(m.getImageMsgID());
-//                if (offm.getET() == null || offm.getET().isEmpty()) {
-//                    valuesinsmsg.put(Constants.T_MESSAGES_ContactMsgValue, offm.getImageMessage());
-//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
-//                }
-                            } else if (m.getMT().equalsIgnoreCase(TYP_LOCATION)) {
-                                valuesinsmsg.put(T_MESSAGES_LocationMsgID, m.getLMID());
-                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                                client.release();
-//                OutFetchLocationMessage oflm = checkAndDownloadImageMessage(m.getImageMsgID());
-//                if (oflm.getET() == null || oflm.getET().isEmpty()) {
-//                    valuesinsmsg.put(Constants.T_MESSAGES_ContactMsgValue, oflm.getImageMessage());
-//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
-//                }
-                            } else if (m.getMT().equalsIgnoreCase(TYP_VIDEO)) {
-                                valuesinsmsg.put(T_MESSAGES_VideoMsgID, m.getVMID());
-                                OGViMMD outmeta = rf.getVideoMessageMetaData(m.getVMID());
-
-                                if (outmeta != null) {
-                                    if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
-                                        if (!dbh.checkfileexists(outmeta.getVM(), TYP_VIDEO, outmeta.getVS(), outmeta.getVMD5())) {
-                                            if (dbh.checkWIFI()) {
-                                                OGViM ofvm = rf.fetchVideoMessage(m.getVMID());
-                                                if (ofvm != null) {
-                                                    if (ofvm.getET() == null || ofvm.getET().isEmpty()) {
-                                                        String checkfilepath = viddir + ofvm.getVM();
-                                                        if (dbh.acknowledgeMessage(Constants.TYP_VIDEO, checkfilepath, m.getMID())) {
-                                                            valuesinsmsg.put(T_MESSAGES_VideoMsgValue, checkfilepath);
-                                                            ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                                                            client.release();
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                            String checkfilepath = viddir + outmeta.getVM();
-                                            if (dbh.acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                                valuesinsmsg.put(T_MESSAGES_VideoMsgValue, checkfilepath);
-                                                ContentProviderClient client = getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                                                client.release();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            dbh.inserIntoTimeTable(m.getMID(), userid);
-                        }
+                        dbh.SaveMessagetoDB(outFetchMessage.getM(), c.getCID());
                     }
                 }
             }

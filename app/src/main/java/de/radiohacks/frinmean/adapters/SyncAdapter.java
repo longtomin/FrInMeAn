@@ -63,7 +63,6 @@ import de.radiohacks.frinmean.modelshort.M;
 import de.radiohacks.frinmean.modelshort.OCN;
 import de.radiohacks.frinmean.modelshort.OFMFC;
 import de.radiohacks.frinmean.modelshort.OGMI;
-import de.radiohacks.frinmean.modelshort.OGTeM;
 import de.radiohacks.frinmean.modelshort.OIMIC;
 import de.radiohacks.frinmean.modelshort.OSImM;
 import de.radiohacks.frinmean.modelshort.OSTeM;
@@ -93,7 +92,6 @@ import static de.radiohacks.frinmean.Constants.T_CHAT_ChatName;
 import static de.radiohacks.frinmean.Constants.T_CHAT_OwningUserID;
 import static de.radiohacks.frinmean.Constants.T_CHAT_OwningUserName;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_BADBID;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_ChatID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ContactMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ContactMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_FileMsgID;
@@ -103,12 +101,8 @@ import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ImageMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_LocationMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_LocationMsgValue;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_MessageTyp;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserID;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_OwningUserName;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_ReadTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_SendTimestamp;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_ShowTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TIME_BADBID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TIME_ReadTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TIME_SendTimestamp;
@@ -116,7 +110,6 @@ import static de.radiohacks.frinmean.Constants.T_MESSAGES_TIME_ShowTimestamp;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TIME_UserID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TIME_UserName;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgID;
-import static de.radiohacks.frinmean.Constants.T_MESSAGES_TextMsgValue;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgID;
 import static de.radiohacks.frinmean.Constants.T_MESSAGES_VideoMsgValue;
 
@@ -257,7 +250,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
-        Log.i(TAG, "Beginning network synchronization");
+        Log.d(TAG, "Beginning network synchronization");
         getPreferenceInfo();
         if (dbh.checkNetwork()) {
             syncCheckNewMessages();
@@ -265,7 +258,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncGetMessageInformation();
             syncUser();
         }
-        Log.i(TAG, "Network synchronization complete");
+        Log.d(TAG, "Network synchronization complete");
     }
 
     private void syncCheckNewMessages() {
@@ -336,143 +329,49 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void SaveMessageToLDB(List<M> in, int ChatID, String ChatName) {
         Log.d(TAG, "start SaveMessageToLDB");
-        boolean newMsg = false;
-        for (int j = 0; j < in.size(); j++) {
-            M m = in.get(j);
-            ContentValues valuesins = new ContentValues();
-            valuesins.put(T_MESSAGES_BADBID, m.getMID());
-            valuesins.put(T_MESSAGES_OwningUserID, m.getOU().getOUID());
-            valuesins.put(T_MESSAGES_OwningUserName, m.getOU().getOUN());
-            valuesins.put(T_MESSAGES_ChatID, ChatID);
-            valuesins.put(T_MESSAGES_MessageTyp, m.getMT());
-            valuesins.put(T_MESSAGES_SendTimestamp, m.getSdT());
-            valuesins.put(T_MESSAGES_ReadTimestamp, m.getRdT());
-            valuesins.put(T_MESSAGES_ShowTimestamp, m.getShT());
 
-            if (m.getMT().equalsIgnoreCase(TYP_TEXT)) {
-                valuesins.put(T_MESSAGES_TextMsgID, m.getTMID());
-                OGTeM oftm = rf.gettextmessage(m.getTMID());
-                if (oftm != null) {
-                    if (oftm.getET() == null || oftm.getET().isEmpty()) {
-                        if (dbh.acknowledgeMessage(Constants.TYP_TEXT, oftm.getTM(), m.getMID())) {
-                            valuesins.put(T_MESSAGES_TextMsgValue, oftm.getTM());
-                            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                            ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
-                            client.release();
-                            newMsg = true;
-                        }
-                    }
-                }
-            } else if (m.getMT().equalsIgnoreCase(TYP_IMAGE)) {
-                valuesins.put(T_MESSAGES_ImageMsgID, m.getIMID());
+        dbh.SaveMessagetoDB(in, ChatID);
+        // Now we do the Notification for the User
+        // Get needed Information from ContentProvider
+        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
+        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.CHAT_CONTENT_URI, CHAT_DB_Columns, T_CHAT_BADBID + " = ?", new String[]{String.valueOf(ChatID)}, null);
 
-                String imgfile = dbh.downloadimage(m.getIMID(), m.getMID(), Constants.TYP_IMAGE);
+        if (c.moveToFirst()) {
+            // Prepare intent which is triggered if the
+            // notification is selected
 
-                valuesins.put(T_MESSAGES_ImageMsgValue, imgfile);
-                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
-                client.release();
+            Intent resultIntent = new Intent(this.getContext(),
+                    SingleChatActivity.class);
+            resultIntent.putExtra(Constants.CHATID, ChatID);
+            resultIntent.putExtra(Constants.CHATNAME, ChatName);
+            resultIntent.putExtra(Constants.OWNINGUSERID, c.getInt(Constants.ID_CHAT_OwningUserID));
+            resultIntent.putExtra(Constants.USERID, userid);
 
-                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                Uri contentUri = Uri.fromFile(new File(imgfile));
-                mediaScanIntent.setData(contentUri);
-                mContext.sendBroadcast(mediaScanIntent);
-                newMsg = true;
+            PendingIntent pIntent = PendingIntent.getActivity(this.getContext(), 0, resultIntent, 0);
 
+            long[] vibpattern = {500, 100, 500};
+            // Build notification
+            Notification.Builder nb = new Notification.Builder(this.getContext());
+            nb.setLights(1, 200, 100);
+            nb.setContentTitle(ChatName);
+            nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat").setSmallIcon(R.drawable.ic_stat_frinmean);
+            nb.setSound(Uri.parse(ringtone));
+            nb.setContentIntent(pIntent);
 
-            } else if (m.getMT().equalsIgnoreCase(TYP_CONTACT)) {
-                valuesins.put(T_MESSAGES_ContactMsgID, m.getCMID());
-                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
-                client.release();
-//                OutFetchContactMessage ofcm = checkAndDownloadImageMessage(m.getImageMsgID());
-//                if (ofcm.getET() == null || ofcm.getET().isEmpty()) {
-//                    valuesins.put(Constants.T_MESSAGES_ContactMsgValue, ofcm.getImageMessage());
-//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
-//                }
-            } else if (m.getMT().equalsIgnoreCase(TYP_FILE)) {
-                valuesins.put(T_MESSAGES_FileMsgID, m.getFMID());
-                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
-                client.release();
-//                OutFetchFileMessage offm = checkAndDownloadImageMessage(m.getImageMsgID());
-//                if (offm.getET() == null || offm.getET().isEmpty()) {
-//                    valuesins.put(Constants.T_MESSAGES_ContactMsgValue, offm.getImageMessage());
-//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
-//                }
-            } else if (m.getMT().equalsIgnoreCase(TYP_LOCATION)) {
-                valuesins.put(T_MESSAGES_LocationMsgID, m.getLMID());
-                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
-                client.release();
-//                OutFetchLocationMessage oflm = checkAndDownloadImageMessage(m.getImageMsgID());
-//                if (oflm.getET() == null || oflm.getET().isEmpty()) {
-//                    valuesins.put(Constants.T_MESSAGES_ContactMsgValue, oflm.getImageMessage());
-//                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
-//                }
-            } else if (m.getMT().equalsIgnoreCase(TYP_VIDEO)) {
-                valuesins.put(T_MESSAGES_VideoMsgID, m.getVMID());
-                String vidfile = dbh.downloadvideo(m.getVMID(), m.getMID());
-
-                valuesins.put(T_MESSAGES_VideoMsgValue, vidfile);
-                ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesins);
-                client.release();
-
-                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                Uri contentUri = Uri.fromFile(new File(vidfile));
-                mediaScanIntent.setData(contentUri);
-                mContext.sendBroadcast(mediaScanIntent);
-                newMsg = true;
-
-                // Insert MSG-ID into Time Table
-                dbh.inserIntoTimeTable(m.getMID(), userid);
+            if (vibrate) {
+                nb.setVibrate(vibpattern);
             }
+
+            Notification noti = nb.build();
+
+            NotificationManager notificationManager = (NotificationManager) this.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            // hide the notification after its selected
+            noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+            notificationManager.notify(0, noti);
         }
-
-        if (newMsg) {
-            // Now we do the Notification for the User
-            // Get needed Information from ContentProvider
-            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
-            Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.CHAT_CONTENT_URI, CHAT_DB_Columns, T_CHAT_BADBID + " = ?", new String[]{String.valueOf(ChatID)}, null);
-
-            if (c.moveToFirst()) {
-                // Prepare intent which is triggered if the
-                // notification is selected
-
-                Intent resultIntent = new Intent(this.getContext(),
-                        SingleChatActivity.class);
-                resultIntent.putExtra(Constants.CHATID, ChatID);
-                resultIntent.putExtra(Constants.CHATNAME, ChatName);
-                resultIntent.putExtra(Constants.OWNINGUSERID, c.getInt(Constants.ID_CHAT_OwningUserID));
-                resultIntent.putExtra(Constants.USERID, userid);
-
-                PendingIntent pIntent = PendingIntent.getActivity(this.getContext(), 0, resultIntent, 0);
-
-                long[] vibpattern = {500, 100, 500};
-                // Build notification
-                Notification.Builder nb = new Notification.Builder(this.getContext());
-                nb.setLights(1, 200, 100);
-                nb.setContentTitle(ChatName);
-                nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat").setSmallIcon(R.drawable.ic_stat_frinmean);
-                nb.setSound(Uri.parse(ringtone));
-                nb.setContentIntent(pIntent);
-
-                if (vibrate) {
-                    nb.setVibrate(vibpattern);
-                }
-
-                Notification noti = nb.build();
-
-                NotificationManager notificationManager = (NotificationManager) this.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-                // hide the notification after its selected
-                noti.flags |= Notification.FLAG_AUTO_CANCEL;
-
-                notificationManager.notify(0, noti);
-            }
-            c.close();
-            client.release();
-        }
+        c.close();
+        client.release();
         Log.d(TAG, "end saveMessageToLDB");
     }
 
@@ -633,7 +532,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             }
                         }
                         // cd.close();
-                        clientdifferent.release();
+                        // clientdifferent.release();
                         count = 0;
                         inputrf.clear();
                     }
