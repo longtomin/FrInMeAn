@@ -330,48 +330,49 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void SaveMessageToLDB(List<M> in, int ChatID, String ChatName) {
         Log.d(TAG, "start SaveMessageToLDB");
 
-        dbh.SaveMessagetoDB(in, ChatID);
-        // Now we do the Notification for the User
-        // Get needed Information from ContentProvider
-        ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
-        Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.CHAT_CONTENT_URI, CHAT_DB_Columns, T_CHAT_BADBID + " = ?", new String[]{String.valueOf(ChatID)}, null);
+        if (dbh.SaveMessagetoDB(in, ChatID)) {
+            // Now we do the Notification for the User
+            // Get needed Information from ContentProvider
+            ContentProviderClient client = mContentResolver.acquireContentProviderClient(FrinmeanContentProvider.CHAT_CONTENT_URI);
+            Cursor c = client.getLocalContentProvider().query(FrinmeanContentProvider.CHAT_CONTENT_URI, CHAT_DB_Columns, T_CHAT_BADBID + " = ?", new String[]{String.valueOf(ChatID)}, null);
 
-        if (c.moveToFirst()) {
-            // Prepare intent which is triggered if the
-            // notification is selected
+            if (c.moveToFirst()) {
+                // Prepare intent which is triggered if the
+                // notification is selected
 
-            Intent resultIntent = new Intent(this.getContext(),
-                    SingleChatActivity.class);
-            resultIntent.putExtra(Constants.CHATID, ChatID);
-            resultIntent.putExtra(Constants.CHATNAME, ChatName);
-            resultIntent.putExtra(Constants.OWNINGUSERID, c.getInt(Constants.ID_CHAT_OwningUserID));
-            resultIntent.putExtra(Constants.USERID, userid);
+                Intent resultIntent = new Intent(this.getContext(),
+                        SingleChatActivity.class);
+                resultIntent.putExtra(Constants.CHATID, ChatID);
+                resultIntent.putExtra(Constants.CHATNAME, ChatName);
+                resultIntent.putExtra(Constants.OWNINGUSERID, c.getInt(Constants.ID_CHAT_OwningUserID));
+                resultIntent.putExtra(Constants.USERID, userid);
 
-            PendingIntent pIntent = PendingIntent.getActivity(this.getContext(), 0, resultIntent, 0);
+                PendingIntent pIntent = PendingIntent.getActivity(this.getContext(), 0, resultIntent, 0);
 
-            long[] vibpattern = {500, 100, 500};
-            // Build notification
-            Notification.Builder nb = new Notification.Builder(this.getContext());
-            nb.setLights(1, 200, 100);
-            nb.setContentTitle(ChatName);
-            nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat").setSmallIcon(R.drawable.ic_stat_frinmean);
-            nb.setSound(Uri.parse(ringtone));
-            nb.setContentIntent(pIntent);
+                long[] vibpattern = {500, 100, 500};
+                // Build notification
+                Notification.Builder nb = new Notification.Builder(this.getContext());
+                nb.setLights(1, 200, 100);
+                nb.setContentTitle(ChatName);
+                nb.setContentText(String.valueOf(in.size()) + " neue Nachrichten im Chat").setSmallIcon(R.drawable.ic_stat_frinmean);
+                nb.setSound(Uri.parse(ringtone));
+                nb.setContentIntent(pIntent);
 
-            if (vibrate) {
-                nb.setVibrate(vibpattern);
+                if (vibrate) {
+                    nb.setVibrate(vibpattern);
+                }
+
+                Notification noti = nb.build();
+
+                NotificationManager notificationManager = (NotificationManager) this.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                // hide the notification after its selected
+                noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+                notificationManager.notify(0, noti);
             }
-
-            Notification noti = nb.build();
-
-            NotificationManager notificationManager = (NotificationManager) this.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            // hide the notification after its selected
-            noti.flags |= Notification.FLAG_AUTO_CANCEL;
-
-            notificationManager.notify(0, noti);
+            c.close();
+            client.release();
         }
-        c.close();
-        client.release();
         Log.d(TAG, "end saveMessageToLDB");
     }
 

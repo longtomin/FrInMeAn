@@ -150,7 +150,8 @@ public class DBHelper {
         return (contentall || activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
     }
 
-    public void SaveMessagetoDB(List<M> in, int c) {
+    public boolean SaveMessagetoDB(List<M> in, int c) {
+        boolean ret = false;
         RestFunctions rf = new RestFunctions();
         for (int k = 0; k < in.size(); k++) {
             M m = in.get(k);
@@ -174,24 +175,27 @@ public class DBHelper {
                             ContentProviderClient clientmsg = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                             ((FrinmeanContentProvider) clientmsg.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                             clientmsg.release();
+                            ret = true;
                         }
                     }
                 }
             } else if (m.getMT().equalsIgnoreCase(TYP_IMAGE)) {
-                valuesinsmsg.put(T_MESSAGES_ImageMsgID, m.getIMID());
+                if (checkWIFI()) {
+                    valuesinsmsg.put(T_MESSAGES_ImageMsgID, m.getIMID());
 
-                String imgfile = downloadimage(m.getIMID(), m.getMID(), Constants.TYP_IMAGE);
+                    String imgfile = downloadimage(m.getIMID(), m.getMID(), Constants.TYP_IMAGE);
 
-                valuesinsmsg.put(T_MESSAGES_ImageMsgValue, imgfile);
-                ContentProviderClient client = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                client.release();
+                    valuesinsmsg.put(T_MESSAGES_ImageMsgValue, imgfile);
+                    ContentProviderClient client = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
+                    client.release();
 
-                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                Uri contentUri = Uri.fromFile(new File(imgfile));
-                mediaScanIntent.setData(contentUri);
-                mContext.sendBroadcast(mediaScanIntent);
-
+                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    Uri contentUri = Uri.fromFile(new File(imgfile));
+                    mediaScanIntent.setData(contentUri);
+                    mContext.sendBroadcast(mediaScanIntent);
+                    ret = true;
+                }
             } else if (m.getMT().equalsIgnoreCase(TYP_CONTACT)) {
                 valuesinsmsg.put(T_MESSAGES_ContactMsgID, m.getCMID());
                 ContentProviderClient client = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -202,6 +206,7 @@ public class DBHelper {
 //                    valuesinsmsg.put(Constants.T_MESSAGES_ContactMsgValue, ofcm.getImageMessage());
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
+                ret = true;
             } else if (m.getMT().equalsIgnoreCase(TYP_FILE)) {
                 valuesinsmsg.put(T_MESSAGES_FileMsgID, m.getFMID());
                 ContentProviderClient client = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -212,6 +217,7 @@ public class DBHelper {
 //                    valuesinsmsg.put(Constants.T_MESSAGES_ContactMsgValue, offm.getImageMessage());
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
+                ret = true;
             } else if (m.getMT().equalsIgnoreCase(TYP_LOCATION)) {
                 valuesinsmsg.put(T_MESSAGES_LocationMsgID, m.getLMID());
                 ContentProviderClient client = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
@@ -222,14 +228,15 @@ public class DBHelper {
 //                    valuesinsmsg.put(Constants.T_MESSAGES_ContactMsgValue, oflm.getImageMessage());
 //                    fcp.insertorupdate(FrinmeanContentProvider.CONTENT_URI, valuesins);
 //                }
+                ret = true;
             } else if (m.getMT().equalsIgnoreCase(TYP_VIDEO)) {
-                valuesinsmsg.put(T_MESSAGES_VideoMsgID, m.getVMID());
-                OGViMMD outmeta = rf.getVideoMessageMetaData(m.getVMID());
+                if (checkWIFI()) {
+                    valuesinsmsg.put(T_MESSAGES_VideoMsgID, m.getVMID());
+                    OGViMMD outmeta = rf.getVideoMessageMetaData(m.getVMID());
 
-                if (outmeta != null) {
-                    if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
-                        if (!checkfileexists(outmeta.getVM(), TYP_VIDEO, outmeta.getVS(), outmeta.getVMD5())) {
-                            if (checkWIFI()) {
+                    if (outmeta != null) {
+                        if (outmeta.getET() == null || outmeta.getET().isEmpty()) {
+                            if (!checkfileexists(outmeta.getVM(), TYP_VIDEO, outmeta.getVS(), outmeta.getVMD5())) {
                                 OGViM ofvm = rf.fetchVideoMessage(m.getVMID());
                                 if (ofvm != null) {
                                     if (ofvm.getET() == null || ofvm.getET().isEmpty()) {
@@ -239,17 +246,19 @@ public class DBHelper {
                                             ContentProviderClient client = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
                                             ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
                                             client.release();
+                                            ret = true;
                                         }
                                     }
                                 }
-                            }
-                        } else {
-                            String checkfilepath = viddir + outmeta.getVM();
-                            if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
-                                valuesinsmsg.put(T_MESSAGES_VideoMsgValue, checkfilepath);
-                                ContentProviderClient client = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
-                                ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
-                                client.release();
+                            } else {
+                                String checkfilepath = viddir + outmeta.getVM();
+                                if (acknowledgeMessage(Constants.TYP_IMAGE, checkfilepath, m.getMID())) {
+                                    valuesinsmsg.put(T_MESSAGES_VideoMsgValue, checkfilepath);
+                                    ContentProviderClient client = mContext.getContentResolver().acquireContentProviderClient(FrinmeanContentProvider.MESSAGES_CONTENT_URI);
+                                    ((FrinmeanContentProvider) client.getLocalContentProvider()).insertorupdate(FrinmeanContentProvider.MESSAGES_CONTENT_URI, valuesinsmsg);
+                                    client.release();
+                                    ret = true;
+                                }
                             }
                         }
                     }
@@ -257,6 +266,7 @@ public class DBHelper {
             }
             inserIntoTimeTable(m.getMID(), userid);
         }
+        return ret;
     }
 
     public String downloadimage(int inImgID, int inMsgID, String ImageType) {
